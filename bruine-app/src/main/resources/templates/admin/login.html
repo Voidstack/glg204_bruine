@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{admin/layout :: head('Administration – Bruine')}"></head>
+
+<body>
+    <section class="section">
+        <div class="container" style="max-width: 400px;">
+            <h1 class="title has-text-centered">Administration</h1>
+
+            <div class="notification is-danger" th:if="${loginError}">
+                Identifiants incorrects. Veuillez réessayer.
+            </div>
+
+            <form class="box" th:action="@{/admin}" method="POST">
+                <div class="field">
+                    <label class="label">Nom d'utilisateur</label>
+                    <div class="control">
+                        <input class="input" type="text" id="username" name="username" autofocus>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Mot de passe</label>
+                    <div class="control">
+                        <input class="input" type="password" id="password" name="password">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-link is-fullwidth">Connexion</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

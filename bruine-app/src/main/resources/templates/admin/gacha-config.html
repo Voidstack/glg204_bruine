@@ -1,0 +1,227 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="~{admin/layout :: head('Config Gacha')}"></head>
+<body>
+
+<nav th:replace="~{admin/layout :: navbar(true)}"></nav>
+
+<section class="section">
+	<div class="container" style="max-width: 960px;">
+		<h1 class="title">Configuration du Gacha</h1>
+		<p class="subtitle">Les valeurs sont des poids relatifs, la probabilité de chaque résultat est son poids divisé
+			par la somme des poids du groupe.</p>
+
+		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
+
+		<form th:action="@{/admin/gacha-config}" method="post">
+			<div class="config-grid" style="display:flex; flex-wrap:wrap; gap:1.5rem;">
+
+				<!-- Rareté -->
+				<div class="box" style="flex:1 1 400px;">
+					<h2 class="title is-5 mb-4">Taux de rareté</h2>
+					<table class="table is-fullwidth is-narrow">
+						<thead>
+						<tr>
+							<th>Rareté</th>
+							<th style="width:90px;">Poids</th>
+							<th style="width:70px;">%</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<td class="has-text-warning">⭐ Légendaire</td>
+							<td><input class="input is-small" type="number" name="rarityLegendary" min="0"
+							           data-group="rarity" th:value="${cfg.rarityLegendary}"></td>
+							<td><span class="tag" data-pct="rarity">—</span></td>
+						</tr>
+						<tr>
+							<td class="has-text-danger">🔮 Épique</td>
+							<td><input class="input is-small" type="number" name="rarityEpic" min="0"
+							           data-group="rarity" th:value="${cfg.rarityEpic}"></td>
+							<td><span class="tag" data-pct="rarity">—</span></td>
+						</tr>
+						<tr>
+							<td class="has-text-info">💎 Rare</td>
+							<td><input class="input is-small" type="number" name="rarityRare" min="0"
+							           data-group="rarity" th:value="${cfg.rarityRare}"></td>
+							<td><span class="tag" data-pct="rarity">—</span></td>
+						</tr>
+						<tr>
+							<td class="has-text-success">🍃 Peu commun</td>
+							<td><input class="input is-small" type="number" name="rarityUncommon" min="0"
+							           data-group="rarity" th:value="${cfg.rarityUncommon}"></td>
+							<td><span class="tag" data-pct="rarity">—</span></td>
+						</tr>
+						<tr>
+							<td class="has-text-grey-light">🪨 Commun</td>
+							<td><input class="input is-small" type="number" name="rarityCommon" min="0"
+							           data-group="rarity" th:value="${cfg.rarityCommon}"></td>
+							<td><span class="tag" data-pct="rarity">—</span></td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- Finish -->
+				<div class="box" style="flex:1 1 400px;">
+					<h2 class="title is-5 mb-4">Taux de finish</h2>
+					<table class="table is-fullwidth is-narrow">
+						<thead>
+						<tr>
+							<th>Finish</th>
+							<th style="width:90px;">Poids</th>
+							<th style="width:70px;">%</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<td>☯ Négatif</td>
+							<td><input class="input is-small" type="number" name="finishNegative" min="0"
+							           data-group="finish" th:value="${cfg.finishNegative}"></td>
+							<td><span class="tag" data-pct="finish">—</span></td>
+						</tr>
+						<tr>
+							<td class="has-text-warning">🌈 Polychrome</td>
+							<td><input class="input is-small" type="number" name="finishPolychrome" min="0"
+							           data-group="finish" th:value="${cfg.finishPolychrome}"></td>
+							<td><span class="tag" data-pct="finish">—</span></td>
+						</tr>
+						<tr>
+							<td class="has-text-info">✨ Foil</td>
+							<td><input class="input is-small" type="number" name="finishFoil" min="0"
+							           data-group="finish" th:value="${cfg.finishFoil}"></td>
+							<td><span class="tag" data-pct="finish">—</span></td>
+						</tr>
+						<tr>
+							<td class="has-text-link">💠 Holographique</td>
+							<td><input class="input is-small" type="number" name="finishHolographic" min="0"
+							           data-group="finish" th:value="${cfg.finishHolographic}"></td>
+							<td><span class="tag" data-pct="finish">—</span></td>
+						</tr>
+						<tr>
+							<td class="has-text-grey-light">⬜ Normal</td>
+							<td><input class="input is-small" type="number" name="finishNormal" min="0"
+							           data-group="finish" th:value="${cfg.finishNormal}"></td>
+							<td><span class="tag" data-pct="finish">—</span></td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- XP par rareté -->
+				<div class="box" style="flex:1 1 400px;">
+					<h2 class="title is-5 mb-4">XP par rareté</h2>
+					<p class="help mb-3">XP rapportée par une carte convertie, avant multiplicateur de finition.</p>
+					<table class="table is-fullwidth is-narrow">
+						<thead>
+						<tr>
+							<th>Rareté</th>
+							<th style="width:90px;">XP</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<td class="has-text-warning">⭐ Légendaire</td>
+							<td><input class="input is-small" type="number" name="xpBaseLegendary" min="0"
+							           th:value="${cfg.xpBaseLegendary}"></td>
+						</tr>
+						<tr>
+							<td class="has-text-danger">🔮 Épique</td>
+							<td><input class="input is-small" type="number" name="xpBaseEpic" min="0"
+							           th:value="${cfg.xpBaseEpic}"></td>
+						</tr>
+						<tr>
+							<td class="has-text-info">💎 Rare</td>
+							<td><input class="input is-small" type="number" name="xpBaseRare" min="0"
+							           th:value="${cfg.xpBaseRare}"></td>
+						</tr>
+						<tr>
+							<td class="has-text-success">🍃 Peu commun</td>
+							<td><input class="input is-small" type="number" name="xpBaseUncommon" min="0"
+							           th:value="${cfg.xpBaseUncommon}"></td>
+						</tr>
+						<tr>
+							<td class="has-text-grey-light">🪨 Commun</td>
+							<td><input class="input is-small" type="number" name="xpBaseCommon" min="0"
+							           th:value="${cfg.xpBaseCommon}"></td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- Multiplicateurs XP -->
+				<div class="box" style="flex:1 1 400px;">
+					<h2 class="title is-5 mb-4">Multiplicateurs XP</h2>
+					<p class="help mb-3">Appliqués lors de la conversion en XP dans /leveup (Min : *1).</p>
+					<table class="table is-fullwidth is-narrow">
+						<thead>
+						<tr>
+							<th>Finish</th>
+							<th style="width:90px;">Mult.</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<td>☯ Négatif</td>
+							<td><input class="input is-small" type="number" name="xpMultNegative" min="1"
+							           th:value="${cfg.xpMultNegative}"></td>
+						</tr>
+
+						<tr>
+							<td class="has-text-warning">🌈 Polychrome</td>
+							<td><input class="input is-small" type="number" name="xpMultPolychrome" min="1"
+							           th:value="${cfg.xpMultPolychrome}"></td>
+						</tr>
+						<tr>
+							<td class="has-text-info">✨ Foil</td>
+							<td><input class="input is-small" type="number" name="xpMultFoil" min="1"
+							           th:value="${cfg.xpMultFoil}"></td>
+						</tr>
+
+						<tr>
+							<td class="has-text-link">💠 Holographique</td>
+							<td><input class="input is-small" type="number" name="xpMultHolographic" min="1"
+							           th:value="${cfg.xpMultHolographic}"></td>
+						</tr>
+
+						<tr>
+							<td class="has-text-grey-light">⬜ Normal</td>
+							<td><input class="input is-small" type="number" name="xpMultNormal" min="1"
+							           th:value="${cfg.xpMultNormal}"></td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+
+			</div>
+
+			<div class="field mt-4">
+				<div class="control">
+					<button class="button is-primary" type="submit">Sauvegarder</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</section>
+
+<script>
+    function updateGroup(group) {
+        const inputs = [...document.querySelectorAll(`input[data-group="${group}"]`)];
+        const spans = [...document.querySelectorAll(`span[data-pct="${group}"]`)];
+        const total = inputs.reduce((s, i) => s + (parseInt(i.value) || 0), 0);
+        inputs.forEach((input, idx) => {
+            const v = parseInt(input.value) || 0;
+            spans[idx].textContent = total > 0 ? (v * 100 / total).toFixed(2) + ' %' : '—';
+        });
+    }
+
+    document.querySelectorAll('input[data-group]').forEach(input => {
+        input.addEventListener('input', () => updateGroup(input.dataset.group));
+    });
+
+    updateGroup('rarity');
+    updateGroup('finish');
+</script>
+</body>
+</html>

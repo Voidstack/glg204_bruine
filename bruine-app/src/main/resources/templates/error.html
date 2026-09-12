@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- cette page, parce qu'elle s'appelle error.html et est dans /templates,
+		 est utilisée automatiquement par Spring Boot pour afficher les erreurs qui ne
+		sont pas interceptées par ailleurs.
+	-->
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Erreur')}"/>
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}">
+	<h1>Bruine</h1>
+</header>
+<div class="container">
+	<div class="block">
+		<h1 class="title">[[${message}]]</h1>
+
+		<div class="notification is-danger is-light" th:if="${errorCode != null}">
+			[[#{${errorCode}}]]
+		</div>
+
+		<div class="notification is-danger is-light" th:if="${error != null}" th:text="${error}">
+			message d'erreur
+		</div>
+
+		<div class="notification is-warning is-light" th:if="${trace != null}" th:text="${trace}">
+
+		</div>
+
+		<table class="table">
+			<tr th:each="var : ${#vars.getVariableNames()}">
+				<th th:text="${var}"></th>
+				<td th:text="${#vars.getVariable(var)}"></td>
+			</tr>
+		</table>
+	</div>
+</div>
+<th:block th:replace="~{layout :: footer-and-js}">
+</th:block>
+</body>
+
+</html>

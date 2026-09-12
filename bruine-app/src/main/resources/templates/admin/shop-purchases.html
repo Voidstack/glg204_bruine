@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="~{admin/layout :: head('Historique des achats')}"></head>
+<body>
+
+<nav th:replace="~{admin/layout :: navbar(true)}"></nav>
+
+<section class="section">
+	<div class="container">
+		<h1 class="title">Historique des achats</h1>
+		<p class="subtitle">Tous les achats de packs, du plus récent au plus ancien</p>
+
+		<div class="box" style="overflow-x: auto;">
+			<table class="table is-fullwidth is-hoverable is-striped">
+				<thead>
+				<tr>
+					<th>Date</th>
+					<th>Utilisateur</th>
+					<th>Steam ID</th>
+					<th>Pack</th>
+					<th class="has-text-right">Points</th>
+					<th class="has-text-right">Payé</th>
+					<th class="has-text-right">Promo</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr th:each="p : ${purchases}">
+					<td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}">—</td>
+					<td th:text="${p.steamUser.username}">—</td>
+					<td class="is-family-monospace is-size-7" th:text="${p.steamUser.steamId}">—</td>
+					<td>
+						<span th:text="${p.packEmoji}">💧</span>
+						<span th:text="${p.packName}">Pack</span>
+					</td>
+					<td class="has-text-right has-text-weight-bold" th:text="${'+' + p.pointsCredited}">+0</td>
+					<td class="has-text-right" th:text="${p.pricePaidEuros + ' €'}">0.00 €</td>
+					<td class="has-text-right">
+                            <span th:if="${p.promoPercent > 0}" class="tag is-warning is-light"
+                                  th:text="${'-' + p.promoPercent + '%'}">-0%</span>
+						<span th:unless="${p.promoPercent > 0}">—</span>
+					</td>
+				</tr>
+				<tr th:if="${#lists.isEmpty(purchases)}">
+					<td colspan="7" class="has-text-centered has-text-grey">Aucun achat enregistré.</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+
+	</div>
+</section>
+
+</body>
+</html>

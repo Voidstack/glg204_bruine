@@ -1,0 +1,181 @@
+:root {
+    /* Palette du site (thème Steam) */
+    /* Fonds (thème sombre Steam) */
+    --bg: #0a1120; /* fond body / navbar */
+    --bg-darkest: #080f18;
+    --bg-deep: #0e1a24;
+    --bg-panel: #16202d;
+    --bg-panel-alt: #253549;
+    --surface-hover: #131f33; /* survol navbar / boutons */
+
+    /* Bleus Steam */
+    --steam-blue-dark: #1b2838;
+    --steam-blue-mid: #2a475e;
+    --steam-border: #3a5060;
+
+    /* Accent (bleu Steam) */
+    --accent: #66c0f4;
+    --accent-light: #90cdf4;
+    --blue: #4299e1;
+    --blue-pale: #bfdbfe;
+
+    /* Texte */
+    --text: #c6d4df; /* texte principal clair */
+    --text-bright: #f1f5f9;
+    --text-muted: #8f98a0; /* texte secondaire */
+    --text-dim: #5a7a94; /* footer / labels discrets */
+    --text-soft: #8fa8bc;
+    --text-soft-2: #6b8fa8;
+    --navbar-text: #c8d8e8;
+
+    /* Marque / liens (violet Enosis) */
+    --link: #9370db;
+    --link-hover: #b59de8;
+
+    /* Violet / épique */
+    --purple: #9b59b6;
+    --purple-light: #c084fc;
+    --violet: #9f7aea;
+    --violet-light: #c4b5fd;
+    --violet-pale: #d6bcfa;
+
+    --silver: var(--grey);
+    --bronze: #7a5020;
+
+    /* Or / orange (rare / légendaire) */
+    --gold: #e5a21c;
+    --gold-light: #fde68a;
+    --orange: #f6ad55;
+    --orange-light: #fbd38d;
+
+    /* Vert (succès / uncommun) */
+    --green: #68d391;
+    /* Rouge (danger / suppression) */
+    --red: #e74c3c;
+
+    /* Common/Divers */
+    --grey: #4a5568;
+
+    --card-common-text: var(--text-muted);
+    --card-common-border: var(--grey);
+    --card-common-strip: rgba(28, 40, 58, 0.96), rgba(20, 30, 45, 0.96);
+
+    --card-uncommon-text: var(--green);
+    --card-uncommon-border: var(--green);
+    --card-uncommon-strip: rgba(28, 50, 28, 0.96), rgba(20, 38, 20, 0.96);
+
+    --card-rare-text: var(--accent-light);
+    --card-rare-border: var(--blue);
+    --card-rare-strip: rgba(28, 34, 85, 0.96), rgba(20, 25, 65, 0.96);
+
+    --card-epic-text: var(--violet-pale);
+    --card-epic-border: var(--violet);
+    --card-epic-strip: rgba(50, 30, 85, 0.96), rgba(38, 22, 65, 0.96);
+
+    --card-legendary-text: var(--orange-light);
+    --card-legendary-border: var(--orange);
+    --card-legendary-strip: rgba(80, 44, 0, 0.96), rgba(55, 30, 0, 0.96);
+
+    /* Structure et dimensions */
+    --card-width: 140px;
+    --card-height: 208px;
+    --card-radius: 12px;
+    --card-bg: var(--bg-darkest);
+    --card-artwork-bg: rgba(0, 0, 0, 0.45);
+    --card-strip-bg: rgba(0, 0, 0, 0.38);
+
+    /* Filets internes, du plus marqué au plus discret. */
+    --card-line: rgba(255, 255, 255, 0.08);
+    --card-line-footer: rgba(255, 255, 255, 0.06);
+    --card-line-soft: rgba(255, 255, 255, 0.04);
+    --card-grid-line: rgba(255, 255, 255, 0.025);
+
+    --card-fx-scale: 1;
+}
+
+/* Styles globaux */
+body {
+    background: var(--bg);
+}
+
+.footer {
+    background: var(--bg-darkest) !important;
+    color: var(--text-dim);
+}
+
+.footer .footer-text {
+    color: var(--text-dim);
+}
+
+.navbar,
+.navbar-menu,
+.navbar-dropdown {
+    background-color: var(--bg);
+}
+
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.navbar-item,
+.navbar-link {
+    color: var(--navbar-text);
+}
+
+.navbar-item:hover,
+.navbar-item.is-active,
+.navbar-link:hover,
+.navbar-link.is-active {
+    background-color: var(--surface-hover) !important;
+    color: #fff !important;
+}
+
+.navbar-item.has-dropdown:hover .navbar-link {
+    background-color: var(--surface-hover) !important;
+    color: #fff !important;
+}
+
+.navbar-dropdown {
+    border-top: 2px solid var(--link);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-burger span {
+    background-color: var(--navbar-text);
+}
+
+.navbar-burger:hover {
+    background-color: var(--surface-hover);
+}
+
+.navbar .button {
+    background-color: var(--surface-hover);
+    border-color: #2a3f5a;
+    color: var(--navbar-text);
+}
+
+.navbar .button:hover {
+    background-color: #1e3050;
+    color: #fff;
+}
+
+a {
+    color: var(--link);
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+.center-text {
+    text-align: center;
+}
+
+.footer-text {
+    text-align: center;
+    font-style: italic;
+}

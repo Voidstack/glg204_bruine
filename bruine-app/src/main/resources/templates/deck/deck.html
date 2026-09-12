@@ -1,0 +1,226 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Mon Deck')}"></th:block>
+	<link rel="stylesheet" th:href="@{/css/deck/deck.css}">
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}"></header>
+
+<!-- Hidden form filled dynamically by JS before submit -->
+<form id="deck-form" th:action="@{/deck}" method="post" style="display:none;">
+</form>
+
+<div class="main-deck">
+	<h1 class="title has-text-centered" style="color:var(--text); margin-bottom:0.25rem;">
+		🃏 Mon Deck
+	</h1>
+	<p class="has-text-centered" style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.5rem;">
+		Glissez les cartes de l'inventaire vers le deck (max 10) - reglissez-les pour les retirer.
+	</p>
+
+	<div class="top-bar">
+		<div class="deck-counter" id="deck-counter">
+			Deck&nbsp;&nbsp;<strong id="deck-count">0</strong>&nbsp;/&nbsp;10
+		</div>
+		<button type="button" class="btn-save" onclick="submitDeck()">💾 Sauvegarder le deck</button>
+	</div>
+
+	<!-- Deck zone -->
+	<div class="deck-zone" id="deck-zone">
+		<div class="deck-zone-hint" id="deck-hint">Glissez des cartes ici depuis l'inventaire</div>
+	</div>
+
+	<!-- Inventory -->
+	<div class="inv-section">
+		<h2>Inventaire</h2>
+
+		<div th:if="${inventoryStacks.isEmpty()}" class="empty-state">
+			<div class="empty-icon">📦</div>
+			<p>Aucune récompense, jouez au Gacha pour en obtenir !</p>
+			<a th:href="@{/gacha}" class="button"
+			   style="background:var(--steam-blue-mid);color:var(--text);border:1px solid var(--accent);">
+				💧 Jouer au Gacha
+			</a>
+		</div>
+
+		<div th:if="${!inventoryStacks.isEmpty()}" id="inv-cards" class="inv-cards">
+			<th:block th:each="stack : ${inventoryStacks}">
+				<div th:replace="~{fragments/card :: card(
+                         view            = ${stack.view},
+                         baseClass       = 'balatro-card',
+                         dataId          = ${#strings.listJoin(stack.cardIds, ',')},
+                         showDescription = true,
+                         showCount       = ${stack.count > 1},
+                         showShine       = true)}">
+				</div>
+			</th:block>
+		</div>
+	</div>
+</div>
+
+<th:block th:replace="~{layout :: footer-and-js}"></th:block>
+<script th:src="@{/js/card-motion.js}"></script>
+
+<script th:inline="javascript">
+    /* Éditeur de deck.
+	 *
+	 * L'inventaire montre une PILE par carte identique, exactement comme /inventory : trois
+	 * exemplaires du même dragon holographique font une seule vignette marquée ×3. Le deck,
+	 * lui, montre des EXEMPLAIRES : dix emplacements, dix cartes distinctes.
+	 *
+	 * Glisser une pile vers le deck en détache donc un exemplaire, la pile perd une unité et
+	 * reste en place. Le relâcher hors du deck le rend à sa pile. Une pile vidée n'est pas
+	 * retirée mais masquée, ce qui lui garde sa position quand une carte revient.
+	 *
+	 * data-id porte les identifiants des exemplaires de la carte : la liste de la pile, un
+	 * seul pour une carte posée dans le deck. Les exemplaires d'une pile étant interchangeables
+	 * même récompense, même finition on prend toujours le premier disponible.
+	 */
+    const INITIAL_DECK_IDS = /*[[${deckCardIds}]]*/ [];
+    const MAX_DECK = 10;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        /* Câbler avant de déplacer : les écouteurs survivent aux déplacements dans le DOM. */
+        stacks().forEach(stack => {
+            stack.remaining = ids(stack);
+            bindCard(stack);
+        });
+
+        INITIAL_DECK_IDS.forEach(id => {
+            const stack = stacks().find(s => s.remaining.includes(id));
+            if (stack) detachToDeck(stack, id);
+        });
+
+        updateUI();
+    });
+
+    function stacks() {
+        return Array.from(document.querySelectorAll('#inv-cards .balatro-card'));
+    }
+
+    function ids(card) {
+        return card.dataset.id.split(',').map(Number);
+    }
+
+    function deckZone() {
+        return document.getElementById('deck-zone');
+    }
+
+    /* Le survol et le glisser viennent de card-motion.js. Seule la règle de dépôt est
+	   propre à l'éditeur : une carte rejoint le deck ou revient dans l'inventaire. */
+    function bindCard(card) {
+        CardMotion.enableHover(card);
+        CardMotion.enableDrag(card, {
+            onMove: highlightDeckZone,
+            onDrop: dropCard
+        });
+    }
+
+    function highlightDeckZone(event) {
+        deckZone().classList.toggle('drag-over', CardMotion.isOver(deckZone(), event));
+    }
+
+    function dropCard(event, card) {
+        const zone = deckZone();
+        zone.classList.remove('drag-over');
+
+        const overDeck = CardMotion.isOver(zone, event);
+        const fromDeck = card.closest('#deck-zone') !== null;
+
+        if (!fromDeck && overDeck) {
+            if (deckSize() < MAX_DECK && card.remaining.length > 0) {
+                detachToDeck(card, card.remaining[0]);
+            }
+        } else if (fromDeck && !overDeck) {
+            returnToStack(card);
+        }
+        /* Tout autre relâchement laisse la carte où elle est. */
+
+        updateUI();
+    }
+
+    /** Sort un exemplaire de sa pile et le pose dans le deck. */
+    function detachToDeck(stack, cardId) {
+        const single = stack.cloneNode(true);
+        single.classList.remove('ghost');
+        single.hidden = false;
+        single.dataset.id = cardId;
+        single.remaining = [cardId];
+        /* La pile de départ est retenue telle quelle : elle n'est jamais retirée du DOM,
+		   seulement masquée, la référence reste donc valable jusqu'au rechargement. */
+        single.origin = stack;
+        /* Le deck compte des exemplaires, jamais des piles : pas de badge de quantité. */
+        paintCount(single, 1);
+        bindCard(single);
+        deckZone().appendChild(single);
+
+        stack.remaining = stack.remaining.filter(id => id !== cardId);
+        paintStack(stack);
+    }
+
+    /** Rend un exemplaire du deck à la pile dont il provient. */
+    function returnToStack(single) {
+        single.origin.remaining.push(Number(single.dataset.id));
+        paintStack(single.origin);
+        single.remove();
+    }
+
+    /** Remet une pile à jour après un retrait ou un retour ; vidée, elle se masque. */
+    function paintStack(stack) {
+        stack.dataset.id = stack.remaining.join(',');
+        stack.hidden = stack.remaining.length === 0;
+        paintCount(stack, stack.remaining.length);
+    }
+
+    /** Badge de quantité, absent à un seul exemplaire, même règle que /inventory. */
+    function paintCount(card, n) {
+        const footer = card.querySelector('.card-footer');
+        if (!footer) return;
+
+        let badge = footer.querySelector('.card-count');
+        if (n > 1) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'card-count';
+                footer.appendChild(badge);
+            }
+            badge.textContent = '×' + n;
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    function deckSize() {
+        return deckZone().querySelectorAll('.balatro-card').length;
+    }
+
+    function updateUI() {
+        const n = deckSize();
+
+        document.getElementById('deck-count').textContent = n;
+        document.getElementById('deck-counter').classList.toggle('maxed', n >= MAX_DECK);
+        document.getElementById('deck-hint').style.display = n === 0 ? '' : 'none';
+    }
+
+    function submitDeck() {
+        const form = document.getElementById('deck-form');
+        /* On repart des cartes réellement posées, en gardant le jeton CSRF. */
+        form.querySelectorAll('input[name="cardIds"]').forEach(i => i.remove());
+
+        document.querySelectorAll('#deck-zone .balatro-card').forEach(card => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'cardIds';
+            input.value = card.dataset.id;
+            form.appendChild(input);
+        });
+        form.submit();
+    }
+</script>
+
+</body>
+</html>

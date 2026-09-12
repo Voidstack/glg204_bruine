@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Profil')}"></th:block>
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}">
+	<h1>Steam Profile</h1>
+</header>
+<main class="container">
+	<section class="section">
+		<div class="box">
+			<h1 class="title">Steam Profile</h1>
+			<div class="content">
+				<p><strong>Username:</strong> <span th:text="${user.username}">Username</span></p>
+				<p><strong>Steam ID:</strong> <span th:text="${user.steamId}">Steam ID</span></p>
+			</div>
+		</div>
+	</section>
+</main>
+
+<th:block th:replace="~{layout :: footer-and-js}">
+</th:block>
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="~{admin/layout :: head('Comptes utilisateurs')}"></head>
+<body>
+
+<nav th:replace="~{admin/layout :: navbar(true)}"></nav>
+
+<section class="section">
+	<div class="container">
+		<h1 class="title">Comptes utilisateurs Steam</h1>
+		<p class="subtitle">Utilisateurs inscrits via connexion Steam</p>
+
+		<!-- Notifications -->
+		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
+
+		<div class="box">
+			<table class="table is-fullwidth is-hoverable">
+				<thead>
+				<tr>
+					<th></th>
+					<th>Pseudo Steam</th>
+					<th>Steam ID</th>
+					<th>Inscription</th>
+					<th>Dernière connexion</th>
+					<th>Score</th>
+					<th></th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr th:if="${steamUsers.empty}">
+					<td colspan="7" class="has-text-centered has-text-grey">Aucun utilisateur inscrit.</td>
+				</tr>
+				<tr th:each="u : ${steamUsers}">
+					<td class="is-vcentered has-text-centered" style="width: 2.5rem;">
+                            <span th:if="${activeSteamIds.contains(u.steamId)}"
+                                  class="has-text-success" title="Connecté">&#9679;</span>
+						<span th:unless="${activeSteamIds.contains(u.steamId)}"
+						      class="has-text-danger" title="Déconnecté">&#9679;</span>
+					</td>
+					<td class="is-vcentered" th:text="${u.username}"></td>
+					<td class="is-vcentered">
+						<a th:href="@{/steam/profile/{id}(id=${u.steamId})}"
+						   target="_blank"
+						   th:text="${u.steamId}"></a>
+					</td>
+					<td class="is-vcentered"
+					    th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+					<td class="is-vcentered"
+					    th:text="${u.lastLoginAt != null} ? ${#temporals.format(u.lastLoginAt, 'dd/MM/yyyy HH:mm')} : '—'"></td>
+					<td class="is-vcentered">
+						<form th:action="@{/admin/steam-users/{id}/score(id=${u.id})}"
+						      method="post"
+						      style="display: flex; gap: 0.4rem; align-items: center;">
+							<input class="input is-small"
+							       type="number"
+							       name="score"
+							       th:value="${u.score}"
+							       style="width: 90px;">
+							<button class="button is-info is-small" type="submit">✓</button>
+						</form>
+					</td>
+					<td class="is-vcentered has-text-right"
+					    style="display: flex; gap: 0.4rem; justify-content: flex-end;">
+						<a th:href="@{/admin/shop-purchases/user/{id}(id=${u.id})}"
+						   class="button is-link is-small" title="Voir l'historique d'achat">Achats</a>
+						<form th:action="@{/admin/impersonate/{id}(id=${u.id})}" method="post" target="_blank">
+							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+							<button class="button is-warning is-small" type="submit"
+							        title="Se connecter en tant que cet utilisateur">Impersonate
+							</button>
+						</form>
+						<form th:action="@{/admin/steam-users/{id}/delete(id=${u.id})}"
+						      method="post"
+						      th:data-username="${u.username}"
+						      onsubmit="return confirm('Supprimer le compte de « ' + this.dataset.username + ' » ?')">
+							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+							<button class="button is-danger is-small" type="submit">Supprimer</button>
+						</form>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</section>
+
+</body>
+</html>

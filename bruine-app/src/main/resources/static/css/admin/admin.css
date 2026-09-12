@@ -1,0 +1,19 @@
+/* Styles partagés par les pages d'administration. */
+td {
+    vertical-align: middle !important;
+}
+
+/* Boutique packs (/admin/shop-packs) */
+.promo-cell {
+    background: #fffbea;
+}
+
+.col-narrow {
+    max-width: 90px;
+}
+
+/* Config gacha : Bulma pose margin-bottom sur toutes les .box sauf la dernière,
+   ce qui la faisait dépasser ses voisines. L'écart vient du gap de la grille. */
+.config-grid .box {
+    margin-bottom: 0;
+}

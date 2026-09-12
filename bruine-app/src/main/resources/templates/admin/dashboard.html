@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+>
+
+<head th:replace="~{admin/layout :: head('Dashboard')}"></head>
+
+<body>
+<nav th:replace="~{admin/layout :: navbar(false)}"></nav>
+
+<section class="section">
+	<div class="container">
+		<h1 class="title">Tableau de bord</h1>
+
+		<div class="columns is-multiline">
+			<div class="column is-one-third">
+				<div class="card">
+					<div class="card-content">
+						<p class="title is-5">Comptes admin</p>
+					</div>
+					<footer class="card-footer">
+						<a th:href="@{/admin/admin-users}" class="card-footer-item">Gérer les comptes</a>
+					</footer>
+				</div>
+			</div>
+
+			<div class="column is-one-third">
+				<div class="card">
+					<div class="card-content">
+						<p class="title is-5">Comptes utilisateurs</p>
+					</div>
+					<footer class="card-footer">
+						<a th:href="@{/admin/steam-users}" class="card-footer-item">Gérer les comptes</a>
+					</footer>
+				</div>
+			</div>
+
+			<div class="column is-one-third">
+				<div class="card">
+					<div class="card-content">
+						<p class="title is-5">Récompenses gacha</p>
+					</div>
+					<footer class="card-footer">
+						<a th:href="@{/admin/gacha-rewards}" class="card-footer-item">Gérer les récompenses</a>
+					</footer>
+				</div>
+			</div>
+
+			<div class="column is-one-third">
+				<div class="card">
+					<div class="card-content">
+						<p class="title is-5">Configuration du gacha</p>
+					</div>
+					<footer class="card-footer">
+						<a th:href="@{/admin/gacha-config}" class="card-footer-item">Taux de drop</a>
+					</footer>
+				</div>
+			</div>
+
+			<div class="column is-one-third">
+				<div class="card">
+					<div class="card-content">
+						<p class="title is-5">Packs boutique</p>
+					</div>
+					<footer class="card-footer">
+						<a th:href="@{/admin/shop-packs}" class="card-footer-item">Gérer les packs</a>
+					</footer>
+				</div>
+			</div>
+
+			<div class="column is-one-third">
+				<div class="card">
+					<div class="card-content">
+						<p class="title is-5">Historique des achats</p>
+					</div>
+					<footer class="card-footer">
+						<a th:href="@{/admin/shop-purchases}" class="card-footer-item">Voir les achats</a>
+					</footer>
+				</div>
+			</div>
+
+			<div class="column is-one-third">
+				<div class="card">
+					<div class="card-content">
+						<p class="title is-5">
+							Sécurité (MFA)
+							<span class="tag is-success is-small ml-2" th:if="${mfaEnabled}">Activée</span>
+							<span class="tag is-warning is-small ml-2" th:unless="${mfaEnabled}">Désactivée</span>
+						</p>
+					</div>
+					<footer class="card-footer">
+						<a th:href="@{/admin/mfa/setup}" class="card-footer-item"
+						   th:text="${mfaEnabled} ? 'Gérer la MFA' : 'Activer la MFA'">Gérer la MFA</a>
+					</footer>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+</body>
+
+</html>

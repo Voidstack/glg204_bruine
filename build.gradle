@@ -1,0 +1,36 @@
+plugins {
+    id 'org.springframework.boot' version '3.5.8' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    group = 'glg203'
+    version = '0.0.1-SNAPSHOT'
+    compileJava.options.encoding = 'UTF-8'
+
+    repositories {
+        mavenCentral()
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+tasks.register('distClean') {
+    dependsOn('clean')
+    doLast {
+        delete 'bin'
+        delete '.classpath'
+        delete '.gradle'
+        delete '.nb-gradle'
+        delete '.project'
+        delete '.settings'
+        delete '.vscode'
+        delete '.DS_Store'
+        delete '.idea'
+        fileTree(dir: '.', include: ['*-correction', '*-sujet']).visit { f -> delete f.file }
+    }
+}

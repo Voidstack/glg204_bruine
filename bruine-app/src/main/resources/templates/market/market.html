@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Marché')}"></th:block>
+	<link rel="stylesheet" th:href="@{/css/market/market.css}">
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}"></header>
+
+<main class="main-market">
+
+	<h1 class="title has-text-centered" style="color:var(--text); margin-bottom:0.25rem;">
+		🛒 Marché
+	</h1>
+	<p class="has-text-centered" style="color:var(--text-muted); margin-bottom:1.8rem; font-size:0.9rem;">
+		Achetez et vendez des cartes avec d'autres joueurs
+	</p>
+
+	<!-- 1 Mettre en vente -->
+	<div class="market-section">
+		<div class="market-section-title">💰 Mettre une carte en vente</div>
+
+		<div th:if="${#lists.isEmpty(myInventory)}" class="empty-state">
+			Votre inventaire est vide, obtenez des cartes via le
+			<a th:href="@{/gacha}" style="color:var(--accent);">Gacha</a> !
+		</div>
+
+		<form th:if="${!#lists.isEmpty(myInventory)}" th:action="@{/market/sell}" method="post"
+		      class="sell-form">
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+			<div class="field">
+				<label for="cardId">Carte à vendre</label>
+				<select id="cardId" name="cardId" required>
+					<option th:each="card : ${myInventory}"
+					        th:value="${card.id}"
+					        th:text="${card.gachaReward.emoji + ' ' + card.gachaReward.name + (card.finish.name() != 'NORMAL' ? ' ' + card.finish.emoji : '') + ' · ' + card.gachaReward.rarity.label}">
+						Carte
+					</option>
+				</select>
+			</div>
+
+			<div class="field">
+				<label for="price">Prix (💧 points)</label>
+				<input id="price" type="number" name="price" min="1" value="10" required/>
+			</div>
+
+			<button type="submit" class="btn-sell">Mettre en vente</button>
+		</form>
+	</div>
+
+	<!-- 2 Mes annonces actives -->
+	<div class="market-section">
+		<div class="market-section-title">
+			📋 Mes annonces
+			<span style="font-weight:normal; font-size:0.8rem; opacity:0.6;"
+			      th:text="'(' + ${#lists.size(myListings)} + ')'"></span>
+		</div>
+
+		<div th:if="${#lists.isEmpty(myListings)}" class="empty-state">
+			Aucune carte en vente pour l'instant.
+		</div>
+
+		<div th:if="${!#lists.isEmpty(myListings)}" class="cards-grid">
+			<div th:each="listing : ${myListings}" class="listing-wrap">
+
+				<div th:replace="~{fragments/card :: card(
+				         view            = ${listing.card},
+				         baseClass       = 'mkt-card',
+				         dataId          = null,
+				         showDescription = false,
+				         showCount       = false,
+				         showShine       = false)}">
+				</div>
+
+				<!-- Prix + annuler -->
+				<div class="listing-meta">
+					<div class="listing-price" th:text="${listing.price} + ' 💧'">10 💧</div>
+				</div>
+				<form th:action="@{/market/cancel/{id}(id=${listing.id})}" method="post">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+					<button type="submit" class="btn-cancel">Annuler</button>
+				</form>
+
+			</div>
+		</div>
+	</div>
+
+	<div class="market-section">
+		<div class="market-section-title">
+			🛒 Toutes les annonces
+			<span style="font-weight:normal; font-size:0.8rem; opacity:0.6;"
+			      th:text="'(' + ${#lists.size(allListings)} + ')'"></span>
+		</div>
+
+		<div th:if="${!#lists.isEmpty(allListings)}" style="margin-bottom:1rem;">
+			<input id="marketFilter" type="text" placeholder="Filtrer par nom..."
+			       style="background:var(--steam-blue-dark); border:1px solid var(--steam-blue-mid); border-radius:6px;
+                          color:var(--text); padding:0.45rem 0.75rem; font-size:0.9rem; width:100%; max-width:320px;"
+			       oninput="filterMarket(this.value)"/>
+		</div>
+
+		<div th:if="${#lists.isEmpty(allListings)}" class="empty-state">
+			Aucune carte en vente pour l'instant, soyez le premier à en proposer une !
+		</div>
+
+		<div id="allListingsGrid" th:if="${!#lists.isEmpty(allListings)}" class="cards-grid">
+			<div th:each="listing : ${allListings}" class="listing-wrap"
+			     th:attr="data-name=${listing.card.name.toLowerCase()}">
+
+				<div th:replace="~{fragments/card :: card(
+				         view            = ${listing.card},
+				         baseClass       = 'mkt-card',
+				         dataId          = null,
+				         showDescription = false,
+				         showCount       = false,
+				         showShine       = false)}">
+				</div>
+
+				<!-- Prix + vendeur + acheter -->
+				<div class="listing-meta">
+					<div class="listing-price" th:text="${listing.price} + ' 💧'">10 💧</div>
+					<div class="listing-seller" th:text="'par ' + ${listing.sellerName}">par joueur</div>
+				</div>
+				<form th:action="@{/market/buy/{id}(id=${listing.id})}" method="post">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+					<button type="submit" class="btn-buy"
+					        th:disabled="${currentScore < listing.price}"
+					        th:title="${currentScore < listing.price} ? 'Score insuffisant' : 'Acheter pour ' + ${listing.price} + ' 💧'">
+						Acheter
+					</button>
+				</form>
+
+			</div>
+		</div>
+	</div>
+
+</main>
+
+<script>
+    function filterMarket(query) {
+        const q = query.toLowerCase().trim();
+        document.querySelectorAll('#allListingsGrid .listing-wrap').forEach(el => {
+            el.style.display = (!q || el.dataset.name.includes(q)) ? '' : 'none';
+        });
+    }
+</script>
+<th:block th:replace="~{layout :: footer-and-js}"></th:block>
+</body>
+</html>

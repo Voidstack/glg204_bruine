@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Boutique')}"></th:block>
+	<link rel="stylesheet" th:href="@{/css/shop/shop.css}">
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}"></header>
+
+<div class="shop-container">
+
+	<div class="shop-title">💧 Boutique Bruine</div>
+	<p class="shop-subtitle">Achète des points pour alimenter le gacha et enrichir ton deck.</p>
+
+	<div class="sandbox-banner">
+		<i class="fa-solid fa-flask"></i>
+		<span>Mode test (Sandbox) - Aucun vrai paiement n'est effectué. Utilise la carte <code>4242 4242 4242 4242</code> pour simuler un achat.</span>
+	</div>
+
+	<!-- Messages flash -->
+	<div th:if="${success}" class="shop-flash ok" th:text="${success}"></div>
+	<div th:if="${error}" class="shop-flash err" th:text="${error}"></div>
+
+	<div class="pack-grid">
+		<div th:each="pack : ${packs}"
+		     class="pack-card"
+		     th:classappend="${pack.popular ? ' featured' : (pack.promoActive ? ' promo' : '')}">
+
+			<span th:if="${pack.popular}" class="pack-popular-badge">⭐ Populaire</span>
+			<span th:if="${pack.promoActive}" class="pack-promo-badge"
+			      th:text="'🔥 -' + ${pack.promoPercent} + '%'">🔥 Promo</span>
+
+			<div class="pack-icon" th:text="${pack.emoji}">💧</div>
+			<div class="pack-name" th:text="${pack.name}">Pack</div>
+			<div class="pack-points"><span
+					th:text="${#numbers.formatInteger(pack.totalPoints, 1, 'WHITESPACE')}">0</span> pts
+			</div>
+			<div th:if="${pack.bonusPoints > 0}" class="pack-bonus"
+			     th:text="'+' + ${#numbers.formatInteger(pack.bonusPoints, 1, 'WHITESPACE')} + ' offerts'">+0 offerts
+			</div>
+
+			<div class="pack-price" th:if="${pack.promoActive}">
+				<span class="old-price" th:text="${pack.priceEuros} + ' €'">0.00 €</span>
+				<span class="new-price" th:text="${pack.effectivePriceEuros} + ' €'">0.00 €</span>
+			</div>
+			<div class="pack-price" th:unless="${pack.promoActive}"
+			     th:text="${pack.priceEuros} + ' €'">0.00 €
+			</div>
+
+			<form class="pack-buy-form" th:action="@{/shop/checkout/{id}(id=${pack.id})}" method="post">
+				<button type="submit" class="pack-buy-btn">Acheter</button>
+			</form>
+		</div>
+	</div>
+
+	<p th:if="${#lists.isEmpty(packs)}" class="history-empty" style="text-align:center;">
+		Aucun pack disponible pour le moment.
+	</p>
+
+	<!-- FAQ / info -->
+	<div class="shop-faq">
+		<p><strong>Comment ça marche ?</strong><br>
+			Chaque tirage au gacha coûte <strong>10 points</strong>. Les points achetés s'ajoutent directement à ton
+			score Bruine visible dans la barre de navigation.</p>
+		<p style="margin-top:0.8rem;"><strong>Remboursement</strong><br>
+			Trop tard, c'est à moi maintenant !</p>
+	</div>
+
+	<!-- Historique d'achat de l'utilisateur connecté -->
+	<div class="history-section">
+		<div class="history-title">🧾 Mon historique d'achat</div>
+
+		<table class="history-table" th:if="${not #lists.isEmpty(history)}">
+			<thead>
+			<tr>
+				<th>Date</th>
+				<th>Pack</th>
+				<th>Points crédités</th>
+				<th>Montant payé</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr th:each="h : ${history}">
+				<td th:text="${#temporals.format(h.createdAt, 'dd/MM/yyyy HH:mm')}">—</td>
+				<td>
+					<span th:text="${h.packEmoji}">💧</span>
+					<span th:text="${h.packName}">Pack</span>
+					<span th:if="${h.promoPercent > 0}" class="pack-promo-badge"
+					      th:text="'-' + ${h.promoPercent} + '%'">-0%</span>
+				</td>
+				<td th:text="'+' + ${#numbers.formatInteger(h.pointsCredited, 1, 'WHITESPACE')}">+0</td>
+				<td th:text="${h.pricePaidEuros} + ' €'">0.00 €</td>
+			</tr>
+			</tbody>
+		</table>
+
+		<p th:if="${#lists.isEmpty(history)}" class="history-empty">
+			Tu n'as encore effectué aucun achat.
+		</p>
+	</div>
+
+</div>
+
+<th:block th:replace="~{layout :: footer-and-js}"></th:block>
+</body>
+</html>

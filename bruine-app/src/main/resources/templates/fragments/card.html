@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  Rendu unique d'une carte, partagé par l'inventaire.
+  Toute modification du visuel d'une carte se fait ici ou card.css ou card-motion.js
+-->
+<div th:fragment="card(view, baseClass, dataId, showDescription, showCount, showShine)"
+     th:class="${baseClass} + ' ' + ${view.cssClasses}"
+     th:attr="data-id=${dataId}">
+
+	<div th:if="${showShine}" class="card-shine"></div>
+
+	<div class="card-header">
+        <span class="card-rarity-pip" th:text="${view.rarity.emoji}">🪨</span>
+		<span class="card-rarity-label" th:text="${view.rarity.label}">Commun</span>
+	</div>
+
+	<div class="card-artwork">
+		<span class="card-icon" th:text="${view.emoji}">&#11088;</span>
+	</div>
+
+	<div class="card-name-strip">
+		<span class="card-name" th:text="${view.name}">Nom</span>
+	</div>
+
+	<div th:if="${showDescription}" class="card-flavor">
+		<span class="card-desc" th:text="${view.description}">description</span>
+	</div>
+
+	<div class="card-footer">
+        <span th:if="${view.hasFinish()}" class="card-finish-badge"
+              th:text="${view.finish.emoji + ' ' + view.finish.badge}">✨ FOIL</span>
+		<span th:if="${showCount}" class="card-count" th:text="'&times;' + ${view.count}">&times;1</span>
+	</div>
+</div>
+
+</body>
+</html>

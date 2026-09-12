@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/layout :: head('Récompenses Gacha')}"></head>
+
+<body>
+<nav th:replace="~{admin/layout :: navbar(true)}"></nav>
+<section class="section">
+	<div class="container">
+		<h1 class="title">Récompenses Gacha</h1>
+		<p class="subtitle">Gérer le catalogue des récompenses disponibles dans le mini-jeu</p>
+
+		<!-- Notifications -->
+		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
+		<div th:if="${error}" class="notification is-danger  is-light" th:text="${error}"></div>
+
+		<div class="box" style="overflow-x: auto;">
+			<table class="table is-fullwidth is-hoverable">
+				<thead>
+				<tr>
+					<th style="width:80px">Emoji</th>
+					<th>Nom</th>
+					<th style="width:160px">Rareté</th>
+					<th>Description</th>
+					<th style="width:160px"></th>
+				</tr>
+				</thead>
+				<tbody>
+
+				<!-- Lignes éditables -->
+				<tr th:each="r : ${rewards}">
+					<form th:action="@{/admin/gacha-rewards/{id}/update(id=${r.id})}" method="post"
+					      style="display: contents;">
+						<td>
+							<label>
+								<input class="input is-small" type="text" name="emoji"
+								       th:value="${r.emoji}" required maxlength="10"
+								       style="max-width: 60px; text-align: center; font-size: 1.2rem;">
+							</label>
+						</td>
+						<td>
+							<label>
+								<input class="input is-small" type="text" name="name"
+								       th:value="${r.name}" required placeholder="Nom" style="min-width: 160px;">
+							</label>
+						</td>
+						<td>
+							<div class="select is-small is-fullwidth">
+								<label>
+									<select name="rarity" required>
+										<option value="LEGENDARY" th:selected="${r.rarity.name() == 'LEGENDARY'}">⭐
+											Légendaire
+										</option>
+										<option value="EPIC" th:selected="${r.rarity.name() == 'EPIC'}">🔮 Épique</option>
+										<option value="RARE" th:selected="${r.rarity.name() == 'RARE'}">💎 Rare</option>
+										<option value="UNCOMMON" th:selected="${r.rarity.name() == 'UNCOMMON'}">🍃 Peu commun
+										</option>
+										<option value="COMMON" th:selected="${r.rarity.name() == 'COMMON'}">🪨 Commun</option>
+									</select>
+								</label>
+							</div>
+						</td>
+						<td>
+							<label>
+								<input class="input is-small" type="text" name="description"
+								       th:value="${r.description}" placeholder="—">
+							</label>
+						</td>
+						<td class="has-text-right">
+							<button class="button is-info is-small mr-1" type="submit">Sauvegarder</button>
+					</form>
+					<form th:action="@{/admin/gacha-rewards/{id}/delete(id=${r.id})}"
+					      method="post" style="display: inline;"
+					      th:data-emoji="${r.emoji}"
+					      onsubmit="return confirm('Supprimer « ' + this.dataset.emoji + ' » ?')">
+						<button class="button is-danger is-small" type="submit">Supprimer</button>
+					</form>
+				</tr>
+
+				<!-- Ligne de création -->
+				<tr style="border-top: 2px solid #dbdbdb;">
+					<td colspan="4">
+						<form th:action="@{/admin/gacha-rewards/create}" method="post"
+						      style="display: flex; gap: .5rem; align-items: center; flex-wrap: wrap;">
+							<label>
+								<input class="input is-small" type="text" name="emoji"
+								       placeholder="Emoji" required maxlength="10"
+								       style="max-width: 70px; text-align: center; font-size: 1.1rem;">
+							</label>
+							<label>
+								<input class="input is-small" type="text" name="name"
+								       placeholder="Nom" required style="min-width: 160px;">
+							</label>
+							<div class="select is-small">
+								<label>
+									<select name="rarity" required>
+										<option value="" disabled selected>Rareté...</option>
+										<option value="LEGENDARY">⭐ Légendaire</option>
+										<option value="EPIC">🔮 Épique</option>
+										<option value="RARE">💎 Rare</option>
+										<option value="UNCOMMON">🍃 Peu commun</option>
+										<option value="COMMON">🪨 Commun</option>
+									</select>
+								</label>
+							</div>
+							<label>
+								<input class="input is-small" type="text" name="description"
+								       placeholder="Description (optionnelle)"
+								       style="flex: 1; min-width: 200px;">
+							</label>
+							<button class="button is-success is-small" type="submit">+ Ajouter</button>
+						</form>
+					</td>
+				</tr>
+
+				</tbody>
+			</table>
+		</div>
+
+	</div>
+</section>
+
+</body>
+</html>

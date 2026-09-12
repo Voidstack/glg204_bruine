@@ -1,0 +1,140 @@
+package com.enosistudio.bruine.deck;
+
+import com.enosistudio.bruine.card.ECardFinish;
+import com.enosistudio.bruine.card.ECardRarity;
+import com.enosistudio.bruine.deck.model.UserCard;
+import com.enosistudio.bruine.deck.repository.UserCardRepository;
+import com.enosistudio.bruine.deck.service.DeckService;
+import com.enosistudio.bruine.gacha.model.GachaReward;
+import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
+import com.enosistudio.bruine.steam.model.SteamUser;
+import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.service.SteamService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+/**
+ * Un deck se partage d'une seule façon : l'image SVG {@code /deck/{steamId}},
+ * intégrable par une balise {@code <img>}. Le profil l'affiche ; l'ancien widget
+ * HTML embarqué en iframe a disparu.
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+@AutoConfigureTestDatabase
+@ActiveProfiles("test")
+@Transactional
+class DeckSharingTest {
+
+    private static final String STEAM_ID = "76561190000000009";
+
+    @Autowired
+    private MockMvc mvc;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private GachaRewardRepository gachaRewardRepository;
+    @Autowired
+    private UserCardRepository userCardRepository;
+    @Autowired
+    private DeckService deckService;
+
+    @MockitoBean
+    private SteamService steamService;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        SteamUser user = new SteamUser();
+        user.setSteamId(STEAM_ID);
+        user.setUsername("Joueuse");
+        user.setScore(0);
+        user = userRepository.save(user);
+
+        GachaReward reward = new GachaReward();
+        reward.setRarity(ECardRarity.EPIC);
+        reward.setName("Dragon de brume");
+        reward.setEmoji("*");
+        gachaRewardRepository.save(reward);
+
+        UserCard card = new UserCard();
+        card.setSteamUser(user);
+        card.setGachaReward(reward);
+        card.setFinish(ECardFinish.HOLOGRAPHIC);
+        card = userCardRepository.save(card);
+
+        deckService.saveDeck(user.getId(), List.of(card.getId()));
+
+        // avatarmedium vide -> le renderer n'essaie aucun appel réseau pour l'avatar
+        when(steamService.getUserData(anyString())).thenReturn(Map.of(
+                "steamid", STEAM_ID,
+                "personaname", "Joueuse",
+                "avatarfull", "",
+                "avatarmedium", "",
+                "personastate", 1,
+                "communityvisibilitystate", 3));
+    }
+
+    @Test
+    void le_deck_est_servi_en_image_svg() throws Exception {
+        mvc.perform(get("/deck/" + STEAM_ID))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("image/svg+xml"));
+    }
+
+    /**
+     * Le template doit rester un SVG ouvrable seul (Inkscape) : XML bien formé, racine {@code <svg>},
+     * {@code viewBox} présent et namespace {@code th} déclaré (sans quoi le parseur rejette les th:*).
+     */
+    @Test
+    void le_template_svg_est_un_fichier_svg_valide() throws Exception {
+        String svg;
+        try (InputStream in = getClass().getResourceAsStream("/templates/deck/svg/deck.svg")) {
+            assertTrue(in != null, "templates/deck/svg/deck.svg introuvable");
+            svg = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        Document doc = factory.newDocumentBuilder().parse(new InputSource(new StringReader(svg)));
+
+        assertEquals("svg", doc.getDocumentElement().getLocalName());
+        assertTrue(doc.getDocumentElement().hasAttribute("viewBox"), "viewBox manquant");
+        assertTrue(svg.contains("xmlns:th="), "namespace th non déclaré");
+    }
+
+    @Test
+    void le_profil_affiche_l_image_du_deck_sans_iframe() throws Exception {
+        String html = mvc.perform(get("/steam/profile/" + STEAM_ID))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        org.junit.jupiter.api.Assertions.assertTrue(html.contains("/deck/" + STEAM_ID),
+                "l'image du deck doit pointer sur /deck/{steamId}");
+        org.junit.jupiter.api.Assertions.assertFalse(html.contains("<iframe"),
+                "plus aucune iframe : l'ancien widget HTML est supprimé");
+    }
+}

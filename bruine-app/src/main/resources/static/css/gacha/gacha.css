@@ -1,0 +1,417 @@
+@import url("../card.css");
+
+body {
+    background: var(--bg-deep);
+}
+
+.gacha-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* Score */
+.score-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent);
+    margin-bottom: 2.5rem;
+}
+
+/* Pack cards grid */
+#pack-select {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.pack-card {
+    width: 158px;
+    height: 236px;
+    border-radius: 14px;
+    border: 2px solid rgb(var(--pack));
+    background: radial-gradient(ellipse at 50% 40%,
+    rgb(var(--pack-deep)) 0%,
+    rgb(var(--pack-shade)) 55%,
+    rgb(var(--pack-void)) 100%);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    cursor: grab;
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+    transform-style: preserve-3d;
+    user-select: none;
+    touch-action: none;
+    transition: box-shadow 0.3s ease;
+}
+
+/* Le pack a des coins plus arrondis que les cartes : sa copie glissée suit. */
+.pack-card.drag-clone {
+    border-radius: 14px;
+}
+
+.pack-card * {
+    pointer-events: none;
+    user-select: none;
+}
+
+.pack-card:active {
+    cursor: grabbing;
+}
+
+/* Var de style par pack */
+.pack-simple {
+    --pack: 56 189 248;
+    --pack-deep: 14 74 106;
+    --pack-shade: 7 31 48;
+    --pack-void: 4 14 24;
+    --pack-text: var(--accent-light);
+    --pack-edge-alpha: 0.15;
+    --pack-hover-edge-alpha: 0.4;
+    --pack-hover-alpha: 0.5;
+    --pack-ring-alpha: 0.38;
+    --pack-orb-alpha: 0.28;
+    --pack-orb-inset-alpha: 0.12;
+    --pack-count-alpha: 0.7;
+}
+
+.pack-plus {
+    --pack: 167 139 250;
+    --pack-deep: 58 20 112;
+    --pack-shade: 24 7 48;
+    --pack-void: 10 3 24;
+    --pack-text: var(--violet-light);
+    --pack-edge-alpha: 0.15;
+    --pack-hover-edge-alpha: 0.42;
+    --pack-hover-alpha: 0.52;
+    --pack-ring-alpha: 0.38;
+    --pack-orb-alpha: 0.28;
+    --pack-orb-inset-alpha: 0.12;
+    --pack-count-alpha: 0.7;
+}
+
+.pack-mega {
+    --pack: 251 191 36;
+    --pack-deep: 92 58 0;
+    --pack-shade: 42 24 0;
+    --pack-void: 18 10 0;
+    --pack-text: var(--gold-light);
+    --pack-edge-alpha: 0.2;
+    --pack-hover-edge-alpha: 0.48;
+    --pack-hover-alpha: 0.58;
+    --pack-ring-alpha: 0.42;
+    --pack-orb-alpha: 0.32;
+    --pack-orb-inset-alpha: 0.14;
+    --pack-count-alpha: 0.8;
+}
+
+/* Shimmer sweep (toutes les cartes) */
+.pack-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+            108deg,
+            transparent 30%,
+            rgba(255, 255, 255, 0.12) 50%,
+            transparent 70%
+    );
+    background-size: 200% 100%;
+    animation: packShimmer 3.2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes packShimmer {
+    0%, 100% {
+        background-position: -120% 0;
+    }
+    50% {
+        background-position: 120% 0;
+    }
+}
+
+/* Diagonal stripe texture */
+.pack-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+            -48deg,
+            transparent,
+            transparent 11px,
+            rgba(255, 255, 255, 0.016) 11px,
+            rgba(255, 255, 255, 0.016) 12px
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Unavailable */
+.pack-card.pack-unavailable {
+    opacity: 0.28;
+    cursor: not-allowed;
+    filter: grayscale(0.85) brightness(0.65);
+}
+
+.pack-card.pack-unavailable::before {
+    animation: none;
+}
+
+/* Ghost (origine pendant le drag) */
+.pack-card.ghost {
+    opacity: 0.12;
+    pointer-events: none;
+}
+
+/* Pack header */
+.pack-header {
+    padding: 0.38rem 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 3;
+    border-bottom: 1px solid rgb(255 255 255 / 0.07);
+    background: linear-gradient(90deg, rgb(var(--pack-deep) / 0.9), rgb(var(--pack-void) / 0.7));
+}
+
+.pack-brand,
+.pack-tier-badge,
+.pack-count,
+.pack-price {
+    color: var(--pack-text);
+}
+
+.pack-brand {
+    font-size: 0.44rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.pack-tier-badge {
+    font-size: 0.41rem;
+    font-weight: 800;
+    border-radius: 3px;
+    padding: 0.1rem 0.3rem;
+    letter-spacing: 0.1em;
+    border: 1px solid rgb(var(--pack) / 0.5);
+    background: rgb(var(--pack) / 0.1);
+}
+
+/* Pack artwork (zone centrale) */
+.pack-artwork {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    position: relative;
+    z-index: 3;
+}
+
+/* Anneaux d'énergie pulsants */
+.pack-energy-ring {
+    position: absolute;
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    border: 1.5px solid rgb(var(--pack) / var(--pack-ring-alpha));
+    animation: energyRing 2.4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.pack-energy-ring::after {
+    content: '';
+    position: absolute;
+    inset: -14px;
+    border-radius: 50%;
+    border: 1px solid rgb(var(--pack) / var(--pack-ring-alpha));
+    opacity: 0.35;
+    animation: energyRing 2.4s ease-in-out infinite 0.5s;
+}
+
+@keyframes energyRing {
+    0%, 100% {
+        opacity: 0.18;
+        transform: scale(0.88);
+    }
+    50% {
+        opacity: 0.65;
+        transform: scale(1.12);
+    }
+}
+
+/* Orbe central lumineux */
+.pack-orb {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+    rgb(var(--pack) / var(--pack-orb-alpha)) 0%,
+    rgb(var(--pack-deep) / 0.55) 60%,
+    transparent 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 4;
+}
+
+.pack-count {
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+}
+
+/* Pack footer */
+.pack-footer {
+    padding: 0.32rem 0.6rem;
+    border-top: 1px solid rgb(255 255 255 / 0.07);
+    background: linear-gradient(90deg, rgb(var(--pack-deep) / 0.8), rgb(var(--pack-void) / 0.6));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 3;
+}
+
+.pack-price {
+    font-size: 0.58rem;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+}
+
+/* Shake progress bar (fixed bottom) */
+#shake-bar-fixed {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    background: rgba(10, 19, 27, 0.92);
+    border: 1px solid var(--steam-blue-mid);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    z-index: 9998;
+    backdrop-filter: blur(6px);
+}
+
+#shake-bar-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+#shake-bar-track {
+    width: 100%;
+    height: 5px;
+    background: var(--steam-blue-dark);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+#shake-bar-inner {
+    height: 100%;
+    width: 0%;
+    border-radius: 3px;
+    transition: width 0.07s ease;
+}
+
+/* Pack open animation (applied to clone) */
+@keyframes packExplode {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+        filter: brightness(1);
+    }
+    40% {
+        transform: scale(1.3);
+        opacity: 1;
+        filter: brightness(2.5);
+    }
+    100% {
+        transform: scale(0.1);
+        opacity: 0;
+        filter: brightness(4);
+    }
+}
+
+/* Gacha cards */
+.cards-grid {
+    gap: 0.75rem;
+    justify-content: center;
+    min-height: 208px;
+}
+
+.gacha-card {
+    opacity: 0;
+    transform: scale(0.7) rotateY(90deg);
+}
+
+.gacha-card.revealed {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+}
+
+.result-summary {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-panel);
+    border-radius: 8px;
+    border: 1px solid var(--steam-blue-mid);
+    display: none;
+}
+
+.result-summary.visible {
+    display: block;
+}
+
+.error-banner {
+    background: #2d1515;
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    color: #fc8181;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.error-banner.visible {
+    display: block;
+}
+
+.odds-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+}
+
+.odds-table td, .odds-table th {
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid var(--steam-blue-mid);
+    color: var(--text-muted);
+}
+
+.odds-table th {
+    color: var(--text);
+    font-weight: bold;
+}

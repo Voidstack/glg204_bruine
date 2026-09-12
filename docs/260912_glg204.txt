@@ -1,0 +1,4 @@
+Lien github : https://github.com/Voidstack/glg204_bruine
+Lien prod : glg204-production.up.railway.app
+
+Je n'ai pas fini mon pdf pour le moment.

@@ -1,0 +1,22 @@
+services:
+  db:
+    image: mysql:9.4
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: glg203
+      MYSQL_DATABASE: bruine
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: glg203
+    ports:
+      - 8081:80

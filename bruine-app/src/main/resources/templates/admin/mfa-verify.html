@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{admin/layout :: head('Vérification MFA')}"></head>
+
+<body>
+    <section class="section">
+        <div class="container" style="max-width: 400px;">
+            <h1 class="title has-text-centered">Vérification en deux étapes</h1>
+            <p class="subtitle has-text-centered is-6">
+                Saisissez le code à 6 chiffres affiché dans votre application d'authentification.
+            </p>
+
+            <div class="notification is-danger" th:if="${mfaError}">
+                Code invalide ou expiré. Veuillez réessayer.
+            </div>
+
+            <form class="box" th:action="@{/admin/mfa}" method="POST">
+                <div class="field">
+                    <label class="label">Code de vérification</label>
+                    <div class="control">
+                        <input class="input has-text-centered" type="text" name="code"
+                               inputmode="numeric" autocomplete="one-time-code"
+                               pattern="[0-9]*" maxlength="6" placeholder="123456" autofocus required>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-link is-fullwidth">Valider</button>
+                    </div>
+                </div>
+            </form>
+
+            <p class="has-text-centered">
+                <form th:action="@{/admin/logout}" method="post">
+                    <button class="button is-text is-small">Annuler et se déconnecter</button>
+                </form>
+            </p>
+        </div>
+    </section>
+</body>
+
+</html>

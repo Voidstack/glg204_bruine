@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Connexion échouée')}"></th:block>
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}">
+	<h1>Login Failed</h1>
+</header>
+<main class="container">
+	<section class="section">
+		<article class="message is-danger">
+			<div class="message-header">
+				<p>Authentication Failed</p>
+			</div>
+			<div class="message-body">
+				Steam authentication failed. Please try again.
+			</div>
+		</article>
+		<a th:href="@{/}" class="button is-primary">Back to Home</a>
+	</section>
+</main>
+
+<th:block th:replace="~{layout :: footer-and-js}">
+</th:block>
+</body>
+
+</html>

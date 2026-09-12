@@ -1,0 +1,1 @@
+-- Empty pour le moment, les tables seront créées par Hibernate

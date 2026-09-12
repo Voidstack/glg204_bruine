@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--
+    Fragments partagés par les pages d'administration.
+    - head(pageTitle) : remplace le <head> complet d'une page admin
+    - navbar(backLink) : barre de navigation sombre ; backLink=true affiche le lien « ← Tableau de bord »
+-->
+
+<head th:fragment="head(pageTitle)">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${pageTitle}">BRUINE Admin</title>
+	<link rel="stylesheet" th:href="@{/webjars/bulma/0.9.4/css/bulma.css}">
+	<link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+</head>
+
+<body>
+
+<nav th:fragment="navbar(backLink)" class="navbar is-dark" role="navigation">
+	<div class="navbar-brand">
+		<span class="navbar-item has-text-white has-text-weight-bold">BRUINE Admin</span>
+	</div>
+	<div class="navbar-end">
+		<div class="navbar-item">
+            <span class="has-text-white mr-4">
+                Connecté : <strong class="has-text-white" sec:authentication="name"></strong>
+            </span>
+			<a th:if="${backLink}" th:href="@{/admin}" class="button is-light is-small mr-2">← Tableau de bord</a>
+			<form th:action="@{/admin/logout}" method="post">
+				<button class="button is-light is-small">Déconnexion</button>
+			</form>
+		</div>
+	</div>
+</nav>
+
+</body>
+</html>

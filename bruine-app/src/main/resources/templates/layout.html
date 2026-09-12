@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<th:block th:fragment="common-head(pageTitle)">
+	<title th:text="${pageTitle}">Bruine</title>
+	<link rel="stylesheet" th:href="@{/webjars/bulma/0.9.4/css/bulma.css}">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<link rel="stylesheet" th:href="@{/css/footer.css}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+</th:block>
+
+<th:block th:fragment="header-and-nav">
+	<header>
+		<nav class="navbar" role="navigation" aria-label="main navigation">
+			<div class="navbar-brand">
+				<a class="navbar-item" th:href="@{/}">
+					<img id="banner_logo" th:src="@{/img/bruine_banner_white.png}" style="max-height:3rem;"
+					     alt="banner_logo"/>
+				</a>
+				<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+				   data-target="navMenu">
+					<span aria-hidden="true"></span>
+					<span aria-hidden="true"></span>
+					<span aria-hidden="true"></span>
+				</a>
+			</div>
+
+			<div class="navbar-menu" id="navMenu">
+				<div class="navbar-start">
+
+				</div>
+
+				<div class="navbar-end">
+					<a class="navbar-item" th:href="@{/gacha}">
+						Jouer
+					</a>
+
+					<div class="navbar-item has-dropdown is-hoverable">
+						<a class="navbar-link" aria-haspopup="true" aria-controls="#dropdown-menu">
+							Menus
+						</a>
+						<div class="navbar-dropdown">
+
+							<a class="navbar-item" th:href="@{/inventory}">
+								Inventaire
+							</a>
+
+							<a class="navbar-item" th:href="@{/deck}">
+								Deck
+							</a>
+
+							<a class="navbar-item" th:href="@{/market}">
+								Marché
+							</a>
+
+							<a class="navbar-item" th:href="@{/levelup}">
+								Level Up
+							</a>
+						</div>
+					</div>
+
+					<div class="navbar-item has-dropdown is-hoverable">
+						<a class="navbar-link" aria-haspopup="true" aria-controls="#dropdown-menu">
+							Classement
+						</a>
+						<div class="navbar-dropdown">
+
+							<a class="navbar-item" th:href="@{/leaderboard}">
+								Temps de jeu total
+							</a>
+
+							<a class="navbar-item" th:href="@{/leaderboard/xp}">
+								XP gagnée
+							</a>
+						</div>
+					</div>
+
+					<div class="navbar-item">
+						<div sec:authorize="not isAuthenticated()"
+						     style="align-self: stretch; display: flex; align-items: stretch;">
+							<a href="/steam/login" style="flex-shrink: 0; width: inherit; align-content: center;">
+								<img th:src="@{/img/steam_signin.png}" alt="Se connecter avec Steam"
+								     style="width: 100%; height: 100%; object-fit: cover; display: block; max-height: inherit;">
+							</a>
+						</div>
+
+						<div sec:authorize="isAuthenticated()" style="display: flex; align-items: center; gap: 0.5rem;">
+							<a th:href="@{/steam/profile}" title="Voir mon profil"
+							   style="flex-shrink: 0; width: 2.2rem; height: 2.2rem; border-radius: 50%; overflow: hidden; display: block;">
+								<img th:src="${#authentication.principal.attributes['avatar']}"
+								     alt="avatar"
+								     style="width: 100%; height: 100%; object-fit: cover; display: block; max-height: inherit;">
+							</a>
+							<a th:href="@{/steam/profile}" sec:authentication="name" title="Voir mon profil"></a>
+							<a th:if="${currentScore != null}"
+							   th:href="@{/gacha}"
+							   title="Dépenser mes points"
+							   style="display:inline-flex;align-items:center;gap:0.3rem;background:linear-gradient(135deg,rgba(20,40,60,0.95),rgba(10,25,45,0.95));border:1px solid rgba(102,192,244,0.3);border-radius:2rem;padding:0.18rem 0.7rem 0.18rem 0.45rem;box-shadow:0 0 10px rgba(102,192,244,0.12);text-decoration:none;transition:border-color 0.2s,box-shadow 0.2s;"
+							   onmouseover="this.style.borderColor='rgba(102,192,244,0.7)';this.style.boxShadow='0 0 16px rgba(102,192,244,0.3)';"
+							   onmouseout="this.style.borderColor='rgba(102,192,244,0.3)';this.style.boxShadow='0 0 10px rgba(102,192,244,0.12)';">
+								<span style="font-size:1rem;line-height:1;filter:drop-shadow(0 0 4px rgba(102,192,244,0.55));">💧</span>
+								<strong style="color:var(--accent);font-size:0.82rem;letter-spacing:0.04em;"
+								        th:text="${currentScore}">0</strong>
+								<a th:if="${currentScore != null}"
+								   th:href="@{/shop}"
+								   title="Acheter des points"
+								   style="display:inline-flex;align-items:center;justify-content:center;width:1.55rem;height:1.55rem;background:linear-gradient(135deg,rgba(20,40,60,0.95),rgba(10,25,45,0.95));border:1px solid rgba(102,192,244,0.3);border-radius:50%;box-shadow:0 0 8px rgba(102,192,244,0.1);text-decoration:none;color:var(--accent);font-size:0.95rem;font-weight:bold;line-height:1;transition:border-color 0.2s,box-shadow 0.2s;"
+								   onmouseover="this.style.borderColor='rgba(102,192,244,0.7)';this.style.boxShadow='0 0 14px rgba(102,192,244,0.3)';"
+								   onmouseout="this.style.borderColor='rgba(102,192,244,0.3)';this.style.boxShadow='0 0 8px rgba(102,192,244,0.1)';">+</a>
+
+							</a>
+							<form th:action="@{/steam/logout}" method="post">
+								<button type="submit" class="button" style="width: 2rem; height: 2rem; padding: 0;">
+									<i class="fa-solid fa-arrow-right-from-bracket"></i>
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</nav>
+	</header>
+	<article class="message is-danger" th:if="${errorMessage != null}">
+		<div class="message-header">
+			<p>Erreur</p>
+			<button class="delete" aria-label="delete"></button>
+		</div>
+		<div class="message-body" th:text="${errorMessage}">Action refusée.</div>
+	</article>
+	<article class="message is-success" th:if="${successMessage != null}">
+		<div class="message-header">
+			<p>Succès</p>
+			<button class="delete" aria-label="delete"></button>
+		</div>
+		<div class="message-body" th:text="${successMessage}">Action effectuée.</div>
+	</article>
+</th:block>
+
+<th:block th:fragment="footer-and-js">
+	<footer th:fragment="footer" class="footer">
+		<div class="block footer-text">
+			[[#{footer.demo}]]
+		</div>
+
+		<!-- Logos des principales technos/brands utilisées, avec liens vers leurs sites -->
+		<div id="logos" class="block center-text"
+		     style="display:flex; justify-content:center; align-items:center; gap:1.8rem; flex-wrap:wrap;">
+			<a href="https://enosistudio.com/" target="_blank" rel="noopener" title="Enosis Studio" class="tiny-logo">
+				<img th:src="@{/img/logo_trans_purple_64.png}" alt="Enosis Studio" style="height:2rem;">
+			</a>
+			<a href="https://spring.io" target="_blank" rel="noopener" title="Spring Boot" class="tiny-logo">
+				<i class="devicon-spring-plain colored"></i>
+			</a>
+			<a href="https://store.steampowered.com" target="_blank" rel="noopener" title="Steam" class="tiny-logo">
+				<i class="fa-brands fa-steam" style="color:var(--text);"></i>
+			</a>
+			<a href="https://www.java.com" target="_blank" rel="noopener" title="Java" class="tiny-logo">
+				<i class="devicon-java-plain colored"></i>
+			</a>
+			<a href="https://www.mysql.com" target="_blank" rel="noopener" title="MySQL" class="tiny-logo">
+				<i class="devicon-mysql-plain colored"></i>
+			</a>
+			<a href="https://www.thymeleaf.org" target="_blank" rel="noopener" title="Thymeleaf" class="tiny-logo">
+				<i class="devicon-thymeleaf-plain colored"></i>
+			</a>
+			<a href="https://railway.com" target="_blank" rel="noopener" title="Railway" class="tiny-logo">
+				<i class="devicon-railway-original colored"></i>
+			</a>
+			<a href="https://docker.com" target="_blank" rel="noopener" title="Docker" class="tiny-logo">
+				<i class="devicon-docker-plain colored"></i>
+			</a>
+			<a href="https://github.com/Voidstack" target="_blank" rel="noopener" title="GitHub" class="tiny-logo">
+				<i class="fa-brands fa-github" style="color:var(--text);"></i>
+			</a>
+			<a href="https://www.jetbrains.com/idea/" target="_blank" rel="noopener" title="JetBrains"
+			   class="tiny-logo">
+				<i class="devicon-intellij-plain"></i>
+			</a>
+			<a href="https://stripe.com/" target="_blank" rel="noopener" title="Stripe" class="tiny-logo">
+				<i class="fa-brands fa-stripe"></i>
+			</a>
+		</div>
+		<div class="block center-text" style="font-size: 0.85rem;">
+			<a th:href="@{/mentions-legales}">Mentions légales</a>
+			&nbsp;·&nbsp;
+			<a th:href="@{/politique-confidentialite}">Politique de confidentialité</a>
+		</div>
+	</footer>
+	<th:block>
+		<script th:src="@{/js/script.js}"></script>
+	</th:block>
+</th:block>
+
+</html>

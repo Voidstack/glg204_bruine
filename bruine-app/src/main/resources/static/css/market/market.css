@@ -1,0 +1,173 @@
+@import url("../card.css"); /* composant carte partagé */
+
+body {
+    background: var(--bg-deep);
+}
+
+.main-market {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+}
+
+.market-section {
+    background: var(--bg-panel);
+    border: 1px solid var(--steam-blue-mid);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.market-section-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--steam-blue-mid);
+    padding-bottom: 0.75rem;
+}
+
+/* Sell form */
+.sell-form {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.sell-form .field {
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 200px;
+}
+
+.sell-form label {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.sell-form select,
+.sell-form input[type="number"] {
+    background: var(--steam-blue-dark);
+    border: 1px solid var(--steam-blue-mid);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.sell-form select:focus,
+.sell-form input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.btn-sell {
+    background: linear-gradient(135deg, #2a6496, #1a4a73);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.btn-sell:hover {
+    background: linear-gradient(135deg, #3a74a6, #2a5a83);
+}
+
+/* Cards grid */
+.cards-grid {
+    gap: 1.2rem;
+}
+
+/* Listing card wrapper */
+.listing-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.listing-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 140px;
+}
+
+.listing-price {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.listing-seller {
+    opacity: 0.7;
+}
+
+.mkt-card {
+    --card-height: 172px;
+    cursor: default;
+}
+
+.mkt-card:hover {
+    transform: translateY(-6px) scale(1.04);
+    z-index: 1;
+}
+
+/* Action buttons */
+.btn-cancel {
+    background: #2a1a1a;
+    border: 1px solid #7c3535;
+    border-radius: 5px;
+    color: #e07070;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    width: 100%;
+    max-width: 140px;
+    transition: background 0.15s;
+}
+
+.btn-cancel:hover {
+    background: #3a2020;
+}
+
+.btn-buy {
+    background: linear-gradient(135deg, #1a4a1a, #2a6a2a);
+    border: 1px solid #4caf50;
+    border-radius: 5px;
+    color: #a8d5a2;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    width: 100%;
+    max-width: 140px;
+    transition: background 0.15s;
+}
+
+.btn-buy:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2a5a2a, #3a7a3a);
+}
+
+.btn-buy:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #555;
+}
+
+/* Empty / error states */
+.empty-state {
+    padding: 2rem 1rem;
+    font-size: 0.9rem;
+}
+

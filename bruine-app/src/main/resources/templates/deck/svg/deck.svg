@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:th="http://www.thymeleaf.org"
+     width="740" height="542" viewBox="0 0 740 542"
+     th:height="${height}" th:viewBox="|0 0 740 ${height}|">
+    <defs>
+        <clipPath id="avatar-clip">
+            <circle cx="41" cy="37" r="22"/>
+        </clipPath>
+    </defs>
+
+    <!-- Fond -->
+    <rect x="0" y="0" width="740" height="542" fill="#171a21" th:height="${height}"/>
+
+    <!-- Bandeau : avatar + nom -->
+    <rect x="0" y="0" width="740" height="74" fill="#1b2838"/>
+    <image th:if="${avatar != null}" th:href="${avatar}" x="19" y="15" width="44" height="44"
+           clip-path="url(#avatar-clip)" preserveAspectRatio="xMidYMid slice"/>
+    <circle th:if="${avatar == null}" cx="41" cy="37" r="22" fill="#2a475e"/>
+    <text x="78" y="44" fill="#c6d4df" font-size="18" font-weight="bold"
+          font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+          th:text="${username}">Joueur
+    </text>
+    <text x="722" y="40" fill="#66c0f4" font-size="13" text-anchor="end"
+          font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+        <tspan font-family="Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif">&#128167;</tspan>
+        Bruine
+    </text>
+
+    <!-- Barre de stats -->
+    <rect x="0" y="74" width="740" height="54" fill="#22384a"/>
+    <line x1="370" x2="370" y1="86" y2="116" stroke="#3a5468"/>
+    <text x="185" y="98" text-anchor="middle" fill="#c6d4df" font-size="15" font-weight="bold"
+          font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+          th:text="${playtime}">0 h
+    </text>
+    <text x="185" y="114" text-anchor="middle" fill="#8f98a0" font-size="11"
+          font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">Temps de jeu
+    </text>
+    <text x="555" y="98" text-anchor="middle" fill="#c6d4df" font-size="15" font-weight="bold"
+          font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+          th:text="${xp}">0
+    </text>
+    <text x="555" y="114" text-anchor="middle" fill="#8f98a0" font-size="11"
+          font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">XP Bruine
+    </text>
+
+    <!-- Cartes : une carte-modele (litteraux), repetee par th:each -->
+    <g th:each="c : ${cards}">
+        <rect x="18" y="146" width="131" height="183" rx="12" fill="#122c47" fill-opacity="0.5"
+              th:x="${c.x}" th:y="${c.y}" th:width="${c.w}" th:height="${c.h}" th:fill="${c.background}"/>
+        <text x="83" y="251" text-anchor="middle" font-size="42"
+              font-family="Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif"
+              th:x="${c.emojiX()}" th:y="${c.emojiY()}" th:text="${c.emoji}">&#11088;
+        </text>
+
+        <!-- badge d'effet, seulement pour une finition speciale -->
+        <text th:if="${c.finishPip != null}" x="106" y="205" text-anchor="middle" font-size="17"
+              font-family="Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif"
+              th:x="${c.finishTextX}" th:y="${c.badgeTextY}"
+              th:text="${c.finishPip}">💠
+        </text>
+
+        <!-- badge de rarete, toujours affiche -->
+        <text x="123" y="330" text-anchor="middle" font-size="17"
+              font-family="Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif"
+              th:x="${c.rarityTextX}" th:y="${c.badgeTextY}"
+              th:text="${c.rarityPip}">🪨
+        </text>
+    </g>
+
+    <!-- Deck vide -->
+    <text th:if="${cards.isEmpty()}" x="370" y="210" text-anchor="middle"
+          fill="#8f98a0" font-size="15" font-style="italic"
+          font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">Deck vide
+    </text>
+</svg>

@@ -1,0 +1,8 @@
+.tiny-logo {
+    opacity: .7;
+    transition: opacity .2s;
+}
+
+.tiny-logo > * {
+    font-size: 2rem;
+}

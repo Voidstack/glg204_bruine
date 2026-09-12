@@ -1,0 +1,106 @@
+@import url("../card.css"); /* composant carte partagé */
+
+/* Level Up - layout de page + cartes d'inventaire
+   (La machine à vapeur est stylée dans steam_machine.css) */
+
+body {
+    background: var(--bg);
+}
+
+/* Layout */
+.levelup-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+}
+
+.levelup-title {
+    text-align: center;
+    color: var(--text);
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+}
+
+.levelup-sub {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.4rem;
+}
+
+/* XP totale */
+.xp-total-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    background: var(--bg-panel);
+    border: 1px solid var(--steam-blue-mid);
+    border-radius: 10px;
+    padding: 0.65rem 1.4rem;
+    margin-bottom: 1.6rem;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.xp-total-bar strong {
+    color: var(--green);
+    font-size: 1.25rem;
+}
+
+/* Two-panel */
+.levelup-layout {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+/* Cards panel (left) */
+.lvlup-inventory {
+    flex: 1;
+    min-width: 0;
+}
+
+.cards-grid {
+    gap: 0.8rem;
+}
+
+/* Card slot */
+.card-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: grab;
+    position: relative;
+}
+
+.card-slot[data-exhausted="true"] {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.card-slot:active {
+    cursor: grabbing;
+}
+
+/* La transformation au survol vient de card-motion.js ; ne reste que le plan. */
+.card-slot:not([data-exhausted="true"]) .inv-card:hover {
+    z-index: 2;
+}
+
+/* xp hint sous la carte */
+.card-xp-hint {
+    font-size: 0.8rem;
+    color: var(--green);
+    font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+    .levelup-layout {
+        flex-direction: column-reverse;
+    }
+}

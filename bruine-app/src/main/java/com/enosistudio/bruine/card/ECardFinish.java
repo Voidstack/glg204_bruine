@@ -1,0 +1,32 @@
+package com.enosistudio.bruine.card;
+
+import lombok.Getter;
+
+/**
+ * Finitions d'une carte. {@link #NORMAL} est l'absence de finition : ni badge ni effet visuel.
+ */
+@Getter
+public enum ECardFinish {
+    NORMAL("⬜", "Normal", "NORM"),
+    HOLOGRAPHIC("💠", "Holographique", "HOLO"),
+    FOIL("✨", "Foil", "FOIL"),
+    POLYCHROME("🌈", "Polychrome", "POLY"),
+    NEGATIVE("☯", "Négatif", "NEG");
+
+    private final String emoji;
+    private final String label;
+    private final String badge;
+
+    ECardFinish(String emoji, String label, String badge) {
+        this.emoji = emoji;
+        this.label = label;
+        this.badge = badge;
+    }
+
+    /**
+     * Code en minuscules, classe CSS de la carte et identifiants côté JavaScript.
+     */
+    public String getCode() {
+        return name().toLowerCase();
+    }
+}

@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - 404')}"></th:block>
+	<link rel="stylesheet" th:href="@{/css/error/404.css}">
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}"></header>
+
+<section class="error-section">
+	<div class="error-code has-text-white">404</div>
+	<h1 class="title has-text-white">Page introuvable</h1>
+	<p class="subtitle has-text-grey">Cette page n'existe pas ou a été déplacée.</p>
+	<a th:href="@{/}" class="button is-primary mt-4">Retour à l'accueil</a>
+</section>
+
+<th:block th:replace="~{layout :: footer-and-js}"></th:block>
+</body>
+
+</html>

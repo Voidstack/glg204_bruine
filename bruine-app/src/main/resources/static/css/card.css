@@ -1,0 +1,336 @@
+@import url("finition.css"); /* effets de finition partagés */
+
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card) {
+    --r-inset-alpha: 0.05;
+    --r-artwork-alpha: 0.50;
+    --r-artwork-inset-alpha: 0.10;
+}
+
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).common {
+    --r-color: var(--grey);
+    --r-text: var(--card-common-text);
+    --r-border: var(--card-common-border);
+    --r-strip: var(--card-common-strip);
+    --r-glow: 0px;
+    --r-glow-alpha: 0;
+    --r-hover-glow: 16px;
+    --r-hover-alpha: 0.35;
+    --r-inset-alpha: 0;
+    --r-artwork-alpha: 0.40;
+    --r-artwork-inset-alpha: 0.06;
+}
+
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).uncommon {
+    --r-color: var(--green);
+    --r-text: var(--card-uncommon-text);
+    --r-border: var(--card-uncommon-border);
+    --r-strip: var(--card-uncommon-strip);
+    --r-glow: 10px;
+    --r-glow-alpha: 0.20;
+    --r-hover-glow: 22px;
+    --r-hover-alpha: 0.45;
+    --r-inset-alpha: 0.04;
+}
+
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).rare {
+    --r-color: var(--blue);
+    --r-text: var(--card-rare-text);
+    --r-border: var(--card-rare-border);
+    --r-strip: var(--card-rare-strip);
+    --r-glow: 12px;
+    --r-glow-alpha: 0.22;
+    --r-hover-glow: 26px;
+    --r-hover-alpha: 0.48;
+}
+
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).epic {
+    --r-color: var(--purple);
+    --r-text: var(--card-epic-text);
+    --r-border: var(--card-epic-border);
+    --r-strip: var(--card-epic-strip);
+    --r-glow: 12px;
+    --r-glow-alpha: 0.25;
+    --r-hover-glow: 26px;
+    --r-hover-alpha: 0.50;
+}
+
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).legendary {
+    --r-color: var(--orange);
+    --r-text: var(--card-legendary-text);
+    --r-border: var(--card-legendary-border);
+    --r-strip: var(--card-legendary-strip);
+    --r-glow: 16px;
+    --r-glow-alpha: 0.30;
+    --r-hover-glow: 30px;
+    --r-hover-alpha: 0.55;
+}
+
+/* Les quatre règles qui consomment la rareté */
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card):is(.common, .uncommon, .rare, .epic, .legendary) {
+    border-color: var(--r-border);
+    color: var(--r-text);
+    box-shadow: 0 0 calc(var(--r-glow) * var(--card-fx-scale)) rgb(from var(--r-color) r g b / var(--r-glow-alpha)),
+    inset 0 0 50px rgb(from var(--r-color) r g b / var(--r-inset-alpha));
+}
+
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card):is(.common, .uncommon, .rare, .epic, .legendary) .card-header {
+    background: linear-gradient(90deg, var(--r-strip));
+}
+
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card):is(.common, .uncommon, .rare, .epic, .legendary) .card-artwork {
+    border-color: rgb(from var(--r-color) r g b / var(--r-artwork-alpha));
+    box-shadow: inset 0 0 28px rgb(from var(--r-color) r g b / var(--r-artwork-inset-alpha));
+}
+
+/* Le gacha est absent : ses cartes se révèlent, elles ne se survolent pas. */
+:is(.inv-card, .balatro-card, .mkt-card):is(.common, .uncommon, .rare, .epic, .legendary):hover {
+    box-shadow: 0 0 calc(var(--r-hover-glow) * var(--card-fx-scale)) rgb(from var(--r-color) r g b / var(--r-hover-alpha)),
+    inset 0 0 50px rgb(from var(--r-color) r g b / var(--r-inset-alpha)) !important;
+}
+
+/* Scintillement des légendaires */
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).legendary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255, 215, 0, 0.12) 50%, transparent 70%);
+    animation: cardShimmer 2.5s infinite;
+    pointer-events: none;
+}
+
+@keyframes cardShimmer {
+    0% {
+        transform: translateX(-120%);
+    }
+    100% {
+        transform: translateX(220%);
+    }
+}
+
+/* Finitions : les effets vivent dans finition.css (partagés avec la page d'accueil),
+   ne reste ici que ce qui est propre à la carte de jeu. */
+
+/* Badge de finition */
+.card-finish-badge {
+    font-size: 0.48rem;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+}
+
+.finish-holographic .card-finish-badge {
+    color: var(--purple-light);
+}
+
+.finish-foil .card-finish-badge {
+    color: var(--blue-pale);
+}
+
+.finish-polychrome .card-finish-badge {
+    color: var(--gold-light);
+}
+
+.finish-negative .card-finish-badge {
+    color: var(--text-bright);
+}
+
+/* Anatomie */
+
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card) {
+    width: var(--card-width);
+    height: var(--card-height);
+    border-radius: var(--card-radius);
+    border: 3px solid;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    flex-shrink: 0;
+    user-select: none;
+    transition: transform 0.2s cubic-bezier(.23, 1, .32, 1), box-shadow 0.2s;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.card-rarity-pip {
+    font-size: 0.6rem;
+    line-height: 1;
+}
+
+.card-rarity-label {
+    opacity: 0.9;
+}
+
+.card-artwork {
+    margin: 0.3rem 0.4rem 0.2rem;
+    border-radius: 6px;
+    border: 1.5px solid var(--card-line);
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-artwork-bg);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+/* Trame fine, purement décorative. */
+.card-artwork::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(var(--card-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--card-grid-line) 1px, transparent 1px);
+    background-size: 14px 14px;
+    pointer-events: none;
+}
+
+.card-icon {
+    font-size: 3.4rem;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.7));
+}
+
+.card-name-strip {
+    padding: 0.24rem 0.45rem;
+    text-align: center;
+    flex-shrink: 0;
+    background: var(--card-strip-bg);
+    border-top: 1px solid var(--card-line);
+    border-bottom: 1px solid var(--card-line-soft);
+    position: relative;
+    z-index: 1;
+}
+
+.card-name {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: bold;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-flavor {
+    padding: 0.25rem 0.45rem;
+    flex: 0 0 auto;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+.card-desc {
+    font-size: 0.65rem;
+    text-align: center;
+    line-height: 1.35;
+    opacity: 0.55;
+    font-style: italic;
+}
+
+.card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.18rem 0.45rem;
+    flex-shrink: 0;
+    border-top: 1px solid var(--card-line-footer);
+    min-height: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.card-count {
+    font-size: 0.6rem;
+    font-weight: bold;
+    margin-left: auto;
+    opacity: 0.85;
+}
+
+/* Mouvement, piloté par js/card-motion.js */
+
+/* Le glisser se fait au pointeur, il faut donc annoncer soi-même l'affordance. */
+:is(.inv-card, .balatro-card, .mkt-card) {
+    cursor: grab;
+}
+
+:is(.inv-card, .balatro-card, .mkt-card):active {
+    cursor: grabbing;
+}
+
+/* Reflet qui suit le curseur, peint par le script de survol. */
+.card-shine {
+    position: absolute;
+    inset: 0;
+    border-radius: 11px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Carte d'origine pendant le glisser : elle reste en place, presque effacée. */
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).ghost {
+    opacity: 0.18;
+    pointer-events: none;
+}
+
+/* Copie qui suit le curseur pendant le glisser.
+ *
+ * Les sélecteurs sont volontairement composés. Chaque feuille de page déclare
+ * position: relative sur sa carte et se charge après celle-ci ; à spécificité égale
+ * la dernière gagnerait, la copie repasserait en flux normal et sortirait de l'écran.
+ * La transition de la carte est neutralisée, elle freinerait l'animation.
+ */
+.drag-clone,
+:is(.inv-card, .balatro-card, .gacha-card, .mkt-card, .pack-card).drag-clone {
+    position: fixed;
+    margin: 0;
+    transition: none;
+    pointer-events: none;
+    z-index: 9999;
+    border-radius: var(--card-radius);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 30px rgba(102, 192, 244, 0.18);
+    will-change: transform;
+}
+
+/* L'écart entre les cartes varie d'une page à l'autre, chacune surcharge gap. */
+.cards-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--text-muted);
+}
+
+.empty-state .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    margin-bottom: 1.5rem;
+}

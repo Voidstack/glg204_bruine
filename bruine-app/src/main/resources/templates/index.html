@@ -1,0 +1,313 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" th:href="@{/css/index.css}">
+	<th:block th:replace="~{layout :: common-head('Bruine')}"/>
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}">
+</header>
+
+<!-- HERO -->
+<section class="sq-hero">
+	<canvas id="sq-canvas"></canvas>
+	<div class="sq-hero__content">
+		<div class="sq-eyebrow">
+			<i class="fa-brands fa-steam"></i> Steam Gamification
+		</div>
+		<h1 class="sq-hero__title">
+			Jouez.<br>
+			<span class="accent">Collectionnez.</span>
+		</h1>
+		<p class="sq-hero__sub">
+			Vos heures de jeu Steam se transforment en 💧. Dépensez-les dans le gacha,
+			constituez votre deck, échangez sur le marché et montez en XP.
+		</p>
+		<div class="sq-hero__cta">
+			<div sec:authorize="not isAuthenticated()">
+				<a href="/steam/login" class="btn-primary">
+					<i class="fa-brands fa-steam"></i> Commencer avec Steam
+				</a>
+			</div>
+			<div sec:authorize="isAuthenticated()">
+				<a th:href="@{/gacha}" class="btn-primary">
+					<i class="fa-solid fa-dice"></i> Tirer des cartes
+				</a>
+			</div>
+			<a href="#features" class="btn-ghost">
+				<i class="fa-solid fa-circle-info"></i> Découvrir
+			</a>
+		</div>
+	</div>
+</section>
+
+<!-- STATS BAR -->
+<div class="sq-statsbar">
+	<div class="sq-statsbar__inner">
+		<div class="sq-stat">
+			<div class="sq-stat__num" th:text="${#numbers.formatInteger(statUsers, 1, 'DEFAULT')}">0</div>
+			<div class="sq-stat__label">Joueurs inscrits</div>
+		</div>
+		<div class="sq-stat">
+			<div class="sq-stat__num" th:text="${#numbers.formatInteger(statPulls, 1, 'DEFAULT')}">0</div>
+			<div class="sq-stat__label">Nombres de cartes obtenues</div>
+		</div>
+		<div class="sq-stat">
+			<div class="sq-stat__num" th:text="${#numbers.formatInteger(statXp, 1, 'DEFAULT')}">0</div>
+			<div class="sq-stat__label">XP cumulée</div>
+		</div>
+	</div>
+</div>
+
+<!-- FEATURES -->
+<section class="sq-section" id="features">
+	<h2 class="sq-section__title fade-in">Composantes de l'application</h2>
+	<p class="sq-section__sub fade-in">Systèmes complémentaires basés sur votre bibliothèque Steam</p>
+	<div class="sq-cards">
+		<div class="sq-card fade-in fi-delay-1">
+			<span class="sq-eyebrow">Gacha</span>
+			<span class="sq-card__icon">🎰</span>
+			<div class="sq-card__text">
+				Dépensez vos points pour tirer jusqu'à 10 cartes d'un coup.
+			</div>
+		</div>
+		<div class="sq-card fade-in fi-delay-2">
+			<span class="sq-eyebrow">Deck</span>
+			<span class="sq-card__icon">🃏</span>
+			<div class="sq-card__text">
+				Composez votre deck. Il est ensuite affiché sur votre profil public et partageable partout,
+				sur le web comme dans un README, via une simple image.
+			</div>
+		</div>
+		<div class="sq-card fade-in fi-delay-3">
+			<span class="sq-eyebrow">Marché</span>
+			<span class="sq-card__icon">🛒</span>
+			<div class="sq-card__text">
+				Mettez vos cartes en vente et achetez celles des autres joueurs.
+			</div>
+		</div>
+		<div class="sq-card fade-in fi-delay-3">
+			<span class="sq-eyebrow">Level</span>
+			<span class="sq-card__icon">⚡</span>
+			<div class="sq-card__text">
+				Convertissez vos cartes en XP sur votre compte.
+			</div>
+		</div>
+		<div class="sq-card fade-in fi-delay-3">
+			<span class="sq-eyebrow">Classement</span>
+			<span class="sq-card__icon">🥇</span>
+			<div class="sq-card__text">
+				Des classements mettant en avant les joueurs les plus actifs.
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- STEPS -->
+<section class="sq-section sq-section--alt">
+	<div class="sq-steps">
+		<div class="sq-step fade-in">
+			<div class="sq-step__num">1</div>
+			<div>
+				<div class="sq-step__title">Connectez-vous avec Steam</div>
+				<div class="sq-step__text">Utilisez votre compte Steam existant pour vous inscrire. Bruine se
+					synchronise avec votre bibliothèque et votre temps de jeu.
+					Aucune information personnelle n'est stockée, à part votre SteamID et votre total d'heures de jeu.
+				</div>
+			</div>
+		</div>
+		<div class="sq-step fade-in fi-delay-1">
+			<div class="sq-step__num">2</div>
+			<div>
+				<div class="sq-step__title">Vos heures de jeu génèrent des points</div>
+				<div class="sq-step__text">Votre temps de jeu Steam est converti en points Bruine à chaque connexion.
+					Jouer plus, gagner plus.
+				</div>
+			</div>
+		</div>
+		<div class="sq-step fade-in fi-delay-2">
+			<div class="sq-step__num">3</div>
+			<div>
+				<div class="sq-step__title">Tirez des cartes au gacha</div>
+				<div class="sq-step__text">10 points par tirage, jusqu'à 10 cartes à la fois. Chaque carte a une rareté
+					+ une finition aléatoire.
+				</div>
+			</div>
+		</div>
+		<div class="sq-step fade-in fi-delay-3">
+			<div class="sq-step__num">4</div>
+			<div>
+				<div class="sq-step__title">Construisez, échangez, montez en XP</div>
+				<div class="sq-step__text">Composez votre deck, échangez sur le marché ou convertissez
+					vos cartes en XP permanente. À vous de choisir.
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- GACHA TEASER -->
+<section class="sq-section">
+	<h2 class="sq-section__title fade-in">5 raretés, 5 finitions</h2>
+	<p class="sq-section__sub fade-in">Chaque carte tirée a une rareté et une finition aléatoires</p>
+
+	<div class="sq-gacha fade-in" style="margin-bottom: 2.5rem;">
+		<div class="sq-gcard">
+			<span class="sq-gcard__emoji">🪨</span>
+			<span class="sq-gcard__label">Common</span>
+		</div>
+		<div class="sq-gcard" style="border-color: var(--green);">
+			<span class="sq-gcard__emoji">🍃</span>
+			<span class="sq-gcard__label">Uncommon</span>
+		</div>
+		<div class="sq-gcard" style="border-color: var(--blue);">
+			<span class="sq-gcard__emoji">💎</span>
+			<span class="sq-gcard__label">Rare</span>
+		</div>
+		<div class="sq-gcard" style="border-color: var(--purple);">
+			<span class="sq-gcard__emoji">🔮</span>
+			<span class="sq-gcard__label">Epic</span>
+		</div>
+		<div class="sq-gcard" style="border-color: var(--red);">
+			<span class="sq-gcard__emoji">⭐</span>
+			<span class="sq-gcard__label">Legendary</span>
+		</div>
+	</div>
+
+	<p class="sq-section__sub fade-in" style="margin-top: 2.5rem; margin-bottom: 1rem;">
+		Et chaque carte peut posséder une finition qui modifie l'apparence <em>et</em> le multiplicateur XP
+	</p>
+	<div class="sq-finishes fade-in">
+		<div class="sq-finish sq-finish--normal">
+			<span class="sq-finish_emoji">⬜</span>
+			<span class="sq-finish_name" style="color: var(--text-soft);">Normal</span>
+			<span class="sq-finish_mult" style="color: var(--text);" th:text="'×' + ${gachaCfg.xpMultNormal} + ' XP'">×1 XP</span>
+		</div>
+		<div class="sq-finish finish-holographic">
+			<span class="sq-finish_emoji">💠</span>
+			<span class="sq-finish_name" style="color: var(--purple-light);">Holographic</span>
+			<span class="sq-finish_mult" style="color: #a8d8f0;" th:text="'×' + ${gachaCfg.xpMultHolographic} + ' XP'">×2 XP</span>
+		</div>
+		<div class="sq-finish finish-foil">
+			<span class="sq-finish_emoji">✨</span>
+			<span class="sq-finish_name" style="color: var(--blue-pale);">Foil</span>
+			<span class="sq-finish_mult" style="color: var(--blue-pale);"
+			      th:text="'×' + ${gachaCfg.xpMultFoil} + ' XP'">×3 XP</span>
+		</div>
+		<div class="sq-finish finish-polychrome">
+			<span class="sq-finish_emoji">🌈</span>
+			<span class="sq-finish_name" style="color: var(--gold-light);">Polychrome</span>
+			<span class="sq-finish_mult" style="color: var(--gold-light);"
+			      th:text="'×' + ${gachaCfg.xpMultPolychrome} + ' XP'">×4 XP</span>
+		</div>
+		<div class="sq-finish finish-negative">
+			<span class="sq-finish_emoji" style="color: white">☯</span>
+			<span class="sq-finish_name" style="color: var(--text-bright);">Negative</span>
+			<span class="sq-finish_mult" style="color: var(--text-bright);"
+			      th:text="'×' + ${gachaCfg.xpMultNegative} + ' XP'">×5 XP</span>
+		</div>
+	</div>
+</section>
+
+<section class="sq-cta">
+	<div class="sq-cta__inner">
+		<div class="sq-eyebrow" style="margin-bottom: 1.5rem;">Rejoignez l'aventure</div>
+		<h2 class="sq-cta__title">Vos heures de jeu ont de la valeur.</h2>
+		<p class="sq-cta__sub">
+			Connectez-vous avec Steam et commencez à accumuler des 💧.
+		</p>
+		<div class="sq-hero__cta">
+			<div sec:authorize="not isAuthenticated()">
+				<a href="/steam/login" class="btn-primary" style="font-size: 1.05rem; padding: 1rem 2.4rem;">
+					<i class="fa-brands fa-steam"></i> Commencer gratuitement
+				</a>
+			</div>
+			<div sec:authorize="isAuthenticated()"
+			     style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center;">
+				<a th:href="@{/gacha}" class="btn-primary" style="font-size: 1.05rem; padding: 1rem 2.4rem;">
+					<i class="fa-solid fa-dice"></i> Tirer des cartes
+				</a>
+				<a th:href="@{/inventory}" class="btn-ghost" style="font-size: 1.05rem; padding: 1rem 2.4rem;">
+					<i class="fa-solid fa-layer-group"></i> Mon inventaire
+				</a>
+			</div>
+		</div>
+	</div>
+</section>
+
+<th:block th:replace="~{layout :: footer-and-js}">
+</th:block>
+
+<script>
+    // Floating particles
+    (function () {
+        const canvas = document.getElementById('sq-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let pts = [];
+
+        function resize() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+
+        function Particle() {
+            this.reset = function () {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.r = Math.random() * 1.4 + 0.4;
+                this.vx = (Math.random() - 0.5) * 0.25;
+                this.vy = -(Math.random() * 0.35 + 0.08);
+                this.a = Math.random() * 0.45 + 0.08;
+            };
+            this.reset();
+        }
+
+        Particle.prototype.update = function () {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.y < -4 || this.x < -4 || this.x > canvas.width + 4) this.reset();
+        };
+
+        Particle.prototype.draw = function () {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(102,192,244,' + this.a + ')';
+            ctx.fill();
+        };
+
+        resize();
+        for (var i = 0; i < 90; i++) pts.push(new Particle());
+
+        (function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            pts.forEach(function (p) {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(loop);
+        })();
+
+        window.addEventListener('resize', resize);
+    })();
+
+    // Scroll fade-in
+    (function () {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (e.isIntersecting) e.target.classList.add('visible');
+            });
+        }, {threshold: 0.12, rootMargin: '0px 0px -40px 0px'});
+
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            io.observe(el);
+        });
+    })();
+</script>
+</body>
+</html>

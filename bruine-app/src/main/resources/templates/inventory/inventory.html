@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Inventaire')}"></th:block>
+	<!-- Après common-head : Bulma définit aussi card-header et card-footer, et gagnerait
+	     à égalité de spécificité si elle était chargée après card.css. -->
+	<link rel="stylesheet" th:href="@{/css/inventory/inventory.css}">
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}"></header>
+
+<main class="main-inventory">
+
+	<h1 class="title has-text-centered" style="color:var(--text); margin-bottom:0.25rem;">
+		🎒 Mon Inventaire
+	</h1>
+	<p class="has-text-centered" style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.9rem;">
+		Récompenses collectées via le Gacha
+	</p>
+
+	<!-- Stats -->
+	<div class="stats-row">
+		<div class="stat-box">
+			<div class="stat-value" th:text="${totalPulls}">0</div>
+			<div class="stat-label">tirages au total</div>
+		</div>
+		<div class="stat-box">
+			<div class="stat-value" th:text="${uniqueCount}">0</div>
+			<div class="stat-label">rewards uniques</div>
+		</div>
+		<div class="stat-box">
+			<div class="stat-value" th:text="${totalAvailable}">22</div>
+			<div class="stat-label">rewards disponibles</div>
+		</div>
+	</div>
+
+	<!-- Barre de progression -->
+	<div class="progress-wrap">
+		<div class="progress-label">
+			<span>Collection complétée</span>
+			<span>
+                <strong style="color:var(--accent);" th:text="${uniqueCount}">0</strong>
+                <span th:text="' / ' + ${totalAvailable}"> / 22</span>
+            </span>
+		</div>
+		<div class="progress-bar-track">
+			<div class="progress-bar-fill"
+			     th:style="'width:' + (${totalAvailable} > 0 ? (${uniqueCount} * 100 / ${totalAvailable}) : 0) + '%'">
+			</div>
+		</div>
+	</div>
+
+	<!-- Empty state -->
+	<div th:if="${totalPulls == 0}" class="empty-state">
+		<div class="empty-icon">📦</div>
+		<p>Votre inventaire est vide, lancez-vous dans le Gacha pour collecter des récompenses !</p>
+		<a th:href="@{/gacha}" class="button"
+		   style="background:var(--steam-blue-mid); color:var(--text); border:1px solid var(--accent);">
+			💧 Jouer au Gacha
+		</a>
+	</div>
+
+	<!-- Cartes (liste plate, triées légendaire → commun) -->
+	<div th:if="${totalPulls > 0}" class="cards-grid">
+		<th:block th:each="item : ${cards}">
+			<div th:replace="~{fragments/card :: card(
+			         view            = ${item.view},
+			         baseClass       = 'inv-card',
+			         dataId          = null,
+			         showDescription = true,
+			         showCount       = ${item.count > 1},
+			         showShine       = true)}">
+			</div>
+		</th:block>
+	</div>
+
+</main>
+
+<th:block th:replace="~{layout :: footer-and-js}"></th:block>
+<script th:src="@{/js/card-motion.js}"></script>
+<script th:src="@{/js/inventory.js}"></script>
+</body>
+</html>

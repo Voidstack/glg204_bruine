@@ -1,0 +1,188 @@
+body {
+    background: var(--bg-deep);
+}
+
+.leaderboard-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+}
+
+/* Tabs */
+.lb-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0 2.5rem;
+}
+
+.lb-tab {
+    padding: 0.45rem 1.4rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1.5px solid var(--steam-blue-mid);
+    color: var(--text-muted);
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.lb-tab:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.lb-tab.active {
+    background: #1b3a52;
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Podium */
+.podium-wrapper {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 1rem;
+    margin: 0 0 3rem;
+}
+
+.podium-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+    max-width: 220px;
+}
+
+.podium-card {
+    width: 100%;
+    border-radius: 12px;
+    padding: 1rem 0.75rem 0.75rem;
+    text-align: center;
+    border: 1.5px solid transparent;
+}
+
+.podium-medal {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.podium-name {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 0.3rem;
+    text-decoration: none;
+}
+
+.podium-stat {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+.podium-platform {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.1rem;
+}
+
+.rank-1 .podium-card {
+    background: linear-gradient(145deg, #2d2000, #4a3500);
+    border-color: var(--gold);
+}
+
+.rank-1 .podium-platform {
+    background: var(--gold);
+    height: 90px;
+    color: #fff3cc;
+}
+
+.rank-1 .podium-name {
+    color: var(--orange-light);
+}
+
+.rank-2 .podium-card {
+    background: linear-gradient(145deg, var(--surface-hover) var(--bg-panel-alt));
+    border-color: var(--grey);
+}
+
+.rank-2 .podium-platform {
+    background: var(--grey);
+    height: 65px;
+    color: #e2e8f0;
+}
+
+.rank-2 .podium-name {
+    color: var(--text);
+}
+
+.rank-3 .podium-card {
+    background: linear-gradient(145deg, #200f00, #3a1a00);
+    border-color: #c77c40;
+}
+
+.rank-3 .podium-platform {
+    background: #7a5020;
+    height: 45px;
+    color: #fde8cc;
+}
+
+.rank-3 .podium-name {
+    color: #f0c080;
+}
+
+/* Rest table */
+.rest-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.rest-table th {
+    color: var(--accent);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--steam-blue-mid);
+    text-align: left;
+}
+
+.rest-table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--steam-blue-dark);
+    color: var(--text);
+}
+
+.rest-table tr:last-child td {
+    border-bottom: none;
+}
+
+.rest-table tr:hover td {
+    background: rgba(102, 192, 244, 0.04);
+}
+
+.rank-num {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    width: 40px;
+}
+
+.playtime-col {
+    color: var(--text-muted);
+}
+
+.score-col {
+    color: var(--accent);
+    font-weight: bold;
+}

@@ -1,0 +1,86 @@
+package com.enosistudio.bruine.admin.service;
+
+import com.enosistudio.bruine.admin.domain.AdminUser;
+import com.enosistudio.bruine.admin.exception.UsernameAlreadyExistsException;
+import com.enosistudio.bruine.admin.repository.AdminUserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class AdminUserService implements UserDetailsService {
+
+    @Autowired
+    AdminUserRepository repository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<AdminUser> optAdminUser = repository.findById(username);
+        if (optAdminUser.isPresent()) {
+            return User.builder()
+                    .username(username)
+                    .password(optAdminUser.get().getUserPassword())
+                    .roles("ADMIN")
+                    .build();
+        } else {
+            throw new UsernameNotFoundException(username);
+        }
+    }
+
+    public AdminUser createUser(String username, String password) throws UsernameAlreadyExistsException {
+        if (repository.existsById(username)) {
+            throw new UsernameAlreadyExistsException();
+        }
+        String encodedPassword = passwordEncoder.encode(password);
+        return repository.save(new AdminUser(username, encodedPassword));
+    }
+
+    public List<AdminUser> findAll() {
+        return repository.findAll();
+    }
+
+    public void deleteUser(String username) {
+        repository.deleteById(username);
+    }
+
+    public void updatePassword(String username, String newPassword) {
+        AdminUser user = repository.findById(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+        user.setUserPassword(passwordEncoder.encode(newPassword));
+        repository.save(user);
+    }
+
+    public boolean isMfaEnabled(String username) {
+        return repository.findById(username).map(AdminUser::isMfaEnabled).orElse(false);
+    }
+
+    public String getMfaSecret(String username) {
+        return repository.findById(username).map(AdminUser::getMfaSecret).orElse(null);
+    }
+
+    public void enableMfa(String username, String secret) {
+        AdminUser user = repository.findById(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+        user.setMfaSecret(secret);
+        user.setMfaEnabled(true);
+        repository.save(user);
+    }
+
+    public void disableMfa(String username) {
+        AdminUser user = repository.findById(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+        user.setMfaSecret(null);
+        user.setMfaEnabled(false);
+        repository.save(user);
+    }
+}

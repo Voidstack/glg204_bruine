@@ -1,0 +1,10 @@
+services:
+  db:
+    image: mariadb:10.8.3-jammy
+    restart: always
+    ports:
+      - 60307:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: glg203
+      MARIADB_DATABASE: bruine
+

@@ -1,0 +1,192 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Profil')}"></th:block>
+	<link rel="stylesheet" th:href="@{/css/steam/profile-by-id.css}">
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}">
+	<h1>Profil Steam</h1>
+</header>
+
+<main class="container" style="max-width: 860px; padding: 2rem 1rem;">
+
+	<div class="box"
+	     style="background: var(--steam-blue-dark); border: 1px solid var(--steam-blue-mid); border-radius: 12px; padding: 0; overflow: hidden;">
+
+		<!-- Bandeau avatar + nom -->
+		<div style="background: linear-gradient(135deg, var(--steam-blue-dark) 0%, var(--steam-blue-mid) 100%); padding: 2.5rem 2rem; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
+			<img th:src="${steamData['avatarfull']}"
+			     th:alt="${steamData['personaname']}"
+			     style="width: 128px; height: 128px; border-radius: 8px; border: 3px solid var(--accent); flex-shrink: 0;">
+			<div>
+				<div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem;">
+					<h1 class="title" style="color: var(--text); margin-bottom: 0;"
+					    th:text="${steamData['personaname']}">Pseudo</h1>
+					<span th:if="${registeredOnSite}"
+					      class="tag is-success"
+					      title="Cet utilisateur a un compte sur Bruine">
+                        ✓ Membre
+                    </span>
+					<span th:unless="${registeredOnSite}"
+					      class="tag"
+					      style="background: #3d3d3f; color: var(--text-muted);"
+					      title="Cet utilisateur n'a pas encore de compte sur Bruine">
+                        Pas encore inscrit
+                    </span>
+				</div>
+				<p th:if="${steamData['realname']}" style="color: var(--text-muted); font-size: 0.95rem;"
+				   th:text="${steamData['realname']}">Nom réel</p>
+				<p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
+					Steam ID : <code style="color: var(--accent);" th:text="${steamData['steamid']}">0</code>
+				</p>
+			</div>
+		</div>
+
+		<!-- Corps -->
+		<div style="padding: 2rem; display: flex; flex-direction: column; gap: 1.2rem;">
+
+			<!-- image SVG (même rendu que le code intégrable) -->
+			<div th:if="${hasDeck}" style="text-align: right;">
+				<button type="button" class="button is-small"
+				        style="margin-top: 0.6rem; background: var(--bg-panel); border-color: var(--steam-blue-mid); color: var(--text-muted);"
+				        th:attr="data-deck-markdown=|![Deck Bruine](${deckImageUrl})|" onclick="copyDeckLink(this)">
+					Copier le deck
+				</button>
+				<img th:src="${deckImageUrl}" alt="Deck Bruine"
+				     style="width: 100%; max-width: 100%; border-radius: 14px; display: block;">
+			</div>
+
+			<!-- Statut -->
+			<div class="field is-horizontal" style="align-items: center; gap: 1rem;">
+				<span style="color: var(--text-muted); min-width: 140px; font-size: 0.9rem;">Statut</span>
+				<span th:switch="${steamData['personastate']}">
+                    <span th:case="1" class="tag" style="background: #57cbde; color: var(--bg-deep);">En ligne</span>
+                    <span th:case="2" class="tag" style="background: #c94f4f; color: white;">Occupé</span>
+                    <span th:case="3" class="tag" style="background: #c9a84c; color: var(--bg-deep);">Absent</span>
+                    <span th:case="4" class="tag" style="background: #888; color: white;">En veille</span>
+                    <span th:case="5" class="tag" style="background: var(--accent); color: var(--bg-deep);">Cherche à échanger</span>
+                    <span th:case="6" class="tag" style="background: var(--accent); color: var(--bg-deep);">Cherche à jouer</span>
+                    <span th:case="*" class="tag"
+                          style="background: #3d3d3f; color: var(--text-muted);">Hors ligne</span>
+                </span>
+			</div>
+
+			<!-- Visibilité -->
+			<div class="field is-horizontal" style="align-items: center; gap: 1rem;">
+				<span style="color: var(--text-muted); min-width: 140px; font-size: 0.9rem;">Profil</span>
+				<span th:if="${steamData['communityvisibilitystate'] == 3}"
+				      class="tag is-success is-light">Public</span>
+				<span th:unless="${steamData['communityvisibilitystate'] == 3}"
+				      class="tag" style="background: #3d3d3f; color: var(--text-muted);">Privé</span>
+			</div>
+
+			<!-- Pays -->
+			<div th:if="${steamData['loccountrycode']}"
+			     class="field is-horizontal" style="align-items: center; gap: 1rem;">
+				<span style="color: var(--text-muted); min-width: 140px; font-size: 0.9rem;">Pays</span>
+				<span style="color: var(--text);" th:text="${steamData['loccountrycode']}"></span>
+			</div>
+
+			<!-- Lien profil Steam -->
+			<div th:if="${steamData['profileurl']}"
+			     class="field is-horizontal" style="align-items: center; gap: 1rem;">
+				<span style="color: var(--text-muted); min-width: 140px; font-size: 0.9rem;">Profil Steam</span>
+				<a th:href="${steamData['profileurl']}" target="_blank" rel="noopener"
+				   style="color: var(--accent);">
+					<i class="fa-brands fa-steam"></i>
+					<span th:text="${steamData['profileurl']}"></span>
+				</a>
+			</div>
+
+		</div>
+
+		<!-- Jeux (chargement asynchrone) -->
+		<div style="padding: 0 2rem 2rem;" id="games-section" th:data-steamid="${steamData['steamid']}">
+
+			<!-- Temps total -->
+			<div style="margin-bottom: 1.2rem; padding: 1rem; background: var(--bg-panel); border-radius: 8px; display: flex; align-items: center; gap: 0.6rem;">
+				<i class="fa-solid fa-clock" style="color: var(--accent);"></i>
+				<span style="color: var(--text-muted); font-size: 0.9rem;">Temps de jeu total Steam :</span>
+				<span id="total-playtime" style="color: var(--text); font-weight: bold;">
+                    <i class="fa-solid fa-spinner fa-spin" style="color: var(--accent); font-size: 0.85rem;"></i>
+                </span>
+			</div>
+
+			<!-- Spinner -->
+			<div id="games-loading"
+			     style="display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted); font-size: 0.9rem;">
+				<i class="fa-solid fa-spinner fa-spin" style="color: var(--accent);"></i>
+				Chargement des jeux...
+			</div>
+
+			<!-- Message profil privé / vide -->
+			<div id="games-empty"
+			     style="display: none; color: var(--text-muted); font-size: 0.9rem; font-style: italic;">
+				Aucun jeu avec plus d'une heure de jeu, ou profil privé.
+			</div>
+
+			<!-- Compteur -->
+			<p id="games-count"
+			   style="display: none; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.8rem;"></p>
+
+			<!-- Liste -->
+			<div id="games-list"
+			     style="display: flex; flex-direction: column; gap: 0.4rem; max-height: 420px; overflow-y: auto; padding-right: 0.3rem;"></div>
+		</div>
+
+		<div style="padding: 1rem 2rem; border-top: 1px solid var(--steam-blue-mid); display: flex; justify-content: space-between; align-items: center;">
+			<a href="/" class="button"
+			   style="background: transparent; border-color: var(--steam-blue-mid); color: var(--text-muted);">
+				<i class="fa-solid fa-arrow-left"></i>&nbsp; Retour
+			</a>
+			<button th:if="${isOwnProfile and registeredOnSite}"
+			        class="button is-danger is-light"
+			        onclick="document.getElementById('modal-delete').classList.add('is-active')">
+				<i class="fa-solid fa-trash"></i>&nbsp; Supprimer mon compte
+			</button>
+		</div>
+	</div>
+
+	<div id="modal-delete" class="modal" th:if="${isOwnProfile and registeredOnSite}">
+		<div class="modal-background"
+		     onclick="document.getElementById('modal-delete').classList.remove('is-active')"></div>
+		<div class="modal-card">
+			<header class="modal-card-head"
+			        style="background: var(--steam-blue-dark); border-bottom: 1px solid var(--steam-blue-mid);">
+				<p class="modal-card-title" style="color: var(--text);">Supprimer mon compte</p>
+				<button class="delete" aria-label="close"
+				        onclick="document.getElementById('modal-delete').classList.remove('is-active')"></button>
+			</header>
+			<section class="modal-card-body" style="background: var(--steam-blue-dark); color: var(--text-muted);">
+				<p>Cette action est <strong style="color: var(--text);">irréversible</strong>.</p>
+				<p style="margin-top: 0.5rem;">
+					Toutes vos données personnelles enregistrées sur Bruine seront définitivement supprimées.
+					Votre compte Steam ne sera pas affecté.
+				</p>
+			</section>
+			<footer class="modal-card-foot"
+			        style="background: var(--steam-blue-dark); border-top: 1px solid var(--steam-blue-mid); justify-content: flex-end; gap: 0.5rem;">
+				<button class="button"
+				        style="background: transparent; border-color: var(--steam-blue-mid); color: var(--text-muted);"
+				        onclick="document.getElementById('modal-delete').classList.remove('is-active')">
+					Annuler
+				</button>
+				<form th:action="@{/steam/profile/{id}/delete(id=${steamData['steamid']})}" method="post">
+					<button type="submit" class="button is-danger">
+						<i class="fa-solid fa-trash"></i>&nbsp; Confirmer la suppression
+					</button>
+				</form>
+			</footer>
+		</div>
+	</div>
+</main>
+
+<th:block th:replace="~{layout :: footer-and-js}"></th:block>
+<script th:src="@{/js/profile-by-id.js}"></script>
+</body>
+</html>

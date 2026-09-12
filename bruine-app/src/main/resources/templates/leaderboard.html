@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Classement')}"></th:block>
+	<link rel="stylesheet" th:href="@{/css/leaderboard.css}">
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}"></header>
+
+<main class="leaderboard-container">
+
+	<h1 class="title has-text-centered" style="color:var(--text); margin-bottom:0.25rem;">
+		Classement Bruine
+	</h1>
+
+	<!-- Tabs -->
+	<div class="lb-tabs">
+		<a th:href="@{/leaderboard/playtime}"
+		   th:classappend="${statMode == 'playtime'} ? 'active' : ''"
+		   class="lb-tab">Temps de jeu</a>
+		<a th:href="@{/leaderboard/xp}"
+		   th:classappend="${statMode == 'xp'} ? 'active' : ''"
+		   class="lb-tab">XP Bruine</a>
+	</div>
+
+	<!-- empty -->
+	<div th:if="${top3.isEmpty()}"
+	     style="text-align:center; padding:4rem 1rem; color:var(--text-muted);">
+		<div style="font-size:3rem; margin-bottom:1rem;">🌧️</div>
+		<p style="font-size:1.1rem; color:var(--text);">Aucun joueur inscrit pour le moment.</p>
+		<p style="margin-top:0.5rem;">
+			<a href="/steam/login" style="color:var(--accent);">Connecte-toi avec Steam</a>
+			pour rejoindre Bruine !
+		</p>
+	</div>
+
+	<!-- Podium -->
+	<div th:if="${!top3.isEmpty()}" class="podium-wrapper">
+
+		<!-- 2e place (gauche) -->
+		<div th:if="${top3.size() >= 2}" class="podium-slot rank-2">
+			<div class="podium-card">
+				<div class="podium-medal">🥈</div>
+				<a th:href="@{/steam/profile/{id}(id=${top3[1].steamId})}"
+				   th:text="${top3[1].username}"
+				   class="podium-name">—</a>
+				<div class="podium-stat" th:if="${statMode == 'playtime'}"
+				     th:text="${top3[1].currentPlaytimeMinutes != null ? (top3[1].currentPlaytimeMinutes / 60) + 'h ' + (top3[1].currentPlaytimeMinutes % 60) + 'min' : 'Données privées'}">
+					—
+				</div>
+				<div class="podium-stat" th:if="${statMode == 'xp'}"
+				     th:text="${top3[1].totalExperience + ' XP'}">—
+				</div>
+			</div>
+			<div class="podium-platform">2</div>
+		</div>
+
+		<!-- 1re place (centre) -->
+		<div class="podium-slot rank-1">
+			<div class="podium-card">
+				<div class="podium-medal">🥇</div>
+				<a th:href="@{/steam/profile/{id}(id=${top3[0].steamId})}"
+				   th:text="${top3[0].username}"
+				   class="podium-name">—</a>
+				<div class="podium-stat" th:if="${statMode == 'playtime'}"
+				     th:text="${top3[0].currentPlaytimeMinutes != null ? (top3[0].currentPlaytimeMinutes / 60) + 'h ' + (top3[0].currentPlaytimeMinutes % 60) + 'min' : 'Données privées'}">
+					—
+				</div>
+				<div class="podium-stat" th:if="${statMode == 'xp'}"
+				     th:text="${top3[0].totalExperience + ' XP'}">—
+				</div>
+			</div>
+			<div class="podium-platform">1</div>
+		</div>
+
+		<!-- 3e place (droite) -->
+		<div th:if="${top3.size() >= 3}" class="podium-slot rank-3">
+			<div class="podium-card">
+				<div class="podium-medal">🥉</div>
+				<a th:href="@{/steam/profile/{id}(id=${top3[2].steamId})}"
+				   th:text="${top3[2].username}"
+				   class="podium-name">—</a>
+				<div class="podium-stat" th:if="${statMode == 'playtime'}"
+				     th:text="${top3[2].currentPlaytimeMinutes != null ? (top3[2].currentPlaytimeMinutes / 60) + 'h ' + (top3[2].currentPlaytimeMinutes % 60) + 'min' : 'Données privées'}">
+					—
+				</div>
+				<div class="podium-stat" th:if="${statMode == 'xp'}"
+				     th:text="${top3[2].totalExperience + ' XP'}">—
+				</div>
+			</div>
+			<div class="podium-platform">3</div>
+		</div>
+
+	</div>
+
+	<div th:if="${!rest.isEmpty()}"
+	     class="box" style="background:var(--bg-panel); border:1px solid var(--steam-blue-mid); padding:0; overflow:hidden;">
+		<table class="rest-table">
+			<thead>
+			<tr>
+				<th>#</th>
+				<th>Joueur</th>
+				<th th:if="${statMode == 'playtime'}">Temps de jeu</th>
+				<th th:if="${statMode == 'xp'}">XP Bruine</th>
+				<th>Inscrit le</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr th:each="u, stat : ${rest}">
+				<td class="rank-num" th:text="${stat.index + 4}"></td>
+				<td>
+					<a th:href="@{/steam/profile/{id}(id=${u.steamId})}"
+					   th:text="${u.username}"
+					   style="color:var(--text); text-decoration:none;">—</a>
+				</td>
+				<td class="playtime-col" th:if="${statMode == 'playtime'}"
+				    th:text="${u.currentPlaytimeMinutes != null ? (u.currentPlaytimeMinutes / 60) + 'h ' + (u.currentPlaytimeMinutes % 60) + 'min' : '—'}">
+					—
+				</td>
+				<td class="score-col" th:if="${statMode == 'xp'}"
+				    th:text="${u.totalExperience + ' XP'}">—
+				</td>
+				<td class="playtime-col" th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy')}">—</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+
+</main>
+
+<th:block th:replace="~{layout :: footer-and-js}"></th:block>
+</body>
+</html>

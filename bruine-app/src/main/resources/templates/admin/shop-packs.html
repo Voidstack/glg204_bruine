@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{admin/layout :: head('Packs Boutique')}"></head>
+<body>
+
+<nav th:replace="~{admin/layout :: navbar(true)}"></nav>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">Packs de la boutique</h1>
+        <p class="subtitle">Gérer les packs € → points Bruine : prix, bonus, promos temporaires et pack « Populaire »</p>
+
+        <div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
+        <div th:if="${error}"   class="notification is-danger  is-light" th:text="${error}"></div>
+
+        <div class="notification is-warning is-light">
+            <strong>Promo temporaire :</strong> renseignez un pourcentage de réduction et, si vous voulez la limiter dans
+            le temps, une date de début et/ou de fin. Laissez les dates vides pour une promo permanente.
+            <strong>Populaire :</strong> une seule case peut rester cochée, cocher un pack décoche automatiquement les autres.
+        </div>
+
+        <div class="box" style="overflow-x: auto;">
+            <table class="table is-fullwidth is-hoverable">
+                <thead>
+                    <tr>
+                        <th style="width:60px">Ordre</th>
+                        <th style="width:60px">Emoji</th>
+                        <th>Nom</th>
+                        <th style="width:90px">Points</th>
+                        <th style="width:90px">Bonus</th>
+                        <th style="width:100px">Prix (€)</th>
+                        <th style="width:70px">Promo %</th>
+                        <th style="width:180px">Début promo</th>
+                        <th style="width:180px">Fin promo</th>
+                        <th style="width:70px">Populaire</th>
+                        <th style="width:170px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <!-- Lignes éditables -->
+                    <tr th:each="p : ${packs}" th:classappend="${p.promoActive ? 'promo-cell' : ''}">
+                        <form th:action="@{/admin/shop-packs/{id}/update(id=${p.id})}" method="post"
+                              style="display: contents;">
+                            <td>
+                                <input class="input is-small col-narrow" type="number" name="sortOrder"
+                                       th:value="${p.sortOrder}" style="max-width:60px;">
+                            </td>
+                            <td>
+                                <input class="input is-small" type="text" name="emoji"
+                                       th:value="${p.emoji}" required maxlength="10"
+                                       style="max-width:55px; text-align:center; font-size:1.1rem;">
+                            </td>
+                            <td>
+                                <input class="input is-small" type="text" name="name"
+                                       th:value="${p.name}" required style="min-width:130px;">
+                            </td>
+                            <td>
+                                <input class="input is-small col-narrow" type="number" name="points" min="0"
+                                       th:value="${p.points}" required>
+                            </td>
+                            <td>
+                                <input class="input is-small col-narrow" type="number" name="bonusPoints" min="0"
+                                       th:value="${p.bonusPoints}">
+                            </td>
+                            <td>
+                                <input class="input is-small col-narrow" type="number" name="priceEuros"
+                                       step="0.01" min="0" th:value="${p.priceEuros}" required>
+                            </td>
+                            <td>
+                                <input class="input is-small col-narrow" type="number" name="promoPercent"
+                                       min="0" max="100" th:value="${p.promoPercent}" style="max-width:60px;">
+                            </td>
+                            <td>
+                                <input class="input is-small" type="datetime-local" name="promoStart"
+                                       th:value="${p.promoStart != null ? #temporals.format(p.promoStart, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                            </td>
+                            <td>
+                                <input class="input is-small" type="datetime-local" name="promoEnd"
+                                       th:value="${p.promoEnd != null ? #temporals.format(p.promoEnd, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                            </td>
+                            <td class="has-text-centered">
+                                <input type="checkbox" name="popular" value="true" th:checked="${p.popular}">
+                            </td>
+                            <td class="has-text-right">
+                                <button class="button is-info is-small mr-1" type="submit">Sauvegarder</button>
+                        </form>
+                                <form th:action="@{/admin/shop-packs/{id}/delete(id=${p.id})}"
+                                      method="post" style="display:inline;"
+                                      th:data-name="${p.name}"
+                                      onsubmit="return confirm('Supprimer le pack « ' + this.dataset.name + ' » ?')">
+                                    <button class="button is-danger is-small" type="submit">Supprimer</button>
+                                </form>
+                            </td>
+                    </tr>
+
+                    <!-- Ligne de création -->
+                    <tr style="border-top: 2px solid #dbdbdb;">
+                        <td colspan="11">
+                            <form th:action="@{/admin/shop-packs/create}" method="post"
+                                  style="display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;">
+                                <input class="input is-small" type="number" name="sortOrder" placeholder="Ordre"
+                                       value="0" style="max-width:70px;">
+                                <input class="input is-small" type="text" name="emoji" placeholder="Emoji"
+                                       required maxlength="10" style="max-width:70px; text-align:center;">
+                                <input class="input is-small" type="text" name="name" placeholder="Nom"
+                                       required style="min-width:140px;">
+                                <input class="input is-small" type="number" name="points" placeholder="Points"
+                                       min="0" required style="max-width:100px;">
+                                <input class="input is-small" type="number" name="bonusPoints" placeholder="Bonus"
+                                       min="0" value="0" style="max-width:90px;">
+                                <input class="input is-small" type="number" name="priceEuros" placeholder="Prix €"
+                                       step="0.01" min="0" required style="max-width:100px;">
+                                <input class="input is-small" type="number" name="promoPercent" placeholder="Promo %"
+                                       min="0" max="100" value="0" style="max-width:90px;">
+                                <input class="input is-small" type="datetime-local" name="promoStart"
+                                       title="Début promo (optionnel)">
+                                <input class="input is-small" type="datetime-local" name="promoEnd"
+                                       title="Fin promo (optionnel)">
+                                <label class="checkbox is-size-7">
+                                    <input type="checkbox" name="popular" value="true"> Populaire
+                                </label>
+                                <button class="button is-success is-small" type="submit">+ Ajouter</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+
+</body>
+</html>

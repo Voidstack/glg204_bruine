@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+>
+
+<head th:replace="~{admin/layout :: head('MFA')}"></head>
+
+<body>
+
+<nav th:replace="~{admin/layout :: navbar(true)}"></nav>
+
+<section class="section">
+	<div class="container" style="max-width: 520px;">
+		<h1 class="title">Authentification à deux facteurs (MFA)</h1>
+
+		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
+		<div th:if="${error}" class="notification is-danger  is-light" th:text="${error}"></div>
+
+		<!-- MFA déjà active -->
+		<div th:if="${mfaEnabled}" class="box">
+			<p class="mb-4">
+				<span class="tag is-success is-medium">MFA activée</span>
+			</p>
+			<p class="mb-4">Votre compte est protégé par un code de vérification à chaque connexion.</p>
+			<form th:action="@{/admin/mfa/disable}" method="post"
+			      onsubmit="return confirm('Désactiver la MFA sur votre compte ?');">
+				<button class="button is-danger">Désactiver la MFA</button>
+			</form>
+		</div>
+
+		<!-- Enrôlement -->
+		<div th:unless="${mfaEnabled}">
+			<div class="box">
+				<p class="subtitle is-6">1. Scannez ce QR code</p>
+				<p class="mb-3">
+					Avec Google Authenticator, Authy ou Microsoft Authenticator, scannez l'image ci-dessous.
+				</p>
+				<div class="has-text-centered mb-4">
+					<img th:src="${qrCode}" alt="QR code MFA" style="max-width: 220px;">
+				</div>
+				<p class="is-size-7 has-text-grey">
+					Impossible de scanner ? Saisissez la clé manuellement :
+					<code th:text="${secret}"></code>
+				</p>
+			</div>
+
+			<div class="box">
+				<p class="subtitle is-6">2. Confirmez avec un code</p>
+				<form th:action="@{/admin/mfa/setup}" method="post" style="display: flex; gap: .5rem;">
+					<input class="input" type="text" name="code"
+					       inputmode="numeric" pattern="[0-9]*" maxlength="6"
+					       placeholder="123456" autocomplete="one-time-code" required>
+					<button class="button is-success" type="submit">Activer la MFA</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</section>
+</body>
+</html>

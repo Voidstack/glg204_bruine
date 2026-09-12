@@ -1,0 +1,89 @@
+/* Holographique arc-en-ciel */
+.finish-holographic {
+}
+
+.finish-holographic::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+            125deg,
+            rgba(255, 0, 128, 0.18) 0%, rgba(255, 165, 0, 0.18) 20%,
+            rgba(255, 255, 0, 0.18) 35%, rgba(0, 255, 128, 0.18) 50%,
+            rgba(0, 180, 255, 0.18) 65%, rgba(150, 0, 255, 0.18) 80%,
+            rgba(255, 0, 128, 0.18) 100%
+    );
+    background-size: 300% 300%;
+    animation: holoShift 3s linear infinite;
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes holoShift {
+    0% {
+        background-position: 0 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+/* Foil balayage blanc argenté */
+.finish-foil {
+    filter: brightness(1.08);
+}
+
+.finish-foil::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 25%, rgba(230, 235, 255, 0.38) 50%, transparent 75%);
+    background-size: 300% 100%;
+    animation: foilSweep 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes foilSweep {
+    0% {
+        background-position: 0 0;
+    }
+    50% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+/* Polychrome rotation teinte */
+.finish-polychrome {
+    animation: polyChrome 2.5s linear infinite;
+}
+
+.finish-polychrome::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, transparent 50%, rgba(255, 255, 255, 0.07) 100%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes polyChrome {
+    0% {
+        filter: hue-rotate(0deg) saturate(1.6) brightness(1.06);
+    }
+    100% {
+        filter: hue-rotate(360deg) saturate(1.6) brightness(1.06);
+    }
+}
+
+/* Négatif */
+.finish-negative {
+    filter: invert(1) hue-rotate(180deg);
+    box-shadow: 0 0 calc(22px * var(--card-fx-scale)) rgba(255, 255, 255, 0.35) !important;
+}

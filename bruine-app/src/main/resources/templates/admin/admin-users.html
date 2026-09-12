@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+>
+<head th:replace="~{admin/layout :: head('Comptes admin')}"></head>
+<body>
+
+<nav th:replace="~{admin/layout :: navbar(true)}"></nav>
+
+<section class="section">
+	<div class="container">
+		<h1 class="title">Comptes administrateurs</h1>
+		<p class="subtitle">Page qui permet de gérer les comptes admin</p>
+
+		<!-- Notifications -->
+		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
+		<div th:if="${error}" class="notification is-danger  is-light" th:text="${error}"></div>
+
+		<!-- Tableau des comptes -->
+		<div class="box">
+			<table class="table is-fullwidth is-hoverable">
+				<thead>
+				<tr>
+					<th>Nom d'utilisateur</th>
+					<th>MFA</th>
+					<th>Nouveau mot de passe</th>
+					<th></th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr th:each="user : ${users}">
+					<td class="is-vcentered">
+						<span th:text="${user.username}"></span>
+					</td>
+					<!-- Statut MFA + désactivation -->
+					<td class="is-vcentered">
+						<span class="tag is-success is-light" th:if="${user.mfaEnabled}">Activée</span>
+						<span class="tag is-light" th:unless="${user.mfaEnabled}">Désactivée</span>
+						<form th:if="${user.mfaEnabled}"
+						      th:action="@{/admin/admin-users/{u}/mfa/disable(u=${user.username})}"
+						      method="post" style="display:inline;"
+						      onsubmit="return confirm('Désactiver la MFA de ce compte ?');">
+							<button class="button is-warning is-small ml-2" type="submit">Désactiver</button>
+						</form>
+					</td>
+					<!-- Changer le mot de passe -->
+					<td class="is-vcentered">
+						<form th:action="@{/admin/admin-users/{u}/password(u=${user.username})}"
+						      method="post" style="display: flex; gap: .5rem;">
+							<input class="input is-small" type="password" name="newPassword"
+							       placeholder="Nouveau mot de passe" required>
+							<button class="button is-info is-small" type="submit">Mettre à jour</button>
+						</form>
+					</td>
+					<!-- Supprimer -->
+					<td class="is-vcentered has-text-right">
+						<form th:action="@{/admin/admin-users/{u}/delete(u=${user.username})}"
+						      method="post"
+						      th:data-username="${user.username}"
+						      th:data-self="${user.username == #authentication.name}"
+						      onsubmit="return handleDelete(this)">
+							<button class="button is-danger is-small" type="submit"
+							        th:disabled="${user.username == #authentication.name}"
+							        th:title="${user.username == #authentication.name} ? 'Vous ne pouvez pas supprimer votre propre compte' : ''">
+								Supprimer
+							</button>
+						</form>
+					</td>
+				</tr>
+
+				<!-- Ligne d'ajout -->
+				<tr style="border-top: 2px solid #dbdbdb;">
+					<td colspan="4">
+						<form th:action="@{/admin/admin-users/create}" method="post"
+						      style="display: flex; gap: .5rem; align-items: center;">
+							<input class="input is-small" type="text" name="username"
+							       placeholder="Nom d'utilisateur" required maxlength="20"
+							       style="max-width: 180px;"
+							       autocomplete="off">
+							<input class="input is-small" type="password" name="password"
+							       placeholder="Mot de passe" required
+							       autocomplete="new-password">
+							<button class="button is-success is-small" type="submit">
+								+ Ajouter
+							</button>
+						</form>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</section>
+
+<script>
+    function handleDelete(form) {
+        if (form.dataset.self === 'true') return false;
+        return confirm('Supprimer le compte « ' + form.dataset.username + ' » ?');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<th:block th:replace="~{layout :: common-head('Bruine - Jouer')}"/>
+	<link rel="stylesheet" th:href="@{/css/gacha/gacha.css}">
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}"></header>
+
+<main class="gacha-container">
+
+	<h1 class="title has-text-centered" style="color:var(--text); margin-bottom:0.25rem;">
+		💧 Bruine Gacha
+	</h1>
+	<p class="has-text-centered" style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.9rem;">
+		Secouez un paquet pour l'ouvrir !
+	</p>
+
+	<div class="score-display">
+		<span style="font-size:1.3rem;">💧</span>
+		<span id="score-value" th:text="${userScore}">0</span>
+		<span style="font-size:1rem; color:var(--text-muted); font-weight:normal;">points</span>
+	</div>
+
+	<div th:if="${spinError}" class="error-banner visible" th:text="${spinError}"></div>
+
+	<div id="pack-select">
+
+		<div class="pack-card pack-simple" data-count="1"
+		     th:classappend="${userScore < costPerPull} ? ' pack-unavailable'">
+			<div class="card-shine"></div>
+			<div class="pack-header">
+				<span class="pack-brand">Bruine</span>
+				<span class="pack-tier-badge">SIMPLE</span>
+			</div>
+			<div class="pack-artwork">
+				<div class="pack-energy-ring"></div>
+				<div class="pack-orb">
+					<span class="pack-count">×1</span>
+				</div>
+			</div>
+			<div class="pack-footer">
+				<span class="pack-price" th:text="${costPerPull} + ' pts'">10 pts</span>
+			</div>
+		</div>
+
+		<div class="pack-card pack-plus" data-count="5"
+		     th:classappend="${userScore < costPerPull * 5} ? ' pack-unavailable'">
+			<div class="card-shine"></div>
+			<div class="pack-header">
+				<span class="pack-brand">Bruine</span>
+				<span class="pack-tier-badge">PLUS</span>
+			</div>
+			<div class="pack-artwork">
+				<div class="pack-energy-ring"></div>
+				<div class="pack-orb">
+					<span class="pack-count">×5</span>
+				</div>
+			</div>
+			<div class="pack-footer">
+				<span class="pack-price" th:text="${costPerPull * 5} + ' pts'">50 pts</span>
+			</div>
+		</div>
+
+		<div class="pack-card pack-mega" data-count="10"
+		     th:classappend="${userScore < costPerPull * 10} ? ' pack-unavailable'">
+			<div class="card-shine"></div>
+			<div class="pack-header">
+				<span class="pack-brand">Bruine</span>
+				<span class="pack-tier-badge">MEGA</span>
+			</div>
+			<div class="pack-artwork">
+				<div class="pack-energy-ring"></div>
+				<div class="pack-orb">
+					<span class="pack-count">×10</span>
+				</div>
+			</div>
+			<div class="pack-footer">
+				<span class="pack-price" th:text="${costPerPull * 10} + ' pts'">100 pts</span>
+			</div>
+		</div>
+
+	</div>
+
+	<!-- Shake progress bar (fixed, shown during drag) -->
+	<div id="shake-bar-fixed">
+		<div id="shake-bar-label">Secouez !</div>
+		<div id="shake-bar-track">
+			<div id="shake-bar-inner"></div>
+		</div>
+	</div>
+
+	<!-- Résultat du dernier tirage, transmis en attribut flash par POST /gacha/spin -->
+	<div id="resultats" class="cards-grid">
+		<th:block th:each="card : ${spinResult != null ? spinResult.results : null}">
+			<div th:replace="~{fragments/card :: card(
+			         view            = ${card},
+			         baseClass       = 'gacha-card',
+			         dataId          = null,
+			         showDescription = true,
+			         showCount       = false,
+			         showShine       = false)}">
+			</div>
+		</th:block>
+	</div>
+
+	<div th:if="${spinResult}" class="result-summary visible">
+		<strong style="color:var(--text);" th:text="${spinResult.totalCost} + ' points dépensés'"></strong>
+		&middot;
+		<a th:href="@{/inventory}" style="color:var(--accent);">Voir mon inventaire →</a>
+	</div>
+
+	<!-- Odds/Proba -->
+	<div class="box" style="background:var(--bg-panel); border:1px solid var(--steam-blue-mid); margin-top:2.5rem;">
+		<h2 class="subtitle" style="color:var(--text); margin-bottom:0.75rem; font-size:1rem;">
+			<i class="fa-solid fa-chart-simple" style="color:var(--accent); margin-right:0.4rem;"></i>
+			Probabilités
+		</h2>
+		<div style="display:flex; gap:2rem; flex-wrap:wrap;">
+			<table class="odds-table" style="flex:1; min-width:180px;">
+				<thead>
+				<tr>
+					<th>Rareté</th>
+					<th>Probabilité</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+					<td style="color:var(--card-legendary-text);">⭐ Légendaire</td>
+					<td th:text="${#numbers.formatDecimal(cfg.rarityLegendary * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				<tr>
+					<td style="color:var(--card-epic-text);">🔮 Épique</td>
+					<td th:text="${#numbers.formatDecimal(cfg.rarityEpic * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				<tr>
+					<td style="color:var(--card-rare-text);">💎 Rare</td>
+					<td th:text="${#numbers.formatDecimal(cfg.rarityRare * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				<tr>
+					<td style="color:var(--card-uncommon-text);">🍃 Peu commun</td>
+					<td th:text="${#numbers.formatDecimal(cfg.rarityUncommon * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				<tr>
+					<td style="color:var(--card-common-text);">🪨 Commun</td>
+					<td th:text="${#numbers.formatDecimal(cfg.rarityCommon * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				</tbody>
+			</table>
+			<table class="odds-table" style="flex:1; min-width:180px;">
+				<thead>
+				<tr>
+					<th>Finish</th>
+					<th>Probabilité</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+					<td style="color:var(--text-bright);">☯ Négatif</td>
+					<td th:text="${#numbers.formatDecimal(cfg.finishNegative * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				<tr>
+					<td style="color:var(--gold-light);">🌈 Polychrome</td>
+					<td th:text="${#numbers.formatDecimal(cfg.finishPolychrome * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				<tr>
+					<td style="color:var(--blue-pale);">✨ Foil</td>
+					<td th:text="${#numbers.formatDecimal(cfg.finishFoil * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				<tr>
+					<td style="color:var(--purple-light);">💠 Holographique</td>
+					<td th:text="${#numbers.formatDecimal(cfg.finishHolographic * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				<tr>
+					<td style="color:var(--text-muted);">⬜ Normal</td>
+					<td th:text="${#numbers.formatDecimal(cfg.finishNormal * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!-- Soumis par gacha.js une fois le paquet secoué ; le champ CSRF est ajouté par th:action -->
+	<form id="spin-form" method="post" th:action="@{/gacha/spin}" hidden>
+		<input type="hidden" id="spin-count" name="count" value="1"/>
+	</form>
+
+</main>
+
+<th:block th:replace="~{layout :: footer-and-js}"></th:block>
+
+<script th:src="@{/js/gacha.js}"></script>
+
+</body>
+</html>

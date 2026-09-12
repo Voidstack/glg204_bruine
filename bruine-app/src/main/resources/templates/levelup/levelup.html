@@ -1,0 +1,138 @@
+<!DOCTYPE HTML>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+	<th:block th:replace="~{layout :: common-head('Bruine - Level Up')}"/>
+	<link rel="stylesheet" th:href="@{/css/levelup/levelup.css}">
+	<link rel="stylesheet" th:href="@{/css/levelup/steam_machine.css}">
+</head>
+
+<body>
+<header th:replace="~{layout :: header-and-nav}"></header>
+
+<main class="levelup-wrap">
+
+	<h1 class="levelup-title">&#9889; Steam Machine</h1>
+	<p class="levelup-sub">Glissez vos cartes dans la machine pour les convertir en XP</p>
+
+	<!-- XP totale -->
+	<div class="xp-total-bar">
+		<span>Expérience totale du compte :</span>
+		<strong id="xp-total" th:text="${totalExperience}">0</strong>
+		<span>XP</span>
+	</div>
+
+	<!-- Empty state -->
+	<div th:if="${totalCards == 0}" class="empty-state">
+		<div class="empty-icon">&#128230;</div>
+		<p>Votre inventaire est vide, pas de cartes à convertir.</p>
+		<a th:href="@{/gacha}" class="button"
+		   style="background:var(--steam-blue-mid); color:var(--text); border:1px solid var(--accent);">
+			Jouer au Gacha
+		</a>
+	</div>
+
+	<div th:if="${totalCards > 0}" class="levelup-layout">
+
+		<!-- Inventaire -->
+		<div class="lvlup-inventory">
+			<div class="cards-grid" id="cards-grid">
+
+				<div th:each="item : ${cards}"
+				     class="card-slot"
+				     th:id="'slot-' + ${item.reward.id} + '-' + ${item.view.finish.code}"
+				     th:attr="data-reward-id=${item.reward.id},
+                              data-finish=${item.view.finish.code},
+                              data-xp=${item.xp},
+                              data-count=${item.count},
+                              data-name=${item.reward.name},
+                              data-emoji=${item.reward.emoji}">
+
+					<div th:replace="~{fragments/card :: card(
+					         view            = ${item.view},
+					         baseClass       = 'inv-card',
+					         dataId          = null,
+					         showDescription = true,
+					         showCount       = true,
+					         showShine       = true)}">
+					</div>
+
+					<div class="card-xp-hint" th:text="'+ ' + ${item.xp} + ' XP'">+ 10 XP</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Steam Machine (droite) -->
+		<div class="machine-panel">
+			<div class="machine-body" id="machine-body">
+
+				<!-- Title bar -->
+				<div class="machine-top-bar">
+					<div class="machine-rivet"></div>
+					<span class="machine-title">&#9881; Steam Machine &#9881;</span>
+					<div class="machine-rivet"></div>
+				</div>
+
+				<!-- Calques SVG inlinés dans le repère 280x180 ; chacun est recadré sur son
+					 dessin, le translate qui l'entoure le remet à sa place. -->
+				<div class="machine-svg-wrap">
+					<svg class="machine-svg" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+						<th:block th:replace="~{levelup/svg/chassis :: svg}"></th:block>
+						<g transform="translate(22,60)">
+							<th:block th:replace="~{levelup/svg/gear-small :: svg}"></th:block>
+						</g>
+						<g transform="translate(198,60)">
+							<th:block th:replace="~{levelup/svg/gear-small :: svg}"></th:block>
+						</g>
+						<g transform="translate(79.25,34)">
+							<th:block th:replace="~{levelup/svg/gear-large :: svg}"></th:block>
+						</g>
+						<g transform="translate(121.25,-0.5)">
+							<th:block th:replace="~{levelup/svg/gauge :: svg}"></th:block>
+						</g>
+					</svg>
+				</div>
+
+				<!-- Indicateur de dépôt ; la zone active est la machine entière (levelup.js) -->
+				<div class="machine-dropzone">
+					<span class="drop-icon">&#9660;</span>
+					<span>Fuel slot, déposez vos cartes</span>
+				</div>
+
+				<!-- Chambre de combustion -->
+				<div class="machine-queue" id="machine-queue"></div>
+
+				<hr class="machine-divider">
+
+				<!-- XP preview -->
+				<div class="machine-xp-preview">
+					<span>XP à générer</span>
+					<span class="xp-gain" id="xp-preview">0 XP</span>
+				</div>
+
+				<!-- Résultat flash -->
+				<div class="machine-result" id="machine-result"></div>
+
+				<!-- Bouton -->
+				<button class="machine-activate" id="activate-btn" disabled>
+					<span>&#9881;</span>
+					<span>ACTIVER LA MACHINE</span>
+				</button>
+
+			</div>
+		</div>
+
+	</div>
+
+</main>
+
+<th:block th:replace="~{layout :: footer-and-js}"></th:block>
+<script th:src="@{/js/card-motion.js}"></script>
+<script th:src="@{/js/levelup.js}"></script>
+</body>
+</html>
