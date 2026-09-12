@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.deck.repository;
 
 import com.enosistudio.bruine.card.ECardFinish;
-import com.enosistudio.bruine.deck.model.UserCard;
+import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,6 @@
-package com.enosistudio.bruine.deck.model;
+package com.enosistudio.bruine.card;
 
-import com.enosistudio.bruine.card.ECardFinish;
+import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import jakarta.persistence.*;
@@ -34,7 +34,9 @@ public class UserCard {
     @Column(nullable = false)
     private ECardFinish finish = ECardFinish.NORMAL;
 
-    /** Deck dans lequel cet exemplaire est posé, ou null s'il est hors deck. */
+    /**
+     * Deck dans lequel cet exemplaire est posé, ou null s'il est hors deck.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deck_id")
     private Deck deck;

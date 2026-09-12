@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.market.service;
 
+import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.common.BusinessRuleException;
-import com.enosistudio.bruine.deck.model.UserCard;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.market.dto.MarketListingDTO;

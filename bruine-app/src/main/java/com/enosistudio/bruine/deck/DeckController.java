@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.deck;
 
+import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.card.UserCardService;
-import com.enosistudio.bruine.deck.model.UserCard;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;

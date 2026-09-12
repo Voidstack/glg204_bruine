@@ -1,6 +1,5 @@
 package com.enosistudio.bruine.card;
 
-import com.enosistudio.bruine.deck.model.UserCard;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.market.service.MarketService;
 import com.enosistudio.bruine.steam.model.SteamUser;

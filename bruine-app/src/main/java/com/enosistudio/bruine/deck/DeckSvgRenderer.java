@@ -2,7 +2,7 @@ package com.enosistudio.bruine.deck;
 
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
-import com.enosistudio.bruine.deck.model.UserCard;
+import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;

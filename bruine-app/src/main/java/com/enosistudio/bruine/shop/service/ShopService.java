@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Porte peut-être un peu trop de responsabilite...
+ */
 @Service
 public class ShopService {
 

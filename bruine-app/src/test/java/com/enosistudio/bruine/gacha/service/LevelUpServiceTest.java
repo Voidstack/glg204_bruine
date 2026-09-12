@@ -2,7 +2,7 @@ package com.enosistudio.bruine.gacha.service;
 
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
-import com.enosistudio.bruine.deck.model.UserCard;
+import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
