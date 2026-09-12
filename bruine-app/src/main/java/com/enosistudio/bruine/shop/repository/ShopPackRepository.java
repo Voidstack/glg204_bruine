@@ -9,12 +9,18 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Voir la doc
+ * <a href="https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html">...</a>
+ */
 @Repository
 public interface ShopPackRepository extends JpaRepository<ShopPack, Long> {
 
     List<ShopPack> findAllByOrderBySortOrderAscIdAsc();
 
-    /** Retire le drapeau « Populaire » de tous les packs sauf celui indiqué. */
+    /**
+     * Retire le drapeau « Populaire » de tous les packs sauf celui indiqué.
+     */
     @Modifying
     @Query("UPDATE ShopPack p SET p.popular = false WHERE p.id <> :id")
     void clearPopularExcept(@Param("id") Long id);

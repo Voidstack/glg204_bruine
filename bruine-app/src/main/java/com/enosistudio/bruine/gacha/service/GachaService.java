@@ -3,6 +3,8 @@ package com.enosistudio.bruine.gacha.service;
 import com.enosistudio.bruine.card.CardViewDTO;
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
+import com.enosistudio.bruine.deck.model.UserCard;
+import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.gacha.dto.GachaResultDTO;
 import com.enosistudio.bruine.gacha.exception.InsufficientScoreException;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
@@ -46,13 +48,16 @@ public class GachaService {
     private final SteamUserService steamUserService;
     private final GachaRewardService gachaRewardService;
     private final GachaConfigRepository gachaConfigRepository;
+    private final UserCardRepository userCardRepository;
 
     public GachaService(SteamUserService steamUserService,
                         GachaRewardService gachaRewardService,
-                        GachaConfigRepository gachaConfigRepository) {
+                        GachaConfigRepository gachaConfigRepository,
+                        UserCardRepository userCardRepository) {
         this.steamUserService = steamUserService;
         this.gachaRewardService = gachaRewardService;
         this.gachaConfigRepository = gachaConfigRepository;
+        this.userCardRepository = userCardRepository;
     }
 
     /**
@@ -96,7 +101,11 @@ public class GachaService {
         GachaReward reward = pickReward(rarity);
 
         if (reward != null) {
-            steamUserService.addCard(user.getId(), reward.getId(), finish);
+            UserCard card = new UserCard();
+            card.setSteamUser(user);
+            card.setGachaReward(reward);
+            card.setFinish(finish);
+            userCardRepository.save(card);
         }
         return CardViewDTO.drawn(rarity, reward, finish);
     }

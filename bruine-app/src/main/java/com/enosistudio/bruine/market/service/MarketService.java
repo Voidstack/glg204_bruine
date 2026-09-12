@@ -38,14 +38,14 @@ public class MarketService {
      */
     @Transactional(readOnly = true)
     public List<MarketListingDTO> findOtherListings(Long userId) {
-        return marketListingRepository.findOthersWithDetails(userId).stream()
+        return marketListingRepository.findBySellerIdNotOrderByCreatedAtDesc(userId).stream()
                 .map(MarketListingDTO::of)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<MarketListingDTO> findMyListings(Long sellerId) {
-        return marketListingRepository.findBySellerIdWithDetails(sellerId).stream()
+        return marketListingRepository.findBySellerIdOrderByCreatedAtDesc(sellerId).stream()
                 .map(MarketListingDTO::of)
                 .toList();
     }

@@ -1,6 +1,5 @@
 package com.enosistudio.bruine.steam.security;
 
-import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,12 +29,7 @@ public class SteamUserService {
 
     @Transactional(readOnly = true)
     public Optional<SteamUser> findBySteamIdWithRewards(String steamId) {
-        return repository.findBySteamIdWithRewards(steamId);
-    }
-
-    @Transactional
-    public void addCard(Long userId, Long rewardId, ECardFinish finish) {
-        repository.addCard(userId, rewardId, finish.name());
+        return repository.findWithRewardsBySteamId(steamId);
     }
 
     @Transactional
@@ -55,11 +49,11 @@ public class SteamUserService {
 
     @Transactional(readOnly = true)
     public List<SteamUser> findLeaderboard() {
-        return repository.findAllOrderByPlaytimeDesc();
+        return repository.findAllByOrderByCurrentPlaytimeMinutesDesc();
     }
 
     @Transactional(readOnly = true)
     public List<SteamUser> findLeaderboardByXp() {
-        return repository.findAllOrderByXpDesc();
+        return repository.findAllByOrderByTotalExperienceDesc();
     }
 }
