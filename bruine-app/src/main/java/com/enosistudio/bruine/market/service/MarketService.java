@@ -36,12 +36,14 @@ public class MarketService {
     /**
      * Annonces des autres joueurs, les plus récentes d'abord.
      */
+    @Transactional(readOnly = true)
     public List<MarketListingDTO> findOtherListings(Long userId) {
         return marketListingRepository.findOthersWithDetails(userId).stream()
                 .map(MarketListingDTO::of)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MarketListingDTO> findMyListings(Long sellerId) {
         return marketListingRepository.findBySellerIdWithDetails(sellerId).stream()
                 .map(MarketListingDTO::of)
@@ -53,6 +55,7 @@ public class MarketService {
      *
      * @param user joueur chargé avec sa collection
      */
+    @Transactional(readOnly = true)
     public List<UserCard> findSellableCards(SteamUser user) {
         Set<Long> listedIds = findAllListedCardIds();
         Set<Long> deckCardIds = deckService.findDeckCardIds(user.getId());
@@ -62,6 +65,7 @@ public class MarketService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public Set<Long> findAllListedCardIds() {
         return marketListingRepository.findAllListedCardIds();
     }

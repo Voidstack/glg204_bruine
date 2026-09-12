@@ -35,10 +35,12 @@ public class ShopService {
     /**
      * Packs triés pour l'affichage (ordre admin puis id).
      */
+    @Transactional(readOnly = true)
     public List<ShopPack> findAllOrdered() {
         return packRepository.findAllByOrderBySortOrderAscIdAsc();
     }
 
+    @Transactional(readOnly = true)
     public Optional<ShopPack> findById(Long id) {
         return packRepository.findById(id);
     }
@@ -56,6 +58,7 @@ public class ShopService {
         return saved;
     }
 
+    @Transactional
     public void deleteById(Long id) {
         packRepository.deleteById(id);
     }
@@ -66,6 +69,9 @@ public class ShopService {
      * Crée une session Stripe Checkout pour l'achat d'un pack et renvoie l'URL de paiement
      * (page hébergée par Stripe). Le pack et l'utilisateur sont passés en metadata pour être
      * retrouvés au moment du crédit des points.
+     *
+     * Aucune transaction ici : la méthode ne touche pas la base, et ouvrir une transaction
+     * autour d'un appel réseau immobiliserait une connexion JDBC le temps de la réponse Stripe.
      *
      * @param baseUrl base publique de l'application (ex. http://localhost:8080) pour les URLs de retour
      */
@@ -148,6 +154,7 @@ public class ShopService {
     /**
      * Historique d'un utilisateur donné (le plus récent d'abord).
      */
+    @Transactional(readOnly = true)
     public List<ShopPurchase> findUserHistory(Long userId) {
         return purchaseRepository.findBySteamUser_IdOrderByCreatedAtDesc(userId);
     }
@@ -155,6 +162,7 @@ public class ShopService {
     /**
      * Tous les achats (vue admin).
      */
+    @Transactional(readOnly = true)
     public List<ShopPurchase> findAllHistory() {
         return purchaseRepository.findAllByOrderByCreatedAtDesc();
     }

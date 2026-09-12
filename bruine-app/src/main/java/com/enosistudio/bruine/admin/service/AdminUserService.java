@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class AdminUserService implements UserDetailsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<AdminUser> optAdminUser = repository.findById(username);
         if (optAdminUser.isPresent()) {
@@ -38,6 +40,7 @@ public class AdminUserService implements UserDetailsService {
         }
     }
 
+    @Transactional
     public AdminUser createUser(String username, String password) throws UsernameAlreadyExistsException {
         if (repository.existsById(username)) {
             throw new UsernameAlreadyExistsException();
@@ -46,14 +49,17 @@ public class AdminUserService implements UserDetailsService {
         return repository.save(new AdminUser(username, encodedPassword));
     }
 
+    @Transactional(readOnly = true)
     public List<AdminUser> findAll() {
         return repository.findAll();
     }
 
+    @Transactional
     public void deleteUser(String username) {
         repository.deleteById(username);
     }
 
+    @Transactional
     public void updatePassword(String username, String newPassword) {
         AdminUser user = repository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
@@ -61,14 +67,17 @@ public class AdminUserService implements UserDetailsService {
         repository.save(user);
     }
 
+    @Transactional(readOnly = true)
     public boolean isMfaEnabled(String username) {
         return repository.findById(username).map(AdminUser::isMfaEnabled).orElse(false);
     }
 
+    @Transactional(readOnly = true)
     public String getMfaSecret(String username) {
         return repository.findById(username).map(AdminUser::getMfaSecret).orElse(null);
     }
 
+    @Transactional
     public void enableMfa(String username, String secret) {
         AdminUser user = repository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
@@ -77,6 +86,7 @@ public class AdminUserService implements UserDetailsService {
         repository.save(user);
     }
 
+    @Transactional
     public void disableMfa(String username) {
         AdminUser user = repository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
