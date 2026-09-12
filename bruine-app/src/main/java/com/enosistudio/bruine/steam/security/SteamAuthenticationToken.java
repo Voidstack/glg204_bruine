@@ -12,13 +12,9 @@ public class SteamAuthenticationToken extends AbstractAuthenticationToken {
     @Getter
     private final String steamId;
 
-    public SteamAuthenticationToken(SteamUserPrincipal principal) {
-        super(null);
-        this.principal = principal;
-        this.steamId = null;
-        this.setAuthenticated(false);
-    }
-
+    /**
+     * Jeton de demande : on n'a que l'identifiant Steam, le provider fera le reste.
+     */
     public SteamAuthenticationToken(String steamId) {
         super(null);
         this.steamId = steamId;
@@ -26,6 +22,9 @@ public class SteamAuthenticationToken extends AbstractAuthenticationToken {
         this.setAuthenticated(false);
     }
 
+    /**
+     * Jeton authentifié, produit par {@link SteamAuthenticationProvider}.
+     */
     public SteamAuthenticationToken(String steamId, SteamUserPrincipal principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;

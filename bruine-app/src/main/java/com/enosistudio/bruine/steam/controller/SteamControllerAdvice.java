@@ -1,8 +1,8 @@
 package com.enosistudio.bruine.steam.controller;
 
+import com.enosistudio.bruine.steam.exception.SteamSessionExpiredException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
-import com.enosistudio.bruine.steam.security.SteamSessionExpiredException;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;

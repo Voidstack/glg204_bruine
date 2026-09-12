@@ -6,26 +6,35 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-public record SteamUserPrincipal(Long id, String steamId, String username, int score, Map<String, Object> attributes, Collection<? extends GrantedAuthority> authorities) implements UserDetails {
-    public static SteamUserPrincipal create(SteamUser user, Map<String, Object> attributes) {
-        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+/**
+ * Identité du joueur Steam connecté, telle que Spring Security la conserve en session.
+ * <p>
+ * Elle ne porte que ce qui identifie et autorise. Tout ce qui bouge en cours de partie
+ * (score, profil Steam) en est volontairement absent : un instantané pris à la connexion
+ * serait faux dès le premier tirage, et ces données sont relues à la demande.
+ */
+public record SteamUserPrincipal(String steamId, String username,
+                                 Collection<? extends GrantedAuthority> authorities) implements UserDetails {
 
-        return new SteamUserPrincipal(user.getId(), user.getSteamId(), user.getUsername(), user.getScore(), Collections.unmodifiableMap(attributes), authorities);
-    }
+    /**
+     * Tous les joueurs ont le même rôle : la liste est partagée plutôt que recréée à chaque connexion.
+     */
+    private static final List<GrantedAuthority> JOUEUR = List.of(new SimpleGrantedAuthority("ROLE_USER"));
 
-    public long getId() {
-        return id;
+    public static SteamUserPrincipal create(SteamUser user) {
+        return new SteamUserPrincipal(user.getSteamId(), user.getUsername(), JOUEUR);
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.authorities;
+        return authorities;
     }
 
+    /**
+     * Aucun mot de passe ici : l'authentification est déléguée à Steam par OpenID.
+     */
     @Override
     public String getPassword() {
         return null;
@@ -33,6 +42,6 @@ public record SteamUserPrincipal(Long id, String steamId, String username, int s
 
     @Override
     public String getUsername() {
-        return this.username;
+        return username;
     }
 }

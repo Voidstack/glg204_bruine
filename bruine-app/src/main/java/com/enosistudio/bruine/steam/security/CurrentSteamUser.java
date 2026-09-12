@@ -1,5 +1,6 @@
 package com.enosistudio.bruine.steam.security;
 
+import com.enosistudio.bruine.steam.exception.SteamSessionExpiredException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.security.core.Authentication;
