@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
-public class AdminDemoController {
+public class AdminImpersonationController {
 
     // avatar par default de steam
     private static final String DEFAULT_AVATAR =
@@ -26,7 +26,7 @@ public class AdminDemoController {
     private final SteamUserService steamUserService;
     private final SteamService steamService;
 
-    public AdminDemoController(SteamUserService steamUserService, SteamService steamService) {
+    public AdminImpersonationController(SteamUserService steamUserService, SteamService steamService) {
         this.steamUserService = steamUserService;
         this.steamService = steamService;
     }

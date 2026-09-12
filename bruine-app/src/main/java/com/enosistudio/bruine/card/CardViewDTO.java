@@ -4,11 +4,7 @@ import com.enosistudio.bruine.deck.model.UserCard;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 
 /**
- * Tout ce qu'il faut pour dessiner une carte, et rien de plus.
- * <p>
- * L'inventaire, la page de conversion, l'éditeur de deck et le gacha affichaient la même
- * carte à partir de quatre objets différents. Ils passent maintenant tous par ce modèle,
- * ce qui permet au fragment templates/fragments/card.html d'être leur unique rendu.
+ * Tout ce qu'il faut pour dessiner une carte.
  */
 public record CardViewDTO(ECardRarity rarity, String emoji, String name, String description,
                           ECardFinish finish, long count) {
@@ -26,8 +22,8 @@ public record CardViewDTO(ECardRarity rarity, String emoji, String name, String 
     /**
      * Vue d'un exemplaire précis, par exemple une carte posée dans un deck.
      */
-    public static CardViewDTO of(UserCard ugr) {
-        return of(ugr.getGachaReward(), ugr.getFinish(), 1);
+    public static CardViewDTO of(UserCard userCard) {
+        return of(userCard.getGachaReward(), userCard.getFinish(), 1);
     }
 
     /**

@@ -33,14 +33,14 @@ public class SteamController {
     private static final Logger log = LoggerFactory.getLogger(SteamController.class);
 
     private final AuthenticationManager authenticationManager;
-    private final SteamService service;
+    private final SteamService steamService;
     private final SteamUserService steamUserService;
     private final SessionRegistry sessionRegistry;
     private final DeckService deckService;
 
-    public SteamController(AuthenticationManager authenticationManager, SteamService service, SteamUserService steamUserService, SessionRegistry sessionRegistry, DeckService deckService) {
+    public SteamController(AuthenticationManager authenticationManager, SteamService steamService, SteamUserService steamUserService, SessionRegistry sessionRegistry, DeckService deckService) {
         this.authenticationManager = authenticationManager;
-        this.service = service;
+        this.steamService = steamService;
         this.steamUserService = steamUserService;
         this.sessionRegistry = sessionRegistry;
         this.deckService = deckService;
@@ -51,7 +51,7 @@ public class SteamController {
         String baseUrl = ServletUriComponentsBuilder.fromRequestUri(request)
                 .replacePath(null)
                 .toUriString();
-        return "redirect:" + service.buildSteamLoginUrl(baseUrl);
+        return "redirect:" + steamService.buildSteamLoginUrl(baseUrl);
     }
 
     @GetMapping("/login/redirect")
@@ -69,7 +69,7 @@ public class SteamController {
         );
 
         try {
-            String steamUserId = service.validateLoginParameters(dto);
+            String steamUserId = steamService.validateLoginParameters(dto);
             SteamAuthenticationToken authReq = new SteamAuthenticationToken(steamUserId);
             Authentication auth = authenticationManager.authenticate(authReq);
             SecurityContext sc = SecurityContextHolder.getContext();
@@ -103,7 +103,7 @@ public class SteamController {
             return new ModelAndView("redirect:/steam/failed");
         }
         try {
-            Map<String, Object> userData = service.getUserData(steamId);
+            Map<String, Object> userData = steamService.getUserData(steamId);
             boolean registeredOnSite = steamUserService.findBySteamId(steamId).isPresent();
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isOwnProfile = auth instanceof SteamAuthenticationToken token
@@ -138,7 +138,7 @@ public class SteamController {
             return Map.of("games", List.of(), "totalPlaytimeMinutes", 0L);
         }
         try {
-            List<SteamGameDTO> games = service.getOwnedGames(steamId).stream()
+            List<SteamGameDTO> games = steamService.getOwnedGames(steamId).stream()
                     .filter(SteamService::isPlayed)
                     .sorted(Comparator.comparingInt(SteamGameDTO::playtimeMinutes).reversed())
                     .toList();

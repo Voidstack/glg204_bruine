@@ -18,11 +18,11 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 sert à centraliser la gestion des exceptions des controleurs Spring.
  */
 @ControllerAdvice
-public class SteamUserModelAdvice {
+public class SteamControllerAdvice {
 
     private final SteamUserService steamUserService;
 
-    public SteamUserModelAdvice(SteamUserService steamUserService) {
+    public SteamControllerAdvice(SteamUserService steamUserService) {
         this.steamUserService = steamUserService;
     }
 

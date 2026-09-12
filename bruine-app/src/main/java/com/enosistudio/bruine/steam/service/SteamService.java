@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -16,16 +16,16 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Component
+@Service
 public class SteamService {
 
     @Value("${steam.token}")
     private String steamApiToken;
-    private final String steamApiUrl = "https://api.steampowered.com";
+    private static final String STEAM_API_URL = "https://api.steampowered.com";
 
     public Map<String, Object> getUserData(String steamUserId) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
-        String url = String.format("%s/ISteamUser/GetPlayerSummaries/v2/?key=%s&format=json&steamids=%s", steamApiUrl, steamApiToken, steamUserId);
+        String url = String.format("%s/ISteamUser/GetPlayerSummaries/v2/?key=%s&format=json&steamids=%s", STEAM_API_URL, steamApiToken, steamUserId);
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
         if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
@@ -47,7 +47,7 @@ public class SteamService {
         RestTemplate restTemplate = new RestTemplate();
         String url = String.format(
                 "%s/IPlayerService/GetOwnedGames/v1/?key=%s&steamid=%s&include_appinfo=1&format=json",
-                steamApiUrl, steamApiToken, steamId);
+                STEAM_API_URL, steamApiToken, steamId);
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
         if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
@@ -105,12 +105,12 @@ public class SteamService {
     public String validateLoginParameters(SteamOpenidLoginDTO dto) throws IllegalArgumentException {
         MultiValueMap<String, String> openidRequest = new LinkedMultiValueMap<>();
         openidRequest.add("openid.ns", dto.getNs());
-        openidRequest.add("openid.op_endpoint", dto.getOp_endpoint());
-        openidRequest.add("openid.claimed_id", dto.getClaimed_id());
+        openidRequest.add("openid.op_endpoint", dto.getOpEndpoint());
+        openidRequest.add("openid.claimed_id", dto.getClaimedId());
         openidRequest.add("openid.identity", dto.getIdentity());
-        openidRequest.add("openid.return_to", dto.getReturn_to());
-        openidRequest.add("openid.response_nonce", dto.getResponse_nonce());
-        openidRequest.add("openid.assoc_handle", dto.getAssoc_handle());
+        openidRequest.add("openid.return_to", dto.getReturnTo());
+        openidRequest.add("openid.response_nonce", dto.getResponseNonce());
+        openidRequest.add("openid.assoc_handle", dto.getAssocHandle());
         openidRequest.add("openid.signed", dto.getSigned());
         openidRequest.add("openid.sig", dto.getSig());
         openidRequest.add("openid.mode", "check_authentication");

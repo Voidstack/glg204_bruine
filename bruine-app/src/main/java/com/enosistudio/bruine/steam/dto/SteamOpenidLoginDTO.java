@@ -18,11 +18,11 @@ public class SteamOpenidLoginDTO {
 
     @URL
     @NotBlank
-    private String op_endpoint;
+    private String opEndpoint;
 
     @URL
     @NotBlank
-    private String claimed_id;
+    private String claimedId;
 
     @URL
     @NotBlank
@@ -30,13 +30,13 @@ public class SteamOpenidLoginDTO {
 
     @URL
     @NotBlank
-    private String return_to;
+    private String returnTo;
 
     @NotBlank
-    private String response_nonce;
+    private String responseNonce;
 
     @NotBlank
-    private String assoc_handle;
+    private String assocHandle;
 
     @NotBlank
     @Pattern(regexp = "^\\w+(?:,\\w+)*$")
@@ -48,14 +48,14 @@ public class SteamOpenidLoginDTO {
     public SteamOpenidLoginDTO() {
     }
 
-    public SteamOpenidLoginDTO(String ns, String op_endpoint, String claimed_id, String identity, String return_to, String response_nonce, String assoc_handle, String signed, String sig) {
+    public SteamOpenidLoginDTO(String ns, String opEndpoint, String claimedId, String identity, String returnTo, String responseNonce, String assocHandle, String signed, String sig) {
         this.ns = ns;
-        this.op_endpoint = op_endpoint;
-        this.claimed_id = claimed_id;
+        this.opEndpoint = opEndpoint;
+        this.claimedId = claimedId;
         this.identity = identity;
-        this.return_to = return_to;
-        this.response_nonce = response_nonce;
-        this.assoc_handle = assoc_handle;
+        this.returnTo = returnTo;
+        this.responseNonce = responseNonce;
+        this.assocHandle = assocHandle;
         this.signed = signed;
         this.sig = sig;
 
@@ -64,7 +64,7 @@ public class SteamOpenidLoginDTO {
 
     private void validate() {
         try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-            Validator                                     validator  = factory.getValidator();
+            Validator validator = factory.getValidator();
             Set<ConstraintViolation<SteamOpenidLoginDTO>> violations = validator.validate(this);
             if (!violations.isEmpty()) {
                 throw new ConstraintViolationException(violations);

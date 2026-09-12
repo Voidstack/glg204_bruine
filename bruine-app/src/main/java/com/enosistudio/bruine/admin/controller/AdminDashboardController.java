@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-public class LoginController {
+public class AdminDashboardController {
 
     private final SteamUserService steamUserService;
     private final AdminUserService adminUserService;
 
-    public LoginController(SteamUserService steamUserService, AdminUserService adminUserService) {
+    public AdminDashboardController(SteamUserService steamUserService, AdminUserService adminUserService) {
         this.steamUserService = steamUserService;
         this.adminUserService = adminUserService;
     }
