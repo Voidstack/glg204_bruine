@@ -6,27 +6,27 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 
-public class SteamAutenticationToken extends AbstractAuthenticationToken {
+public class SteamAuthenticationToken extends AbstractAuthenticationToken {
 
     private final SteamUserPrincipal principal;
     @Getter
     private final String steamId;
 
-    public SteamAutenticationToken(SteamUserPrincipal principal) {
+    public SteamAuthenticationToken(SteamUserPrincipal principal) {
         super(null);
         this.principal = principal;
         this.steamId = null;
         this.setAuthenticated(false);
     }
 
-    public SteamAutenticationToken(String steamId) {
+    public SteamAuthenticationToken(String steamId) {
         super(null);
         this.steamId = steamId;
         this.principal = null;
         this.setAuthenticated(false);
     }
 
-    public SteamAutenticationToken(String steamId, SteamUserPrincipal principal, Collection<? extends GrantedAuthority> authorities) {
+    public SteamAuthenticationToken(String steamId, SteamUserPrincipal principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;
         this.steamId = steamId;

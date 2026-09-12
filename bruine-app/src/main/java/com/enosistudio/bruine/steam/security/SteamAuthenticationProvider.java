@@ -28,7 +28,7 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String steamId = ((SteamAutenticationToken) authentication).getSteamId();
+        String steamId = ((SteamAuthenticationToken) authentication).getSteamId();
 
         Map<String, Object> userAttributes;
         try {
@@ -57,11 +57,11 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
         user = userService.save(user);
         SteamUserPrincipal steamUserPrincipal = SteamUserPrincipal.create(user, userAttributes);
 
-        return new SteamAutenticationToken(steamId, steamUserPrincipal, steamUserPrincipal.getAuthorities());
+        return new SteamAuthenticationToken(steamId, steamUserPrincipal, steamUserPrincipal.getAuthorities());
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return authentication.equals(SteamAutenticationToken.class);
+        return authentication.equals(SteamAuthenticationToken.class);
     }
 }

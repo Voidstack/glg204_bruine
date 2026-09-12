@@ -9,7 +9,7 @@ import java.util.Optional;
 
 /**
  * Accès au joueur Steam authentifié pour la requête en cours.
- *
+ * <p>
  * Ce composant existe pour ne plus recopier dans chaque contrôleur le même bloc de
  * vérification du jeton, qui doit distinguer une session Steam d'une session admin.
  * Un {@link Optional} vide signifie qu'aucun joueur n'est connecté, au contrôleur de
@@ -24,7 +24,9 @@ public class CurrentSteamUser {
         this.steamUserService = steamUserService;
     }
 
-    /** Joueur connecté, sans sa collection de cartes. */
+    /**
+     * Joueur connecté, sans sa collection de cartes.
+     */
     public Optional<SteamUser> find() {
         return authenticatedSteamId().flatMap(steamUserService::findBySteamId);
     }
@@ -47,14 +49,16 @@ public class CurrentSteamUser {
         return find().orElseThrow(SteamSessionExpiredException::new);
     }
 
-    /** Variante de {@link #require()} avec la collection de cartes déjà chargée. */
+    /**
+     * Variante de {@link #require()} avec la collection de cartes déjà chargée.
+     */
     public SteamUser requireWithRewards() {
         return findWithRewards().orElseThrow(SteamSessionExpiredException::new);
     }
 
     private Optional<String> authenticatedSteamId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!(auth instanceof SteamAutenticationToken token)
+        if (!(auth instanceof SteamAuthenticationToken token)
                 || !token.isAuthenticated()
                 || token.getPrincipal() == null) {
             return Optional.empty();

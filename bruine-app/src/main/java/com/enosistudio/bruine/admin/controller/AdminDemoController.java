@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.admin.controller;
 
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.security.SteamAutenticationToken;
+import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
 import com.enosistudio.bruine.steam.security.SteamUserPrincipal;
 import com.enosistudio.bruine.steam.security.SteamUserService;
 import com.enosistudio.bruine.steam.service.SteamService;
@@ -44,7 +44,7 @@ public class AdminDemoController {
         }
 
         SteamUserPrincipal principal = SteamUserPrincipal.create(user, attributes);
-        SteamAutenticationToken token = new SteamAutenticationToken(
+        SteamAuthenticationToken token = new SteamAuthenticationToken(
                 user.getSteamId(), principal, principal.getAuthorities()
         );
 

@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.steam.controller;
 
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.security.SteamAutenticationToken;
+import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
 import com.enosistudio.bruine.steam.security.SteamSessionExpiredException;
 import com.enosistudio.bruine.steam.security.SteamUserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +28,7 @@ public class SteamUserModelAdvice {
 
     @ModelAttribute("currentScore")
     public Integer currentScore(Authentication authentication) {
-        if (authentication instanceof SteamAutenticationToken token
+        if (authentication instanceof SteamAuthenticationToken token
                 && token.isAuthenticated()
                 && token.getPrincipal() != null) {
             return steamUserService.findBySteamId(token.getPrincipal().steamId())

@@ -3,7 +3,7 @@ package com.enosistudio.bruine.steam.controller;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.steam.dto.SteamGameDTO;
 import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
-import com.enosistudio.bruine.steam.security.SteamAutenticationToken;
+import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
 import com.enosistudio.bruine.steam.security.SteamUserService;
 import com.enosistudio.bruine.steam.service.SteamService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -70,7 +70,7 @@ public class SteamController {
 
         try {
             String steamUserId = service.validateLoginParameters(dto);
-            SteamAutenticationToken authReq = new SteamAutenticationToken(steamUserId);
+            SteamAuthenticationToken authReq = new SteamAuthenticationToken(steamUserId);
             Authentication auth = authenticationManager.authenticate(authReq);
             SecurityContext sc = SecurityContextHolder.getContext();
             sc.setAuthentication(auth);
@@ -89,7 +89,7 @@ public class SteamController {
     @GetMapping("/profile")
     public ModelAndView profile() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth instanceof SteamAutenticationToken token
+        if (auth instanceof SteamAuthenticationToken token
                 && token.isAuthenticated()
                 && token.getPrincipal() != null) {
             return new ModelAndView("redirect:/steam/profile/" + token.getPrincipal().steamId());
@@ -106,7 +106,7 @@ public class SteamController {
             Map<String, Object> userData = service.getUserData(steamId);
             boolean registeredOnSite = steamUserService.findBySteamId(steamId).isPresent();
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            boolean isOwnProfile = auth instanceof SteamAutenticationToken token
+            boolean isOwnProfile = auth instanceof SteamAuthenticationToken token
                     && token.isAuthenticated()
                     && token.getPrincipal() != null
                     && token.getPrincipal().steamId().equals(steamId);
@@ -152,7 +152,7 @@ public class SteamController {
     @PostMapping("/profile/{steamId}/delete")
     public String deleteMyAccount(@PathVariable String steamId, HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!(auth instanceof SteamAutenticationToken token)
+        if (!(auth instanceof SteamAuthenticationToken token)
                 || !token.isAuthenticated()
                 || token.getPrincipal() == null
                 || !token.getPrincipal().steamId().equals(steamId)) {
