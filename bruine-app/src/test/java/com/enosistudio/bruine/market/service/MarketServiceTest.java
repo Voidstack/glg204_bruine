@@ -11,7 +11,7 @@ import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ class MarketServiceTest {
     private UserCardRepository userCardRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private SteamUserRepository steamUserRepository;
 
     @Autowired
     private GachaRewardRepository gachaRewardRepository;
@@ -126,9 +126,9 @@ class MarketServiceTest {
         entityManager.flush();
         entityManager.clear();
 
-        assertEquals(20, userRepository.findById(buyer.getId()).orElseThrow().getScore(),
+        assertEquals(20, steamUserRepository.findById(buyer.getId()).orElseThrow().getScore(),
                 "l'acheteur paie le prix affiché");
-        assertEquals(80, userRepository.findById(seller.getId()).orElseThrow().getScore(),
+        assertEquals(80, steamUserRepository.findById(seller.getId()).orElseThrow().getScore(),
                 "le vendeur touche exactement ce prix");
         assertEquals(buyer.getId(),
                 userCardRepository.findById(card.getId()).orElseThrow().getSteamUser().getId());
@@ -185,7 +185,7 @@ class MarketServiceTest {
         user.setSteamId(steamId);
         user.setUsername("joueur " + steamId);
         user.setScore(score);
-        return userRepository.save(user);
+        return steamUserRepository.save(user);
     }
 
     private UserCard createCard(SteamUser holder) {

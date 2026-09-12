@@ -11,7 +11,7 @@ import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ class DeckServiceTest {
     private DeckRepository deckRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private SteamUserRepository steamUserRepository;
 
     @Autowired
     private UserCardRepository userCardRepository;
@@ -172,7 +172,7 @@ class DeckServiceTest {
         SteamUser user = new SteamUser();
         user.setSteamId(steamId);
         user.setUsername("joueur " + steamId);
-        return userRepository.save(user);
+        return steamUserRepository.save(user);
     }
 
     private GachaReward createReward(ECardRarity rarity) {

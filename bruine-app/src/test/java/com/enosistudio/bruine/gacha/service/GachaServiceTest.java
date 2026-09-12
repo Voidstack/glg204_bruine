@@ -10,7 +10,7 @@ import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaConfigRepository;
 import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import com.enosistudio.bruine.steam.security.SteamUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class GachaServiceTest {
     private UserCardRepository userCardRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private SteamUserRepository steamUserRepository;
 
     private SteamUser player;
 
@@ -183,7 +183,7 @@ class GachaServiceTest {
         user.setSteamId("76561190000000001");
         user.setUsername("joueur");
         user.setScore(score);
-        return userRepository.save(user);
+        return steamUserRepository.save(user);
     }
 
     private void createReward(ECardRarity rarity) {

@@ -5,7 +5,7 @@ import com.enosistudio.bruine.shop.model.ShopPurchase;
 import com.enosistudio.bruine.shop.repository.ShopPackRepository;
 import com.enosistudio.bruine.shop.repository.ShopPurchaseRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import com.enosistudio.bruine.steam.security.SteamUserService;
 import com.stripe.exception.StripeException;
 import org.junit.jupiter.api.Test;
@@ -17,13 +17,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Règles de la boutique côté service.
- *
+ * <p>
  * Le dialogue avec Stripe n'est pas joué ici : ce sont des appels statiques du SDK. Sont
  * vérifiées les décisions que la boutique prend seule, avant d'appeler Stripe ou sans
  * l'appeler du tout. Le calcul des prix vit sur l'entité et se teste dans ShopPackTest.
@@ -43,7 +41,7 @@ class ShopServiceTest {
     private ShopPurchaseRepository shopPurchaseRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private SteamUserRepository steamUserRepository;
 
     @Autowired
     private TestEntityManager entityManager;
@@ -125,7 +123,7 @@ class ShopServiceTest {
         player.setSteamId("76561190000000001");
         player.setUsername("joueur");
         player.setScore(score);
-        return userRepository.save(player);
+        return steamUserRepository.save(player);
     }
 
     private void recordPurchase(SteamUser player, String sessionId) {

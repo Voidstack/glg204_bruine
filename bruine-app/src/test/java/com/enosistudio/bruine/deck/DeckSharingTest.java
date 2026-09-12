@@ -8,7 +8,7 @@ import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import com.enosistudio.bruine.steam.service.SteamService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +20,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
@@ -27,9 +29,6 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -56,7 +55,7 @@ class DeckSharingTest {
     @Autowired
     private MockMvc mvc;
     @Autowired
-    private UserRepository userRepository;
+    private SteamUserRepository steamUserRepository;
     @Autowired
     private GachaRewardRepository gachaRewardRepository;
     @Autowired
@@ -73,7 +72,7 @@ class DeckSharingTest {
         user.setSteamId(STEAM_ID);
         user.setUsername("Joueuse");
         user.setScore(0);
-        user = userRepository.save(user);
+        user = steamUserRepository.save(user);
 
         GachaReward reward = new GachaReward();
         reward.setRarity(ECardRarity.EPIC);

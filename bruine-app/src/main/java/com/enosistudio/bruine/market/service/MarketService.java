@@ -8,7 +8,7 @@ import com.enosistudio.bruine.market.dto.MarketListingDTO;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,16 +20,16 @@ public class MarketService {
 
     private final MarketListingRepository marketListingRepository;
     private final UserCardRepository userCardRepository;
-    private final UserRepository userRepository;
+    private final SteamUserRepository steamUserRepository;
     private final DeckService deckService;
 
     public MarketService(MarketListingRepository marketListingRepository,
                          UserCardRepository userCardRepository,
-                         UserRepository userRepository,
+                         SteamUserRepository steamUserRepository,
                          DeckService deckService) {
         this.marketListingRepository = marketListingRepository;
         this.userCardRepository = userCardRepository;
-        this.userRepository = userRepository;
+        this.steamUserRepository = steamUserRepository;
         this.deckService = deckService;
     }
 
@@ -102,8 +102,8 @@ public class MarketService {
             throw new BusinessRuleException("Vous ne pouvez pas acheter votre propre carte.");
         }
 
-        SteamUser managedBuyer = userRepository.findById(buyer.getId()).orElseThrow();
-        SteamUser managedSeller = userRepository.findById(listing.getSeller().getId()).orElseThrow();
+        SteamUser managedBuyer = steamUserRepository.findById(buyer.getId()).orElseThrow();
+        SteamUser managedSeller = steamUserRepository.findById(listing.getSeller().getId()).orElseThrow();
 
         if (managedBuyer.getScore() < listing.getPrice()) {
             throw new BusinessRuleException("Score insuffisant (il vous faut " + listing.getPrice() + " 💧).");
@@ -111,8 +111,8 @@ public class MarketService {
 
         managedBuyer.setScore(managedBuyer.getScore() - listing.getPrice());
         managedSeller.setScore(managedSeller.getScore() + listing.getPrice());
-        userRepository.save(managedBuyer);
-        userRepository.save(managedSeller);
+        steamUserRepository.save(managedBuyer);
+        steamUserRepository.save(managedSeller);
 
         userCardRepository.transferToNewOwner(listing.getUserCard().getId(), managedBuyer);
         marketListingRepository.deleteById(listingId);

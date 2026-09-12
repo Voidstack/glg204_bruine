@@ -2,7 +2,7 @@ package com.enosistudio.bruine.steam.security;
 
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +11,9 @@ import java.util.Optional;
 @Service
 public class SteamUserService {
 
-    private final UserRepository repository;
+    private final SteamUserRepository repository;
 
-    public SteamUserService(UserRepository repository) {
+    public SteamUserService(SteamUserRepository repository) {
         this.repository = repository;
     }
 

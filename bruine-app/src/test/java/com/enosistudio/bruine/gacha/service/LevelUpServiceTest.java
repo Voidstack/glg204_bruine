@@ -9,7 +9,6 @@ import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaConfigRepository;
 import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
-import com.enosistudio.bruine.gacha.service.GachaRewardService;
 import com.enosistudio.bruine.level.dto.ConvertRequestDTO;
 import com.enosistudio.bruine.level.dto.ConvertResultDTO;
 import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
@@ -18,7 +17,7 @@ import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.market.service.MarketService;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import com.enosistudio.bruine.steam.security.SteamUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,7 +59,7 @@ class LevelUpServiceTest {
     private MarketListingRepository marketListingRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private SteamUserRepository steamUserRepository;
 
     @Autowired
     private TestEntityManager entityManager;
@@ -191,7 +190,7 @@ class LevelUpServiceTest {
         SteamUser user = new SteamUser();
         user.setSteamId("76561190000000001");
         user.setUsername("joueur");
-        return userRepository.save(user);
+        return steamUserRepository.save(user);
     }
 
     private GachaReward createReward(ECardRarity rarity) {
@@ -230,7 +229,7 @@ class LevelUpServiceTest {
     private SteamUser reloadOwner() {
         entityManager.flush();
         entityManager.clear();
-        return userRepository.findById(owner.getId()).orElseThrow();
+        return steamUserRepository.findById(owner.getId()).orElseThrow();
     }
 
     /**

@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<SteamUser, Long> {
+public interface SteamUserRepository extends JpaRepository<SteamUser, Long> {
 
     Optional<SteamUser> findBySteamId(String steamId);
 
@@ -24,11 +24,11 @@ public interface UserRepository extends JpaRepository<SteamUser, Long> {
     void addCard(@Param("userId") Long userId, @Param("rewardId") Long rewardId, @Param("finish") String finish);
 
     @org.springframework.data.jpa.repository.Query(
-        "SELECT u FROM SteamUser u ORDER BY COALESCE(u.currentPlaytimeMinutes, 0) DESC")
+            "SELECT u FROM SteamUser u ORDER BY COALESCE(u.currentPlaytimeMinutes, 0) DESC")
     java.util.List<SteamUser> findAllOrderByPlaytimeDesc();
 
     @org.springframework.data.jpa.repository.Query(
-        "SELECT u FROM SteamUser u ORDER BY u.totalExperience DESC")
+            "SELECT u FROM SteamUser u ORDER BY u.totalExperience DESC")
     java.util.List<SteamUser> findAllOrderByXpDesc();
 
     @Query("SELECT SUM(u.totalPulls) FROM SteamUser u")

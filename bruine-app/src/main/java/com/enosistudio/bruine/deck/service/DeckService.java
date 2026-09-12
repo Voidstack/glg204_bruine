@@ -6,7 +6,7 @@ import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.UserRepository;
+import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,16 +20,16 @@ public class DeckService {
     private static final int MAX_DECK_SIZE = 10;
 
     private final DeckRepository deckRepository;
-    private final UserRepository userRepository;
+    private final SteamUserRepository steamUserRepository;
     private final UserCardRepository userCardRepository;
     private final MarketListingRepository marketListingRepository;
 
     public DeckService(DeckRepository deckRepository,
-                       UserRepository userRepository,
+                       SteamUserRepository steamUserRepository,
                        UserCardRepository userCardRepository,
                        MarketListingRepository marketListingRepository) {
         this.deckRepository = deckRepository;
-        this.userRepository = userRepository;
+        this.steamUserRepository = steamUserRepository;
         this.userCardRepository = userCardRepository;
         this.marketListingRepository = marketListingRepository;
     }
@@ -58,7 +58,7 @@ public class DeckService {
      */
     @Transactional
     public void saveDeck(Long userId, List<Long> cardIds) {
-        SteamUser user = userRepository.findById(userId).orElseThrow();
+        SteamUser user = steamUserRepository.findById(userId).orElseThrow();
 
         Deck deck = deckRepository.findBySteamUserId(userId).orElseGet(() -> {
             Deck d = new Deck();
