@@ -3,7 +3,6 @@ package com.enosistudio.bruine.admin.service;
 import com.enosistudio.bruine.admin.domain.AdminUser;
 import com.enosistudio.bruine.admin.exception.UsernameAlreadyExistsException;
 import com.enosistudio.bruine.admin.repository.AdminUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,11 +16,13 @@ import java.util.Optional;
 @Service
 public class AdminUserService implements UserDetailsService {
 
-    @Autowired
-    AdminUserRepository repository;
+    private final AdminUserRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    public AdminUserService(AdminUserRepository repository, PasswordEncoder passwordEncoder) {
+        this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
