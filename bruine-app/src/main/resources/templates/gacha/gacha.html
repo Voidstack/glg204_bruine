@@ -131,23 +131,23 @@
 				<tbody>
 				<tr>
 					<td style="color:var(--card-legendary-text);">⭐ Légendaire</td>
-					<td th:text="${#numbers.formatDecimal(cfg.rarityLegendary * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.rarityLegendary * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				<tr>
 					<td style="color:var(--card-epic-text);">🔮 Épique</td>
-					<td th:text="${#numbers.formatDecimal(cfg.rarityEpic * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.rarityEpic * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				<tr>
 					<td style="color:var(--card-rare-text);">💎 Rare</td>
-					<td th:text="${#numbers.formatDecimal(cfg.rarityRare * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.rarityRare * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				<tr>
 					<td style="color:var(--card-uncommon-text);">🍃 Peu commun</td>
-					<td th:text="${#numbers.formatDecimal(cfg.rarityUncommon * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.rarityUncommon * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				<tr>
 					<td style="color:var(--card-common-text);">🪨 Commun</td>
-					<td th:text="${#numbers.formatDecimal(cfg.rarityCommon * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.rarityCommon * 100.0 / rarityTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				</tbody>
 			</table>
@@ -161,23 +161,23 @@
 				<tbody>
 				<tr>
 					<td style="color:var(--text-bright);">☯ Négatif</td>
-					<td th:text="${#numbers.formatDecimal(cfg.finishNegative * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.finishNegative * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				<tr>
 					<td style="color:var(--gold-light);">🌈 Polychrome</td>
-					<td th:text="${#numbers.formatDecimal(cfg.finishPolychrome * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.finishPolychrome * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				<tr>
 					<td style="color:var(--blue-pale);">✨ Foil</td>
-					<td th:text="${#numbers.formatDecimal(cfg.finishFoil * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.finishFoil * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				<tr>
 					<td style="color:var(--purple-light);">💠 Holographique</td>
-					<td th:text="${#numbers.formatDecimal(cfg.finishHolographic * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.finishHolographic * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				<tr>
 					<td style="color:var(--text-muted);">⬜ Normal</td>
-					<td th:text="${#numbers.formatDecimal(cfg.finishNormal * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
+					<td th:text="${#numbers.formatDecimal(gachaConfig.finishNormal * 100.0 / finishTotal, 1, 2)} + ' %'"></td>
 				</tr>
 				</tbody>
 			</table>

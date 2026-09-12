@@ -36,7 +36,7 @@ public class GachaController {
         ModelAndView mav = new ModelAndView("gacha/gacha");
         mav.addObject("costPerPull", GachaService.COST_PER_PULL);
         mav.addObject("userScore", user.getScore());
-        mav.addObject("cfg", config);
+        mav.addObject("gachaConfig", config);
         mav.addObject("rarityTotal", rarityTotal(config));
         mav.addObject("finishTotal", finishTotal(config));
         return mav;
@@ -49,12 +49,12 @@ public class GachaController {
      * de rejouer le tirage : le résultat voyage en attribut flash, le temps d'une requête.
      */
     @PostMapping("/spin")
-    public String spin(@RequestParam(defaultValue = "1") int count, RedirectAttributes redirect) {
+    public String spin(@RequestParam(defaultValue = "1") int count, RedirectAttributes redirectAttributes) {
         SteamUser user = currentSteamUser.require();
         try {
-            redirect.addFlashAttribute("spinResult", gachaService.spin(user, count));
+            redirectAttributes.addFlashAttribute("spinResult", gachaService.spin(user, count));
         } catch (InsufficientScoreException tooPoor) {
-            redirect.addFlashAttribute("spinError",
+            redirectAttributes.addFlashAttribute("spinError",
                     "Score insuffisant ! Il vous faut au moins " + tooPoor.getRequiredScore() + " points.");
         }
         return "redirect:/gacha"; // rechargement de la page pour afficher le résultat du tirage

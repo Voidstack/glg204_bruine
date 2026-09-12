@@ -50,7 +50,7 @@ public class AdminShopPackController {
                          @RequestParam(defaultValue = "0") int promoPercent,
                          @RequestParam(required = false) String promoStart,
                          @RequestParam(required = false) String promoEnd,
-                         RedirectAttributes ra) {
+                         RedirectAttributes redirectAttributes) {
         ShopPack pack = new ShopPack();
         pack.setName(name);
         pack.setEmoji(emoji);
@@ -63,7 +63,7 @@ public class AdminShopPackController {
         pack.setPromoStart(parseDateTime(promoStart));
         pack.setPromoEnd(parseDateTime(promoEnd));
         shopService.save(pack);
-        ra.addFlashAttribute("success", "Pack « " + name + " » créé.");
+        redirectAttributes.addFlashAttribute("success", "Pack « " + name + " » créé.");
         return "redirect:/admin/shop-packs";
     }
 
@@ -79,7 +79,7 @@ public class AdminShopPackController {
                          @RequestParam(defaultValue = "0") int promoPercent,
                          @RequestParam(required = false) String promoStart,
                          @RequestParam(required = false) String promoEnd,
-                         RedirectAttributes ra) {
+                         RedirectAttributes redirectAttributes) {
         shopService.findById(id).ifPresent(pack -> {
             pack.setName(name);
             pack.setEmoji(emoji);
@@ -93,14 +93,14 @@ public class AdminShopPackController {
             pack.setPromoEnd(parseDateTime(promoEnd));
             shopService.save(pack);
         });
-        ra.addFlashAttribute("success", "Pack mis à jour.");
+        redirectAttributes.addFlashAttribute("success", "Pack mis à jour.");
         return "redirect:/admin/shop-packs";
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         shopService.deleteById(id);
-        ra.addFlashAttribute("success", "Pack supprimé.");
+        redirectAttributes.addFlashAttribute("success", "Pack supprimé.");
         return "redirect:/admin/shop-packs";
     }
 }

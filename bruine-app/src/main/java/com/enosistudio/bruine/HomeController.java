@@ -25,7 +25,7 @@ public class HomeController {
         model.addAttribute("statUsers", steamUserRepository.count());
         model.addAttribute("statPulls", nullToZero(steamUserRepository.sumTotalPulls()));
         model.addAttribute("statXp", nullToZero(steamUserRepository.sumTotalExperience()));
-        model.addAttribute("gachaCfg", gachaConfigRepository.findById(1).orElseGet(GachaConfig::new));
+        model.addAttribute("gachaConfig", gachaConfigRepository.findById(1).orElseGet(GachaConfig::new));
         return "index";
     }
 

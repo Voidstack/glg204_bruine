@@ -36,18 +36,18 @@ public class ShopController {
      * et redirige l'utilisateur vers la page de paiement hébergée par Stripe.
      */
     @PostMapping("/checkout/{id}")
-    public String checkout(@PathVariable Long id, RedirectAttributes ra) {
+    public String checkout(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         SteamUser user = currentSteamUser.require();
         return shopService.findById(id).map(pack -> {
             try {
                 String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
                 return "redirect:" + shopService.createCheckoutSession(user, pack, baseUrl);
             } catch (StripeException e) {
-                ra.addFlashAttribute("error", "Impossible de démarrer le paiement : " + e.getMessage());
+                redirectAttributes.addFlashAttribute("error", "Impossible de démarrer le paiement : " + e.getMessage());
                 return "redirect:/shop";
             }
         }).orElseGet(() -> {
-            ra.addFlashAttribute("error", "Ce pack n'existe plus.");
+            redirectAttributes.addFlashAttribute("error", "Ce pack n'existe plus.");
             return "redirect:/shop";
         });
     }
@@ -56,15 +56,15 @@ public class ShopController {
      * Retour après paiement réussi : on valide la session et on crédite les points.
      */
     @GetMapping("/success")
-    public String success(@RequestParam("session_id") String sessionId, RedirectAttributes ra) {
+    public String success(@RequestParam("session_id") String sessionId, RedirectAttributes redirectAttributes) {
         try {
             shopService.fulfillCheckout(sessionId).ifPresentOrElse(
-                    purchase -> ra.addFlashAttribute("success",
+                    purchase -> redirectAttributes.addFlashAttribute("success",
                             "Paiement accepté, " + purchase.getPointsCredited() + " points crédités !"),
-                    () -> ra.addFlashAttribute("error",
+                    () -> redirectAttributes.addFlashAttribute("error",
                             "Paiement non confirmé ou déjà pris en compte."));
         } catch (StripeException e) {
-            ra.addFlashAttribute("error", "Erreur lors de la vérification du paiement : " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Erreur lors de la vérification du paiement : " + e.getMessage());
         }
         return "redirect:/shop";
     }
@@ -73,8 +73,8 @@ public class ShopController {
      * Retour après annulation du paiement sur Stripe.
      */
     @GetMapping("/cancel")
-    public String cancel(RedirectAttributes ra) {
-        ra.addFlashAttribute("error", "Paiement annulé, aucun point n'a été débité.");
+    public String cancel(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("error", "Paiement annulé, aucun point n'a été débité.");
         return "redirect:/shop";
     }
 }

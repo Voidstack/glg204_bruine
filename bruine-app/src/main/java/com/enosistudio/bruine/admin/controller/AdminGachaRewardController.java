@@ -29,14 +29,14 @@ public class AdminGachaRewardController {
                          @RequestParam String name,
                          @RequestParam ECardRarity rarity,
                          @RequestParam(required = false) String description,
-                         RedirectAttributes ra) {
+                         RedirectAttributes redirectAttributes) {
         GachaReward reward = new GachaReward();
         reward.setEmoji(emoji);
         reward.setName(name);
         reward.setRarity(rarity);
         reward.setDescription(description);
         rewardService.save(reward);
-        ra.addFlashAttribute("success", "Récompense « " + emoji + " » créée.");
+        redirectAttributes.addFlashAttribute("success", "Récompense « " + emoji + " » créée.");
         return "redirect:/admin/gacha-rewards";
     }
 
@@ -46,7 +46,7 @@ public class AdminGachaRewardController {
                          @RequestParam String name,
                          @RequestParam ECardRarity rarity,
                          @RequestParam(required = false) String description,
-                         RedirectAttributes ra) {
+                         RedirectAttributes redirectAttributes) {
         rewardService.findById(id).ifPresent(reward -> {
             reward.setEmoji(emoji);
             reward.setName(name);
@@ -54,14 +54,14 @@ public class AdminGachaRewardController {
             reward.setDescription(description);
             rewardService.save(reward);
         });
-        ra.addFlashAttribute("success", "Récompense mise à jour.");
+        redirectAttributes.addFlashAttribute("success", "Récompense mise à jour.");
         return "redirect:/admin/gacha-rewards";
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, RedirectAttributes ra) {
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         rewardService.deleteById(id);
-        ra.addFlashAttribute("success", "Récompense supprimée.");
+        redirectAttributes.addFlashAttribute("success", "Récompense supprimée.");
         return "redirect:/admin/gacha-rewards";
     }
 }
