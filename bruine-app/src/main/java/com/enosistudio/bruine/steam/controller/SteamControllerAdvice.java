@@ -2,11 +2,9 @@ package com.enosistudio.bruine.steam.controller;
 
 import com.enosistudio.bruine.steam.exception.SteamSessionExpiredException;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
-import com.enosistudio.bruine.steam.service.SteamUserService;
+import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,28 +12,27 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
-/*
-sert à centraliser la gestion des exceptions des controleurs Spring.
+/**
+ * Ce que toutes les pages du site ont en commun, posé une fois pour toutes :
+ * le score affiché dans la barre de navigation, et le rattrapage d'une session
+ * Steam devenue orpheline.
  */
 @ControllerAdvice
 public class SteamControllerAdvice {
 
-    private final SteamUserService steamUserService;
+    private final CurrentSteamUser currentSteamUser;
 
-    public SteamControllerAdvice(SteamUserService steamUserService) {
-        this.steamUserService = steamUserService;
+    public SteamControllerAdvice(CurrentSteamUser currentSteamUser) {
+        this.currentSteamUser = currentSteamUser;
     }
 
+    /**
+     * Score du joueur connecté, relu à chaque rendu : celui du jeton de session serait
+     * périmé dès le premier tirage. {@code null} quand personne n'est connecté.
+     */
     @ModelAttribute("currentScore")
-    public Integer currentScore(Authentication authentication) {
-        if (authentication instanceof SteamAuthenticationToken token
-                && token.isAuthenticated()
-                && token.getPrincipal() != null) {
-            return steamUserService.findBySteamId(token.getPrincipal().steamId())
-                    .map(SteamUser::getScore)
-                    .orElse(null);
-        }
-        return null;
+    public Integer currentScore() {
+        return currentSteamUser.find().map(SteamUser::getScore).orElse(null);
     }
 
     /**

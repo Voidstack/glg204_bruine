@@ -3,6 +3,7 @@ package com.enosistudio.bruine.steam.controller;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.steam.dto.SteamGameDTO;
 import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
+import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
 import com.enosistudio.bruine.steam.service.SteamService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
@@ -37,13 +38,17 @@ public class SteamController {
     private final SteamUserService steamUserService;
     private final SessionRegistry sessionRegistry;
     private final DeckService deckService;
+    private final CurrentSteamUser currentSteamUser;
 
-    public SteamController(AuthenticationManager authenticationManager, SteamService steamService, SteamUserService steamUserService, SessionRegistry sessionRegistry, DeckService deckService) {
+    public SteamController(AuthenticationManager authenticationManager, SteamService steamService,
+                           SteamUserService steamUserService, SessionRegistry sessionRegistry,
+                           DeckService deckService, CurrentSteamUser currentSteamUser) {
         this.authenticationManager = authenticationManager;
         this.steamService = steamService;
         this.steamUserService = steamUserService;
         this.sessionRegistry = sessionRegistry;
         this.deckService = deckService;
+        this.currentSteamUser = currentSteamUser;
     }
 
     @GetMapping("/login")
@@ -88,13 +93,9 @@ public class SteamController {
 
     @GetMapping("/profile")
     public ModelAndView profile() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth instanceof SteamAuthenticationToken token
-                && token.isAuthenticated()
-                && token.getPrincipal() != null) {
-            return new ModelAndView("redirect:/steam/profile/" + token.getPrincipal().steamId());
-        }
-        return new ModelAndView("redirect:/");
+        return currentSteamUser.steamId()
+                .map(connecte -> new ModelAndView("redirect:/steam/profile/" + connecte))
+                .orElseGet(() -> new ModelAndView("redirect:/"));
     }
 
     @GetMapping("/profile/{steamId}")
@@ -105,11 +106,7 @@ public class SteamController {
         try {
             Map<String, Object> userData = steamService.getUserData(steamId);
             boolean registeredOnSite = steamUserService.findBySteamId(steamId).isPresent();
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            boolean isOwnProfile = auth instanceof SteamAuthenticationToken token
-                    && token.isAuthenticated()
-                    && token.getPrincipal() != null
-                    && token.getPrincipal().steamId().equals(steamId);
+            boolean isOwnProfile = currentSteamUser.steamId().filter(steamId::equals).isPresent();
 
             boolean hasDeck = steamUserService.findBySteamId(steamId)
                     .map(u -> !deckService.findDeckCardIds(u.getId()).isEmpty())
@@ -151,11 +148,8 @@ public class SteamController {
 
     @PostMapping("/profile/{steamId}/delete")
     public String deleteMyAccount(@PathVariable String steamId, HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!(auth instanceof SteamAuthenticationToken token)
-                || !token.isAuthenticated()
-                || token.getPrincipal() == null
-                || !token.getPrincipal().steamId().equals(steamId)) {
+        // On ne supprime que son propre compte, jamais celui d'un autre joueur.
+        if (currentSteamUser.steamId().filter(steamId::equals).isEmpty()) {
             return "redirect:/steam/failed";
         }
         steamUserService.findBySteamId(steamId)

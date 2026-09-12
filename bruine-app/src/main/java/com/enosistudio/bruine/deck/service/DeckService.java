@@ -66,9 +66,11 @@ public class DeckService {
             return deckRepository.save(d);
         });
 
-        // Détache d'abord tout ce qui était dans le deck : la sélection est recomposée
-        // en entier à chaque sauvegarde, pas fusionnée avec l'ancienne.
-        userCardRepository.clearDeck(deck.getId());
+        // Vide d'abord le deck : la sélection est recomposée en entier à chaque sauvegarde,
+        // jamais fusionnée avec l'ancienne. Une carte reposée juste après ne produira aucun
+        // UPDATE, Hibernate comparant l'état final à l'état initial.
+        userCardRepository.findBySteamUserIdAndDeckIsNotNull(userId)
+                .forEach(card -> card.setDeck(null));
 
         if (cardIds != null) {
             Set<Long> listedCardIds = marketListingRepository.findAllListedCardIds();

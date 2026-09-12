@@ -120,12 +120,12 @@ public class MarketService {
             throw new BusinessRuleException("Score insuffisant (il vous faut " + listing.getPrice() + " 💧).");
         }
 
+        // Les trois entités viennent d'être chargées dans cette transaction : Hibernate les
+        // suit, poser les valeurs suffit, il écrit les UPDATE au flush sans save() explicite.
         managedBuyer.setScore(managedBuyer.getScore() - listing.getPrice());
         managedSeller.setScore(managedSeller.getScore() + listing.getPrice());
-        steamUserRepository.save(managedBuyer);
-        steamUserRepository.save(managedSeller);
+        listing.getUserCard().setSteamUser(managedBuyer);
 
-        userCardRepository.transferToNewOwner(listing.getUserCard().getId(), managedBuyer);
         marketListingRepository.deleteById(listingId);
     }
 

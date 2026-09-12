@@ -5,59 +5,57 @@ plugins {
 
 dependencies {
     // Spring Boot core
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     // JPA/Hibernate accès BDD (entités, repositories)
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     // MVC + serveur Tomcat embarqué (contrôleurs REST/HTML)
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'     // Moteur de templates HTML côté serveur
-    implementation 'org.springframework.boot:spring-boot-starter-validation'    // Bean Validation (@NotBlank, @Size...)
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // Moteur de templates HTML côté serveur
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    // Bean Validation (@NotBlank, @Size...)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     // Spring Security auth, chaînes de filtres, MFA
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     // Rechargement à chaud en dev (jamais packagé en prod)
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    implementation 'org.springframework.session:spring-session-core'
-    // Gestion des sessions (registry, contextes isolés admin/steam)
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     // Balises sec:* dans Thymeleaf (sec:authentication...)
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'     // JUnit 5, Mockito, AssertJ, MockMvc
-    testImplementation 'org.springframework.security:spring-security-test'
+    // JUnit 5, Mockito, AssertJ, MockMvc
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     // Helpers de test d'authentification/autorisation
-    testRuntimeOnly 'com.h2database:h2'                                        // Base en memoire des tests @DataJpaTest
+    testImplementation 'org.springframework.security:spring-security-test'
+    // Base en memoire des tests @DataJpaTest
+    testRuntimeOnly 'com.h2database:h2'
 
-    compileOnly 'org.projectlombok:lombok:1.18.42'
     // Génère getters/setters/constructeurs à la compilation
-    annotationProcessor 'org.projectlombok:lombok:1.18.42'
+    compileOnly 'org.projectlombok:lombok:1.18.42'
     // Processeur d'annotations Lombok (obligatoire avec le compileOnly)
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
-    implementation "org.webjars.npm:bulma:0.9.4"
     // Framework CSS Bulma servi via WebJars (version figée dans les URLs des templates)
+    implementation "org.webjars.npm:bulma:0.9.4"
 
-    runtimeOnly 'com.mysql:mysql-connector-j'
     // Driver JDBC MySQL/MariaDB (runtime seulement)
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
-    testImplementation 'org.seleniumhq.selenium:htmlunit3-driver'
-    // Navigateur headless pour les tests d'intégration web
-
-    implementation 'org.flywaydb:flyway-core'
     // Migrations de schéma versionnées (V1...V10)
-    implementation 'org.flywaydb:flyway-mysql'                                // Support Flyway spécifique MySQL/MariaDB
+    implementation 'org.flywaydb:flyway-core'
+    // Support Flyway spécifique MySQL/MariaDB
+    implementation 'org.flywaydb:flyway-mysql'
 
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
-    // (Dé)sérialisation XML réponses OpenID/Steam
-    implementation 'com.stripe:stripe-java:26.3.0'
     // SDK Stripe paiements Checkout de la boutique
+    implementation 'com.stripe:stripe-java:26.3.0'
 
     // MFA / TOTP admin (compatible Google Authenticator, Authy, etc.) algo implémenté maison (RFC 6238)
-    implementation 'commons-codec:commons-codec'
     // Apache Commons Codec encodage Base32 du secret (version gérée par Spring Boot)
+    implementation 'commons-codec:commons-codec'
+    // Encodage du QR code d'enrôlement
     implementation 'com.google.zxing:core:3.5.3'
-    // ZXing (Google) encodage du QR code d'enrôlement
+    // Rendu du QR code en image PNG (Java SE)
     implementation 'com.google.zxing:javase:3.5.3'
-    // ZXing (Google) rendu du QR code en image PNG (Java SE)
 
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // Lanceur JUnit Platform (exécution des tests au runtime)
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

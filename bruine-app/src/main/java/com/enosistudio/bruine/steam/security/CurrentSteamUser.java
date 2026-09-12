@@ -30,7 +30,7 @@ public class CurrentSteamUser {
      * Joueur connecté, sans sa collection de cartes.
      */
     public Optional<SteamUser> find() {
-        return authenticatedSteamId().flatMap(steamUserService::findBySteamId);
+        return steamId().flatMap(steamUserService::findBySteamId);
     }
 
     /**
@@ -39,7 +39,7 @@ public class CurrentSteamUser {
      * paresseuse hors transaction.
      */
     public Optional<SteamUser> findWithRewards() {
-        return authenticatedSteamId().flatMap(steamUserService::findBySteamIdWithRewards);
+        return steamId().flatMap(steamUserService::findBySteamIdWithRewards);
     }
 
     /**
@@ -58,7 +58,13 @@ public class CurrentSteamUser {
         return findWithRewards().orElseThrow(SteamSessionExpiredException::new);
     }
 
-    private Optional<String> authenticatedSteamId() {
+    /**
+     * Identifiant Steam du joueur connecté, sans aller en base.
+     * <p>
+     * C'est le seul endroit qui connaisse la forme du jeton d'authentification : tout le
+     * reste de l'application passe par ici plutôt que de relire le {@code SecurityContext}.
+     */
+    public Optional<String> steamId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof SteamAuthenticationToken token)
                 || !token.isAuthenticated()
