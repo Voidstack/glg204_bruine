@@ -1,6 +1,7 @@
 package com.enosistudio.bruine.steam.security;
 
 import com.enosistudio.bruine.steam.model.SteamUser;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;

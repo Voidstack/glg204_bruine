@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.admin.controller;
 
 import com.enosistudio.bruine.steam.security.SteamUserPrincipal;
-import com.enosistudio.bruine.steam.security.SteamUserService;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

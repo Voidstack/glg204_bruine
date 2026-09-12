@@ -3,6 +3,7 @@ package com.enosistudio.bruine.steam.service;
 import com.enosistudio.bruine.steam.dto.SteamGameDTO;
 import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
 import com.enosistudio.bruine.steam.exception.SteamException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ public class SteamService {
     @Value("${steam.token}")
     private String steamApiToken;
     private static final String STEAM_API_URL = "https://api.steampowered.com";
+    private static final String OPENID_NAMESPACE = "http://specs.openid.net/auth/2.0";
 
     public Map<String, Object> getUserData(String steamUserId) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
@@ -29,14 +31,20 @@ public class SteamService {
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
         if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
-            throw new SteamException();
+            throw new SteamException("GetPlayerSummaries a répondu " + response.getStatusCode());
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode tree = mapper.readTree(response.getBody());
-        Iterator<JsonNode> playersIterator = tree.get("response").get("players").iterator();
+        JsonNode players = mapper.readTree(response.getBody()).path("response").path("players");
 
-        return (Map<String, Object>) mapper.convertValue(playersIterator.next(), Map.class);
+        // Steam répond 200 avec un tableau vide quand l'identifiant ne correspond à personne :
+        // sans ce contrôle, le cas partait en NoSuchElementException au premier next().
+        if (!players.isArray() || players.isEmpty()) {
+            throw new SteamException("Aucun profil Steam pour l'identifiant " + steamUserId);
+        }
+
+        return mapper.convertValue(players.get(0), new TypeReference<>() {
+        });
     }
 
     /**
@@ -51,7 +59,7 @@ public class SteamService {
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
         if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
-            throw new SteamException();
+            throw new SteamException("GetOwnedGames a répondu " + response.getStatusCode());
         }
 
         ObjectMapper mapper = new ObjectMapper();
@@ -122,24 +130,28 @@ public class SteamService {
 
         ResponseEntity<String> response = restTemplate.postForEntity("https://steamcommunity.com/openid/login", request, String.class);
         if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                    "Steam a répondu " + response.getStatusCode() + " à la vérification du jeton OpenID.");
         }
 
         Map<String, String> responseBody = this.parseLoginValidationResponse(response.getBody());
 
-        if (!responseBody.containsKey("ns") || !responseBody.get("ns").equals("http://specs.openid.net/auth/2.0")) {
-            throw new IllegalArgumentException();
+        if (!OPENID_NAMESPACE.equals(responseBody.get("ns"))) {
+            throw new IllegalArgumentException(
+                    "Espace de noms OpenID inattendu dans la réponse Steam : " + responseBody.get("ns"));
         }
 
-        if (!responseBody.containsKey("is_valid") || !responseBody.get("is_valid").equals("true")) {
-            throw new IllegalArgumentException();
+        if (!"true".equals(responseBody.get("is_valid"))) {
+            throw new IllegalArgumentException(
+                    "Steam a rejeté le jeton OpenID (is_valid=" + responseBody.get("is_valid") + ").");
         }
 
         Pattern p = Pattern.compile("^https?://steamcommunity.com/openid/id/(7656119\\d{10})/?$");
         Matcher m = p.matcher(dto.getIdentity());
 
         if (!m.find()) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                    "Identité OpenID inexploitable, aucun identifiant Steam dedans : " + dto.getIdentity());
         }
 
         return m.group(1); // steamUserId
@@ -150,12 +162,13 @@ public class SteamService {
 
         Map<String, String> body = new HashMap<>();
         for (String line : response.split("\n")) {
-            if (line.isEmpty()) continue;
-            String[] values = line.split(":", 2);
-            String key = values[0];
-            String value = values[1];
-
-            body.put(key, value);
+            // La réponse est une suite de « clé:valeur ». Toute ligne sans séparateur (ligne
+            // vide, message inattendu) est ignorée plutôt que de faire planter la connexion.
+            String[] keyValue = line.split(":", 2);
+            if (keyValue.length < 2) {
+                continue;
+            }
+            body.put(keyValue[0], keyValue[1]);
         }
 
         return body;

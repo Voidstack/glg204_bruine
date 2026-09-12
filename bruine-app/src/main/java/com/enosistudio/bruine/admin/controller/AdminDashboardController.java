@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.admin.controller;
 
 import com.enosistudio.bruine.admin.service.AdminUserService;
-import com.enosistudio.bruine.steam.security.SteamUserService;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

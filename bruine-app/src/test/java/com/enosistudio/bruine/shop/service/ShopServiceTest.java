@@ -6,7 +6,7 @@ import com.enosistudio.bruine.shop.repository.ShopPackRepository;
 import com.enosistudio.bruine.shop.repository.ShopPurchaseRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.repository.SteamUserRepository;
-import com.enosistudio.bruine.steam.security.SteamUserService;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import com.stripe.exception.StripeException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -11,7 +11,7 @@ import com.enosistudio.bruine.gacha.repository.GachaConfigRepository;
 import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.repository.SteamUserRepository;
-import com.enosistudio.bruine.steam.security.SteamUserService;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

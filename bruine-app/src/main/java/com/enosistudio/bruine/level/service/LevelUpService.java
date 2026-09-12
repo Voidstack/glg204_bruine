@@ -12,12 +12,11 @@ import com.enosistudio.bruine.level.dto.ConvertResultDTO;
 import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
 import com.enosistudio.bruine.market.service.MarketService;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.security.SteamUserService;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 

@@ -83,6 +83,13 @@ public class MarketService {
             throw new BusinessRuleException("Cette carte ne vous appartient pas.");
         }
 
+        // Une carte déjà en vente ne peut pas l'être deux fois. La contrainte d'unicité sur
+        // market_listing.card_id le garantit de toute façon, mais elle ne sait pas le dire au
+        // joueur : sans cette vérification, un double envoi du formulaire finit en erreur 500.
+        if (marketListingRepository.existsByUserCardId(cardId)) {
+            throw new BusinessRuleException("Cette carte est déjà en vente.");
+        }
+
         // Bloquer la vente si cette carte précise est dans le deck
         Set<Long> deckCardIds = deckService.findDeckCardIds(seller.getId());
         if (deckCardIds.contains(card.getId())) {

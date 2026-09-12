@@ -5,7 +5,7 @@ import com.enosistudio.bruine.shop.model.ShopPurchase;
 import com.enosistudio.bruine.shop.repository.ShopPackRepository;
 import com.enosistudio.bruine.shop.repository.ShopPurchaseRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.security.SteamUserService;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
@@ -69,7 +69,7 @@ public class ShopService {
      * Crée une session Stripe Checkout pour l'achat d'un pack et renvoie l'URL de paiement
      * (page hébergée par Stripe). Le pack et l'utilisateur sont passés en metadata pour être
      * retrouvés au moment du crédit des points.
-     *
+     * <p>
      * Aucune transaction ici : la méthode ne touche pas la base, et ouvrir une transaction
      * autour d'un appel réseau immobiliserait une connexion JDBC le temps de la réponse Stripe.
      *

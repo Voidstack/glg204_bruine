@@ -2,9 +2,11 @@ package com.enosistudio.bruine.steam.security;
 
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamService;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
@@ -30,12 +32,16 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String steamId = ((SteamAuthenticationToken) authentication).getSteamId();
 
+        // Le profil est indispensable : sans lui on ne sait ni nommer le joueur, ni le créer.
+        // On lève plutôt que de retourner null, qui signifierait « ce provider ne sait pas
+        // traiter ce jeton » et ferait remonter une ProviderNotFoundException trompeuse.
         Map<String, Object> userAttributes;
         try {
             userAttributes = steamService.getUserData(steamId);
-        } catch (Exception e) {
-            log.warn("Récupération du profil Steam impossible pour {}", steamId, e);
-            return null;
+        } catch (Exception steamIndisponible) {
+            log.warn("Récupération du profil Steam impossible pour {}", steamId, steamIndisponible);
+            throw new AuthenticationServiceException(
+                    "Profil Steam inaccessible, connexion impossible pour le moment.", steamIndisponible);
         }
         Optional<SteamUser> userOptional = userService.findBySteamId(steamId);
         SteamUser user = userOptional.orElseGet(() -> {
@@ -50,8 +56,9 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
                 user.setInitialPlaytimeMinutes(totalPlaytime);
             }
             user.setCurrentPlaytimeMinutes(totalPlaytime);
-        } catch (Exception ignored) {
-            // profil privé ou API indisponible les champs restent inchangés
+        } catch (Exception tempsDeJeuIndisponible) {
+            // Profil privé ou API muette : les compteurs restent inchangés, la connexion continue.
+            // Contrairement au profil ci-dessus, le temps de jeu n'est pas indispensable au login.
         }
 
         user = userService.save(user);

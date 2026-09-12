@@ -30,4 +30,10 @@ public interface MarketListingRepository extends JpaRepository<MarketListing, Lo
 
     @Query("SELECT ml.userCard.id FROM MarketListing ml")
     Set<Long> findAllListedCardIds();
+
+    /**
+     * Une annonce court-elle déjà pour cet exemplaire ? La colonne est unique en base,
+     * mais la règle doit se voir avant l'INSERT pour être refusée proprement au joueur.
+     */
+    boolean existsByUserCardId(Long userCardId);
 }
