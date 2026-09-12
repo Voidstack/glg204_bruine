@@ -62,7 +62,7 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
         }
 
         user = userService.save(user);
-        SteamUserPrincipal steamUserPrincipal = SteamUserPrincipal.create(user);
+        SteamUserPrincipal steamUserPrincipal = SteamUserPrincipal.create(user, (String) userAttributes.get("avatar"));
 
         return new SteamAuthenticationToken(steamId, steamUserPrincipal, steamUserPrincipal.getAuthorities());
     }

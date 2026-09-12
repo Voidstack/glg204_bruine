@@ -11,11 +11,12 @@ import java.util.List;
 /**
  * Identité du joueur Steam connecté, telle que Spring Security la conserve en session.
  * <p>
- * Elle ne porte que ce qui identifie et autorise. Tout ce qui bouge en cours de partie
- * (score, profil Steam) en est volontairement absent : un instantané pris à la connexion
- * serait faux dès le premier tirage, et ces données sont relues à la demande.
+ * Elle ne porte que ce qui identifie, autorise, et s'affiche dans la barre de navigation.
+ * Le score en est volontairement absent : un instantané pris à la connexion serait faux dès
+ * le premier tirage, il est relu à chaque rendu par {@code SteamControllerAdvice}. Le pseudo
+ * et l'avatar, eux, ne bougent qu'entre deux connexions.
  */
-public record SteamUserPrincipal(String steamId, String username,
+public record SteamUserPrincipal(String steamId, String username, String avatarUrl,
                                  Collection<? extends GrantedAuthority> authorities) implements UserDetails {
 
     /**
@@ -23,8 +24,18 @@ public record SteamUserPrincipal(String steamId, String username,
      */
     private static final List<GrantedAuthority> JOUEUR = List.of(new SimpleGrantedAuthority("ROLE_USER"));
 
-    public static SteamUserPrincipal create(SteamUser user) {
-        return new SteamUserPrincipal(user.getSteamId(), user.getUsername(), JOUEUR);
+    /**
+     * Avatar générique de Steam, servi quand le profil n'en fournit pas.
+     */
+    private static final String AVATAR_PAR_DEFAUT =
+            "https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg";
+
+    /**
+     * @param avatarUrl vignette du profil Steam, ou {@code null} pour l'avatar générique
+     */
+    public static SteamUserPrincipal create(SteamUser user, String avatarUrl) {
+        String avatar = (avatarUrl == null || avatarUrl.isBlank()) ? AVATAR_PAR_DEFAUT : avatarUrl;
+        return new SteamUserPrincipal(user.getSteamId(), user.getUsername(), avatar, JOUEUR);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.enosistudio.bruine.admin.domain;
+package com.enosistudio.bruine.admin.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name="admin_user")
+@Table(name = "admin_user")
 public class AdminUser {
     @Id
     @Size(max = 20)
@@ -27,13 +27,17 @@ public class AdminUser {
     @NotBlank
     private String userPassword;
 
-    /** Secret TOTP (base32) partagé avec l'appli d'authentification. Null si MFA désactivée. */
+    /**
+     * Secret TOTP (base32) partagé avec l'appli d'authentification. Null si MFA désactivée.
+     */
     @Setter
     @Size(max = 64)
     @Column(name = "mfa_secret")
     private String mfaSecret;
 
-    /** MFA activée pour ce compte. */
+    /**
+     * MFA activée pour ce compte.
+     */
     @Setter
     @Column(name = "mfa_enabled", nullable = false)
     private boolean mfaEnabled = false;

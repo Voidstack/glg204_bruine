@@ -1,15 +1,15 @@
 package com.enosistudio.bruine.admin.service;
 
-import com.enosistudio.bruine.admin.domain.AdminUser;
 import com.enosistudio.bruine.admin.exception.UsernameAlreadyExistsException;
+import com.enosistudio.bruine.admin.model.AdminUser;
 import com.enosistudio.bruine.admin.repository.AdminUserRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
