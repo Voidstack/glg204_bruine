@@ -1,5 +1,7 @@
 package com.enosistudio.bruine.admin.controller;
 
+import com.enosistudio.bruine.admin.mfa.AdminRoles;
+import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
 import com.enosistudio.bruine.admin.service.AdminUserService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import jakarta.servlet.http.HttpSession;
@@ -27,7 +29,7 @@ public class AdminDashboardController {
                         Authentication authentication,
                         Model model) {
         boolean isAdmin = authentication != null
-                && authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                && authentication.getAuthorities().contains(new SimpleGrantedAuthority(AdminRoles.ADMIN));
         if (isAdmin) {
             model.addAttribute("steamUsers", steamUserService.findAll());
             model.addAttribute("mfaEnabled", adminUserService.isMfaEnabled(authentication.getName()));
@@ -41,7 +43,7 @@ public class AdminDashboardController {
 
     @PostMapping("/admin/logout")
     public String adminLogout(HttpSession session) {
-        session.removeAttribute("ADMIN_SECURITY_CONTEXT");
+        session.removeAttribute(AdminSecurityContextService.CONTEXT_KEY);
         return "redirect:/admin";
     }
 }

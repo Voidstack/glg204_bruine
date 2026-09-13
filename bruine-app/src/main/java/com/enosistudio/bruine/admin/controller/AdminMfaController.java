@@ -1,5 +1,6 @@
 package com.enosistudio.bruine.admin.controller;
 
+import com.enosistudio.bruine.admin.mfa.AdminRoles;
 import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
 import com.enosistudio.bruine.admin.mfa.MfaAuthenticationSuccessHandler;
 import com.enosistudio.bruine.admin.mfa.TotpService;
@@ -60,7 +61,7 @@ public class AdminMfaController {
                              Authentication authentication,
                              Model model) {
         // déjà admin complet : le 2e facteur est inutile
-        if (hasRole(authentication, "ROLE_ADMIN")) {
+        if (hasRole(authentication, AdminRoles.ADMIN)) {
             return "redirect:/admin";
         }
         model.addAttribute("mfaError", error != null);
@@ -72,7 +73,7 @@ public class AdminMfaController {
                        Authentication authentication,
                        HttpServletRequest request,
                        HttpServletResponse response) throws IOException {
-        if (!hasRole(authentication, MfaAuthenticationSuccessHandler.ROLE_PRE_MFA)) {
+        if (!hasRole(authentication, AdminRoles.PRE_MFA)) {
             response.sendRedirect(request.getContextPath() + "/admin");
             return;
         }
@@ -81,7 +82,7 @@ public class AdminMfaController {
 
         if (totpService.verify(secret, code)) {
             Authentication full = UsernamePasswordAuthenticationToken.authenticated(
-                    username, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+                    username, null, List.of(new SimpleGrantedAuthority(AdminRoles.ADMIN)));
             adminSecurityContext.save(full, request, response);
             response.sendRedirect(request.getContextPath() + "/admin");
         } else {

@@ -22,8 +22,6 @@ import java.util.List;
 @Component
 public class MfaAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    public static final String ROLE_PRE_MFA = "ROLE_PRE_MFA";
-
     private final AdminUserService adminUserService;
     private final AdminSecurityContextService adminSecurityContext;
 
@@ -40,7 +38,7 @@ public class MfaAuthenticationSuccessHandler implements AuthenticationSuccessHan
 
         if (adminUserService.isMfaEnabled(username)) {
             Authentication preMfa = UsernamePasswordAuthenticationToken.authenticated(
-                    username, null, List.of(new SimpleGrantedAuthority(ROLE_PRE_MFA)));
+                    username, null, List.of(new SimpleGrantedAuthority(AdminRoles.PRE_MFA)));
             adminSecurityContext.save(preMfa, request, response);
             response.sendRedirect(request.getContextPath() + "/admin/mfa");
         } else {

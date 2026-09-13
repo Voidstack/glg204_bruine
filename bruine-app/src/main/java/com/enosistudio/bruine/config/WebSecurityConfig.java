@@ -1,5 +1,6 @@
 package com.enosistudio.bruine.config;
 
+import com.enosistudio.bruine.admin.mfa.AdminRoles;
 import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
 import com.enosistudio.bruine.admin.mfa.MfaAuthenticationSuccessHandler;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationProvider;
@@ -42,7 +43,7 @@ public class WebSecurityConfig {
 
     /**
      * Chaîne admin, contexte de session isolé du site principal.
-     * L'authentification est stockée sous la clé "ADMIN_SECURITY_CONTEXT",
+     * L'authentification est stockée sous la clé {@link AdminSecurityContextService#CONTEXT_KEY},
      * séparée de la clé par défaut utilisée par la chaîne principale.
      * Un admin connecté ici apparaît donc comme anonyme sur le reste du site.
      */
@@ -57,9 +58,9 @@ public class WebSecurityConfig {
                         // page de login (LoginController décide login vs dashboard selon l'auth)
                         .requestMatchers("/admin").permitAll()
                         // 2e facteur : accessible tant qu'on n'a pas fini le MFA
-                        .requestMatchers("/admin/mfa").hasAnyRole("ADMIN", "PRE_MFA")
+                        .requestMatchers("/admin/mfa").hasAnyAuthority(AdminRoles.ADMIN, AdminRoles.PRE_MFA)
                         // tout le reste de /admin/** exige un admin complet
-                        .anyRequest().hasRole("ADMIN")
+                        .anyRequest().hasAuthority(AdminRoles.ADMIN)
                 )
                 // non connecté -> page de login ; connecté sans le bon rôle (ex. PRE_MFA) -> /admin
                 .exceptionHandling(e -> e.accessDeniedHandler(
