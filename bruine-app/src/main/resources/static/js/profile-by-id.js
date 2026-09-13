@@ -1,9 +1,13 @@
-function copyDeckLink(btn) {
-    navigator.clipboard.writeText(btn.dataset.deckMarkdown).then(function () {
-        const original = btn.innerHTML;
+function copierDeck(btn) {
+    if (btn.dataset.enCours) return;
+
+    navigator.clipboard.writeText(btn.dataset.copy).then(function () {
+        const libelle = btn.innerHTML;
+        btn.dataset.enCours = '1';
         btn.innerHTML = '<i class="fa-solid fa-check"></i>&nbsp; Copié !';
         setTimeout(function () {
-            btn.innerHTML = original;
+            btn.innerHTML = libelle;
+            delete btn.dataset.enCours;
         }, 1500);
     });
 }

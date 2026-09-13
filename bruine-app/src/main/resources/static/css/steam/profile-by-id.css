@@ -6,3 +6,134 @@
     opacity: 0;
     animation: gameFadeIn 0.18s ease forwards;
 }
+
+/* Structure de la carte de profil */
+
+.profile-card {
+    background: var(--steam-blue-dark);
+    border: 1px solid var(--steam-blue-mid);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.profile-banner {
+    background: linear-gradient(135deg, var(--steam-blue-dark) 0%, var(--steam-blue-mid) 100%);
+    padding: 2.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.profile-avatar {
+    width: 128px;
+    height: 128px;
+    border-radius: 8px;
+    border: 3px solid var(--accent);
+    flex-shrink: 0;
+}
+
+.profile-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
+}
+
+.profile-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.profile-deck-image {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 14px;
+    display: block;
+}
+
+.profile-actions {
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--steam-blue-mid);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Bloc des jeux, rempli par profile-by-id.js */
+
+.profile-games {
+    padding: 0 2rem 2rem;
+}
+
+.profile-playtime {
+    margin-bottom: 1.2rem;
+    padding: 1rem;
+    background: var(--bg-panel);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+/* Le script bascule ces display en style inline, qui reste prioritaire sur ces règles. */
+#games-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+#games-empty {
+    display: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+#games-count {
+    display: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.8rem;
+}
+
+#games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 0.3rem;
+}
+
+/* Modale : deux classes pour passer devant les règles de Bulma, à spécificité égale. */
+
+.profile-modal .modal-card-head {
+    background: var(--steam-blue-dark);
+    border-bottom: 1px solid var(--steam-blue-mid);
+}
+
+.profile-modal .modal-card-body {
+    background: var(--steam-blue-dark);
+    color: var(--text-muted);
+}
+
+.profile-modal .modal-card-foot {
+    background: var(--steam-blue-dark);
+    border-top: 1px solid var(--steam-blue-mid);
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.profile-deck-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
