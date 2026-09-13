@@ -1,4 +1,3 @@
--- Steam user table for OAuth authentication
 CREATE TABLE steam_user
 (
     id                       BIGINT       NOT NULL AUTO_INCREMENT,

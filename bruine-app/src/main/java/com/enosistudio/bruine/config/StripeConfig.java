@@ -1,4 +1,4 @@
-package com.enosistudio.bruine.shop;
+package com.enosistudio.bruine.config;
 
 import com.stripe.Stripe;
 import org.springframework.beans.factory.annotation.Value;

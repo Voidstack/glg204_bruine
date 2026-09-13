@@ -6,7 +6,7 @@ plugins {
 subprojects {
     apply plugin: 'java'
 
-    group = 'glg203'
+    group = 'glg204'
     version = '0.0.1-SNAPSHOT'
     compileJava.options.encoding = 'UTF-8'
 

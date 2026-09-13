@@ -7,15 +7,11 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import java.util.Locale;
 
-/**
- * Réglages MVC de l'application.
- */
 @Configuration
 public class WebConfig {
 
     /**
-     * L'interface est en français. On suit l'en-tête Accept-Language du navigateur,
-     * en retombant sur le français quand il ne demande rien de connu.
+     * L'ui est en français.
      */
     @Bean
     public LocaleResolver localeResolver() {
