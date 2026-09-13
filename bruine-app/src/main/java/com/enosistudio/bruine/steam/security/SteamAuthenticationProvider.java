@@ -12,9 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class SteamAuthenticationProvider implements AuthenticationProvider {
@@ -44,25 +42,18 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
             throw new AuthenticationServiceException(
                     "Profil Steam inaccessible, connexion impossible pour le moment.", steamIndisponible);
         }
-        Optional<SteamUser> userOptional = userService.findBySteamId(steamId);
-        SteamUser user = userOptional.orElseGet(() -> {
-            String username = (String) userAttributes.get("personaname");
-            return new SteamUser(null, steamId, username);
-        });
-        user.setLastLoginAt(LocalDateTime.now());
-
+        Long totalPlaytime;
         try {
-            long totalPlaytime = steamService.getTotalPlaytimeMinutes(steamId);
-            if (user.getInitialPlaytimeMinutes() == null) {
-                user.setInitialPlaytimeMinutes(totalPlaytime);
-            }
-            user.setCurrentPlaytimeMinutes(totalPlaytime);
+            totalPlaytime = steamService.getTotalPlaytimeMinutes(steamId);
         } catch (SteamException tempsDeJeuIndisponible) {
             // Profil privé ou API muette : les compteurs restent inchangés, la connexion continue.
             // Contrairement au profil ci-dessus, le temps de jeu n'est pas indispensable au login.
+            totalPlaytime = null;
         }
 
-        user = userService.save(user);
+        // Les appels Steam sont faits avant : le joueur n'est relu et verrouillé qu'au moment
+        // d'écrire, pour ne pas écraser un score modifié pendant ces appels réseau.
+        SteamUser user = userService.recordLogin(steamId, (String) userAttributes.get("personaname"), totalPlaytime);
         SteamUserPrincipal steamUserPrincipal = SteamUserPrincipal.create(user, (String) userAttributes.get("avatar"));
 
         return new SteamAuthenticationToken(steamId, steamUserPrincipal, steamUserPrincipal.getAuthorities());

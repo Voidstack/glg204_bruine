@@ -106,15 +106,28 @@ public class MarketService {
 
     @Transactional
     public void buy(SteamUser buyer, Long listingId) {
-        MarketListing listing = marketListingRepository.findById(listingId)
-                .orElseThrow(() -> new BusinessRuleException("Annonce introuvable."));
+        // Verrou sur l'annonce d'abord : un achat concurrent de la même carte attend ici,
+        // puis ne la trouve plus.
+        MarketListing listing = marketListingRepository.findForUpdateById(listingId)
+                .orElseThrow(() -> new BusinessRuleException("Annonce introuvable ou déjà vendue."));
 
-        if (listing.getSeller().getId().equals(buyer.getId())) {
+        Long buyerId = buyer.getId();
+        Long sellerId = listing.getSeller().getId();
+        if (sellerId.equals(buyerId)) {
             throw new BusinessRuleException("Vous ne pouvez pas acheter votre propre carte.");
         }
 
-        SteamUser managedBuyer = steamUserRepository.findById(buyer.getId()).orElseThrow();
-        SteamUser managedSeller = steamUserRepository.findById(listing.getSeller().getId()).orElseThrow();
+        // Puis les deux joueurs, toujours dans l'ordre de leur id : deux achats croisés
+        // (A achète à B pendant que B achète à A) ne peuvent pas s'interbloquer.
+        SteamUser managedBuyer;
+        SteamUser managedSeller;
+        if (buyerId < sellerId) {
+            managedBuyer = steamUserRepository.findForUpdateById(buyerId).orElseThrow();
+            managedSeller = steamUserRepository.findForUpdateById(sellerId).orElseThrow();
+        } else {
+            managedSeller = steamUserRepository.findForUpdateById(sellerId).orElseThrow();
+            managedBuyer = steamUserRepository.findForUpdateById(buyerId).orElseThrow();
+        }
 
         if (managedBuyer.getScore() < listing.getPrice()) {
             throw new BusinessRuleException("Score insuffisant (il vous faut " + listing.getPrice() + " 💧).");
@@ -126,7 +139,7 @@ public class MarketService {
         managedSeller.setScore(managedSeller.getScore() + listing.getPrice());
         listing.getUserCard().setSteamUser(managedBuyer);
 
-        marketListingRepository.deleteById(listingId);
+        marketListingRepository.delete(listing);
     }
 
     @Transactional

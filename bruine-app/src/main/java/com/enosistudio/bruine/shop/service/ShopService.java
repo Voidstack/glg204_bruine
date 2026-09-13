@@ -124,15 +124,15 @@ public class ShopService {
 
         ShopPack pack = parseLong(session.getMetadata().get("packId"))
                 .flatMap(packRepository::findById).orElse(null);
-        SteamUser user = parseLong(session.getMetadata().get("userId"))
-                .flatMap(steamUserService::findById).orElse(null);
-        if (pack == null || user == null) {
+        Long userId = parseLong(session.getMetadata().get("userId")).orElse(null);
+        if (pack == null || userId == null || steamUserService.findById(userId).isEmpty()) {
             return Optional.empty();
         }
 
+        // crédit sous verrou : un tirage ou un achat simultané ne doit pas l'écraser
+        SteamUser user = steamUserService.lock(userId);
         int total = pack.getTotalPoints();
         user.setScore(user.getScore() + total);
-        steamUserService.save(user);
 
         ShopPurchase purchase = new ShopPurchase();
         purchase.setSteamUser(user);

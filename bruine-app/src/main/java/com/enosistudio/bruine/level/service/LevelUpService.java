@@ -69,18 +69,18 @@ public class LevelUpService {
      * <p>
      * Une demande est ignorée si sa finition est inconnue, si le joueur ne possède plus
      * la carte, ou si l'exemplaire est mis en vente sur le marché.
-     *
-     * @param user joueur chargé SANS sa collection : Hibernate tenterait sinon de
-     *             fusionner une collection contenant des cartes déjà supprimées
+     * il est relu sous verrou avant toute modification,  ne détruisent pas deux fois le même exemplaire.
      */
     @Transactional
     public ConvertResultDTO convert(SteamUser user, List<ConvertRequestDTO> requests) {
+        // verrou pris en premier : les lectures suivantes voient l'état laissé par une conversion concurrente
+        SteamUser player = steamUserService.lock(user.getId());
         GachaConfig config = gachaService.currentConfig();
         Set<Long> listedCardIds = marketService.findAllListedCardIds();
         long xpGained = 0;
 
         for (ConvertRequestDTO request : requests) {
-            Optional<UserCard> convertible = findConvertible(user, request, listedCardIds);
+            Optional<UserCard> convertible = findConvertible(player, request, listedCardIds);
             if (convertible.isEmpty()) {
                 continue;
             }
@@ -89,9 +89,8 @@ public class LevelUpService {
             userCardRepository.delete(card);
         }
 
-        user.setTotalExperience(user.getTotalExperience() + xpGained);
-        steamUserService.save(user);
-        return new ConvertResultDTO(xpGained, user.getTotalExperience());
+        player.setTotalExperience(player.getTotalExperience() + xpGained);
+        return new ConvertResultDTO(xpGained, player.getTotalExperience());
     }
 
     private Optional<UserCard> findConvertible(SteamUser user, ConvertRequestDTO request, Set<Long> listedCardIds) {

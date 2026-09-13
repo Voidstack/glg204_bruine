@@ -39,10 +39,7 @@ public class AdminSteamUserController {
     public String updateScore(@PathVariable Long id,
                               @RequestParam int score,
                               RedirectAttributes redirectAttributes) {
-        steamUserService.findById(id).ifPresent(user -> {
-            user.setScore(score);
-            steamUserService.save(user);
-        });
+        steamUserService.updateScore(id, score);
         redirectAttributes.addFlashAttribute("success", "Score mis à jour.");
         return "redirect:/admin/steam-users";
     }

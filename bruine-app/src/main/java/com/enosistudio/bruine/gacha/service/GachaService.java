@@ -79,20 +79,20 @@ public class GachaService {
         int pulls = Math.min(Math.max(requestedPulls, 1), MAX_PULLS_PER_SPIN);
         int totalCost = pulls * COST_PER_PULL;
 
-        if (user.getScore() < totalCost) {
-            throw new InsufficientScoreException(user.getScore(), totalCost);
+        SteamUser steanUser = steamUserService.lock(user.getId());
+        if (steanUser.getScore() < totalCost) {
+            throw new InsufficientScoreException(steanUser.getScore(), totalCost);
         }
 
-        user.setScore(user.getScore() - totalCost);
-        user.setTotalPulls(user.getTotalPulls() + pulls);
-        steamUserService.save(user);
+        steanUser.setScore(steanUser.getScore() - totalCost);
+        steanUser.setTotalPulls(steanUser.getTotalPulls() + pulls);
 
         GachaConfig config = currentConfig();
         List<CardViewDTO> drawn = new ArrayList<>(pulls);
         for (int i = 0; i < pulls; i++) {
-            drawn.add(drawOne(user, config));
+            drawn.add(drawOne(steanUser, config));
         }
-        return new GachaResultDTO(drawn, user.getScore(), totalCost);
+        return new GachaResultDTO(drawn, steanUser.getScore(), totalCost);
     }
 
     private CardViewDTO drawOne(SteamUser user, GachaConfig config) {
