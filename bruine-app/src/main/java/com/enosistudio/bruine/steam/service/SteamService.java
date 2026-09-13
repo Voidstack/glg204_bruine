@@ -3,6 +3,7 @@ package com.enosistudio.bruine.steam.service;
 import com.enosistudio.bruine.steam.dto.SteamGameDTO;
 import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
 import com.enosistudio.bruine.steam.exception.SteamException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +12,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -25,17 +27,9 @@ public class SteamService {
     private static final String STEAM_API_URL = "https://api.steampowered.com";
     private static final String OPENID_NAMESPACE = "http://specs.openid.net/auth/2.0";
 
-    public Map<String, Object> getUserData(String steamUserId) throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
+    public Map<String, Object> getUserData(String steamUserId) throws SteamException {
         String url = String.format("%s/ISteamUser/GetPlayerSummaries/v2/?key=%s&format=json&steamids=%s", STEAM_API_URL, steamApiToken, steamUserId);
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
-        if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
-            throw new SteamException("GetPlayerSummaries a répondu " + response.getStatusCode());
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode players = mapper.readTree(response.getBody()).path("response").path("players");
+        JsonNode players = get("GetPlayerSummaries", url).path("response").path("players");
 
         // Steam répond 200 avec un tableau vide quand l'identifiant ne correspond à personne :
         // sans ce contrôle, le cas partait en NoSuchElementException au premier next().
@@ -43,7 +37,7 @@ public class SteamService {
             throw new SteamException("Aucun profil Steam pour l'identifiant " + steamUserId);
         }
 
-        return mapper.convertValue(players.get(0), new TypeReference<>() {
+        return new ObjectMapper().convertValue(players.get(0), new TypeReference<>() {
         });
     }
 
@@ -51,21 +45,11 @@ public class SteamService {
      * Retourne tous les jeux possédés par le joueur.
      * Renvoie une liste vide si le profil est privé ou si l'API ne répond pas.
      */
-    public List<SteamGameDTO> getOwnedGames(String steamId) throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
+    public List<SteamGameDTO> getOwnedGames(String steamId) throws SteamException {
         String url = String.format(
                 "%s/IPlayerService/GetOwnedGames/v1/?key=%s&steamid=%s&include_appinfo=1&format=json",
                 STEAM_API_URL, steamApiToken, steamId);
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
-        if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
-            throw new SteamException("GetOwnedGames a répondu " + response.getStatusCode());
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode gamesNode = mapper.readTree(response.getBody())
-                .path("response")
-                .path("games");
+        JsonNode gamesNode = get("GetOwnedGames", url).path("response").path("games");
 
         if (!gamesNode.isArray()) {
             return List.of(); // profil privé ou aucun jeu
@@ -83,11 +67,41 @@ public class SteamService {
         return games;
     }
 
-    public long getTotalPlaytimeMinutes(String steamId) throws Exception {
+    public long getTotalPlaytimeMinutes(String steamId) throws SteamException {
         return getOwnedGames(steamId).stream()
                 .filter(SteamService::isPlayed)
                 .mapToLong(SteamGameDTO::playtimeMinutes)
                 .sum();
+    }
+
+    /**
+     * Interroge une API Steam et rend l'arbre JSON de sa réponse.
+     * <p>
+     * Panne réseau, code d'erreur HTTP et JSON illisible aboutissent tous à une
+     * {@link SteamException}. C'est ce qui permet aux appelants de ne plus attraper
+     * {@code Exception} pour se protéger d'une indisponibilité de Steam : la
+     * {@link RestClientException} d'un délai dépassé n'étant pas vérifiée, elle leur
+     * échapperait autrement.
+     *
+     * @param api nom de l'API interrogée, pour que le message dise laquelle a échoué
+     */
+    private JsonNode get(String api, String url) throws SteamException {
+        ResponseEntity<String> response;
+        try {
+            response = new RestTemplate().getForEntity(url, String.class);
+        } catch (RestClientException steamInjoignable) {
+            throw new SteamException(api + " est injoignable", steamInjoignable);
+        }
+
+        if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
+            throw new SteamException(api + " a répondu " + response.getStatusCode());
+        }
+
+        try {
+            return new ObjectMapper().readTree(response.getBody());
+        } catch (JsonProcessingException reponseIllisible) {
+            throw new SteamException(api + " a renvoyé un JSON illisible", reponseIllisible);
+        }
     }
 
     /**

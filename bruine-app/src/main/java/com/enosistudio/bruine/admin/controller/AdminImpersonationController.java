@@ -1,5 +1,6 @@
 package com.enosistudio.bruine.admin.controller;
 
+import com.enosistudio.bruine.steam.exception.SteamException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
 import com.enosistudio.bruine.steam.security.SteamUserPrincipal;
@@ -52,7 +53,7 @@ public class AdminImpersonationController {
     private String avatarUrl(String steamId) {
         try {
             return (String) steamService.getUserData(steamId).get("avatar");
-        } catch (Exception steamIndisponible) {
+        } catch (SteamException steamIndisponible) {
             return null;
         }
     }

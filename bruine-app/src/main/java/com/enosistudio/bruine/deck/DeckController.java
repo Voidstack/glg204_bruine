@@ -3,6 +3,7 @@ package com.enosistudio.bruine.deck;
 import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.card.UserCardService;
 import com.enosistudio.bruine.deck.service.DeckService;
+import com.enosistudio.bruine.steam.exception.SteamException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import com.enosistudio.bruine.steam.service.SteamService;
@@ -10,6 +11,7 @@ import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
@@ -92,7 +94,7 @@ public class DeckController {
             byte[] bytes = new RestTemplate().getForObject(s, byte[].class);
             if (bytes == null || bytes.length == 0) return null;
             return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(bytes);
-        } catch (Exception e) {
+        } catch (SteamException | RestClientException avatarIndisponible) {
             return null;
         }
     }

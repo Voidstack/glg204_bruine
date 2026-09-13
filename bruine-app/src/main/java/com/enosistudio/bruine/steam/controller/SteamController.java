@@ -2,6 +2,7 @@ package com.enosistudio.bruine.steam.controller;
 
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.steam.dto.SteamGameDTO;
+import com.enosistudio.bruine.steam.exception.SteamException;
 import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
@@ -13,10 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -83,8 +86,8 @@ public class SteamController {
             session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
             sessionRegistry.registerNewSession(session.getId(), auth.getPrincipal());
 
-        } catch (Exception e) {
-            log.warn("Échec de la validation du retour OpenID Steam", e);
+        } catch (IllegalArgumentException | RestClientException | AuthenticationException echecOpenid) {
+            log.warn("Échec de la connexion Steam", echecOpenid);
             return new ModelAndView("redirect:/steam/failed");
         }
 
@@ -123,7 +126,7 @@ public class SteamController {
             mav.addObject("hasDeck", hasDeck);
             mav.addObject("deckImageUrl", deckImageUrl);
             return mav;
-        } catch (Exception e) {
+        } catch (SteamException steamIndisponible) {
             return new ModelAndView("redirect:/steam/failed");
         }
     }
@@ -141,7 +144,7 @@ public class SteamController {
                     .toList();
             long total = games.stream().mapToLong(SteamGameDTO::playtimeMinutes).sum();
             return Map.of("games", games, "totalPlaytimeMinutes", total);
-        } catch (Exception e) {
+        } catch (SteamException steamIndisponible) {
             return Map.of("games", List.of(), "totalPlaytimeMinutes", 0L);
         }
     }

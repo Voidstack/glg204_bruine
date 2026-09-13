@@ -1,5 +1,6 @@
 package com.enosistudio.bruine.steam.security;
 
+import com.enosistudio.bruine.steam.exception.SteamException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
@@ -38,7 +39,7 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
         Map<String, Object> userAttributes;
         try {
             userAttributes = steamService.getUserData(steamId);
-        } catch (Exception steamIndisponible) {
+        } catch (SteamException steamIndisponible) {
             log.warn("Récupération du profil Steam impossible pour {}", steamId, steamIndisponible);
             throw new AuthenticationServiceException(
                     "Profil Steam inaccessible, connexion impossible pour le moment.", steamIndisponible);
@@ -56,7 +57,7 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
                 user.setInitialPlaytimeMinutes(totalPlaytime);
             }
             user.setCurrentPlaytimeMinutes(totalPlaytime);
-        } catch (Exception tempsDeJeuIndisponible) {
+        } catch (SteamException tempsDeJeuIndisponible) {
             // Profil privé ou API muette : les compteurs restent inchangés, la connexion continue.
             // Contrairement au profil ci-dessus, le temps de jeu n'est pas indispensable au login.
         }
