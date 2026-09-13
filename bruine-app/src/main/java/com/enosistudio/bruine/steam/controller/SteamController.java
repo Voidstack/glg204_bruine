@@ -10,6 +10,7 @@ import com.enosistudio.bruine.steam.service.SteamService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,37 +57,51 @@ public class SteamController {
 
     @GetMapping("/login")
     public String login(HttpServletRequest request) {
-        String baseUrl = ServletUriComponentsBuilder.fromRequestUri(request)
+        return "redirect:" + steamService.buildSteamLoginUrl(baseUrl(request));
+    }
+
+    /**
+     * Base publique du site, calculée de la même façon à l'aller et au retour de Steam
+     * pour que le {@code return_to} de l'assertion puisse être comparé.
+     */
+    private static String baseUrl(HttpServletRequest request) {
+        return ServletUriComponentsBuilder.fromRequestUri(request)
                 .replacePath(null)
+                .replaceQuery(null)
                 .toUriString();
-        return "redirect:" + steamService.buildSteamLoginUrl(baseUrl);
     }
 
     @GetMapping("/login/redirect")
     public ModelAndView loginRedirect(HttpServletRequest request, @RequestParam Map<String, String> allRequestParams) {
-        SteamOpenidLoginDTO dto = new SteamOpenidLoginDTO(
-                allRequestParams.get("openid.ns"),
-                allRequestParams.get("openid.op_endpoint"),
-                allRequestParams.get("openid.claimed_id"),
-                allRequestParams.get("openid.identity"),
-                allRequestParams.get("openid.return_to"),
-                allRequestParams.get("openid.response_nonce"),
-                allRequestParams.get("openid.assoc_handle"),
-                allRequestParams.get("openid.signed"),
-                allRequestParams.get("openid.sig")
-        );
-
         try {
-            String steamUserId = steamService.validateLoginParameters(dto);
+            // construit dans le try : des paramètres OpenID absents ou malformés sont un échec de connexion, pas une 500
+            SteamOpenidLoginDTO dto = new SteamOpenidLoginDTO(
+                    allRequestParams.get("openid.ns"),
+                    allRequestParams.get("openid.op_endpoint"),
+                    allRequestParams.get("openid.claimed_id"),
+                    allRequestParams.get("openid.identity"),
+                    allRequestParams.get("openid.return_to"),
+                    allRequestParams.get("openid.response_nonce"),
+                    allRequestParams.get("openid.assoc_handle"),
+                    allRequestParams.get("openid.signed"),
+                    allRequestParams.get("openid.sig")
+            );
+
+            String steamUserId = steamService.validateLoginParameters(dto, baseUrl(request));
             SteamAuthenticationToken authReq = new SteamAuthenticationToken(steamUserId);
             Authentication auth = authenticationManager.authenticate(authReq);
-            SecurityContext sc = SecurityContextHolder.getContext();
+            SecurityContext sc = SecurityContextHolder.createEmptyContext();
             sc.setAuthentication(auth);
+            SecurityContextHolder.setContext(sc);
             HttpSession session = request.getSession(true);
+            // Protection contre la fixation de session : nouvel identifiant, attributs conservés
+            // (dont le contexte admin). Pas de session.invalidate(), cf. isolation des deux chaînes.
+            request.changeSessionId();
             session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
             sessionRegistry.registerNewSession(session.getId(), auth.getPrincipal());
 
-        } catch (IllegalArgumentException | RestClientException | AuthenticationException echecOpenid) {
+        } catch (IllegalArgumentException | ConstraintViolationException | RestClientException
+                 | AuthenticationException echecOpenid) {
             log.warn("Échec de la connexion Steam", echecOpenid);
             return new ModelAndView("redirect:/steam/failed");
         }

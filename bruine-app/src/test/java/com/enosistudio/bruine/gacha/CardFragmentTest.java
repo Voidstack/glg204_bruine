@@ -160,7 +160,7 @@ class CardFragmentTest {
         CardStackDTO stack = new CardStackDTO(reward, ECardFinish.HOLOGRAPHIC, List.of(7L, 8L, 9L));
         String out = render("/templates/deck/deck.html", Map.of("stack", stack));
 
-        assertCommonCardStructure(out, "balatro-card");
+        assertCommonCardStructure(out, "deck-card");
         assertTrue(out.contains("data-id=\"7,8,9\""),
                 "L'éditeur détache un exemplaire précis, il lui faut toute la réserve : " + out);
         assertTrue(out.contains("Texte de saveur"),

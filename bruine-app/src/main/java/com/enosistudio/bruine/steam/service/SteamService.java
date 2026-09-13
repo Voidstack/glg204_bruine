@@ -24,6 +24,13 @@ public class SteamService {
 
     private static final String STEAM_API_URL = "https://api.steampowered.com";
     private static final String OPENID_NAMESPACE = "http://specs.openid.net/auth/2.0";
+    private static final String STEAM_OPENID_ENDPOINT = "https://steamcommunity.com/openid/login";
+    private static final Pattern STEAM_IDENTITY = Pattern.compile("^https?://steamcommunity\\.com/openid/id/(7656119\\d{10})/?$");
+    /**
+     * Champs que Steam doit avoir signés pour que l'assertion soit exploitable (OpenID 2.0 §10.1).
+     */
+    private static final Set<String> REQUIRED_SIGNED_FIELDS =
+            Set.of("op_endpoint", "return_to", "response_nonce", "assoc_handle", "claimed_id", "identity");
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -122,9 +129,9 @@ public class SteamService {
 
     public String buildSteamLoginUrl(String baseUrl) {
         String realm = baseUrl + "/";
-        String returnTo = baseUrl + "/steam/login/redirect";
+        String returnTo = returnToUrl(baseUrl);
 
-        return "https://steamcommunity.com/openid/login" +
+        return STEAM_OPENID_ENDPOINT +
                 "?openid.ns=http://specs.openid.net/auth/2.0" +
                 "&openid.mode=checkid_setup" +
                 "&openid.identity=http://specs.openid.net/auth/2.0/identifier_select" +
@@ -133,7 +140,38 @@ public class SteamService {
                 "&openid.return_to=" + returnTo;
     }
 
-    public String validateLoginParameters(SteamOpenidLoginDTO dto) throws IllegalArgumentException {
+    /**
+     * URL de retour après authentification Steam, identique à l'envoi et à la vérification.
+     */
+    private static String returnToUrl(String baseUrl) {
+        return baseUrl + "/steam/login/redirect";
+    }
+
+    /**
+     * Steam signe aussi les assertions destinées à d'autres sites.
+     */
+    public String validateLoginParameters(SteamOpenidLoginDTO dto, String baseUrl) throws IllegalArgumentException {
+        if (!STEAM_OPENID_ENDPOINT.equals(dto.getOpEndpoint())) {
+            throw new IllegalArgumentException(
+                    "Assertion OpenID émise par un fournisseur inattendu : " + dto.getOpEndpoint());
+        }
+
+        if (!returnToUrl(baseUrl).equals(dto.getReturnTo())) {
+            throw new IllegalArgumentException(
+                    "Assertion OpenID destinée à une autre adresse : " + dto.getReturnTo());
+        }
+
+        if (!dto.getClaimedId().equals(dto.getIdentity())) {
+            throw new IllegalArgumentException(
+                    "claimed_id et identity diffèrent : " + dto.getClaimedId() + " / " + dto.getIdentity());
+        }
+
+        Set<String> signedFields = Set.of(dto.getSigned().split(","));
+        if (!signedFields.containsAll(REQUIRED_SIGNED_FIELDS)) {
+            throw new IllegalArgumentException(
+                    "Champs OpenID non signés par Steam, signés : " + dto.getSigned());
+        }
+
         MultiValueMap<String, String> openidRequest = new LinkedMultiValueMap<>();
         openidRequest.add("openid.ns", dto.getNs());
         openidRequest.add("openid.op_endpoint", dto.getOpEndpoint());
@@ -150,7 +188,7 @@ public class SteamService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(openidRequest, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity("https://steamcommunity.com/openid/login", request, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(STEAM_OPENID_ENDPOINT, request, String.class);
         if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
             throw new IllegalArgumentException(
                     "Steam a répondu " + response.getStatusCode() + " à la vérification du jeton OpenID.");
@@ -168,8 +206,7 @@ public class SteamService {
                     "Steam a rejeté le jeton OpenID (is_valid=" + responseBody.get("is_valid") + ").");
         }
 
-        Pattern p = Pattern.compile("^https?://steamcommunity.com/openid/id/(7656119\\d{10})/?$");
-        Matcher m = p.matcher(dto.getIdentity());
+        Matcher m = STEAM_IDENTITY.matcher(dto.getIdentity());
 
         if (!m.find()) {
             throw new IllegalArgumentException(

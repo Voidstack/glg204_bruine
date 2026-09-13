@@ -6,6 +6,7 @@ import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
 import com.enosistudio.bruine.steam.security.SteamUserPrincipal;
 import com.enosistudio.bruine.steam.service.SteamService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,7 +30,7 @@ public class AdminImpersonationController {
     }
 
     @PostMapping("/impersonate/{id}")
-    public String impersonate(@PathVariable Long id, HttpSession session) {
+    public String impersonate(@PathVariable Long id, HttpServletRequest request, HttpSession session) {
         SteamUser user = steamUserService.findById(id).orElse(null);
         if (user == null) return "redirect:/admin";
 
@@ -40,6 +41,7 @@ public class AdminImpersonationController {
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(token);
+        request.changeSessionId();
         session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, context);
 
         return "redirect:/";
