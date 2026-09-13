@@ -30,19 +30,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Un deck se partage d'une seule façon : l'image SVG {@code /deck/{steamId}},
- * intégrable par une balise {@code <img>}. Le profil l'affiche ; l'ancien widget
- * HTML embarqué en iframe a disparu.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase
@@ -54,12 +48,16 @@ class DeckSharingTest {
 
     @Autowired
     private MockMvc mvc;
+
     @Autowired
     private SteamUserRepository steamUserRepository;
+
     @Autowired
     private GachaRewardRepository gachaRewardRepository;
+
     @Autowired
     private UserCardRepository userCardRepository;
+
     @Autowired
     private DeckService deckService;
 
@@ -88,7 +86,6 @@ class DeckSharingTest {
 
         deckService.saveDeck(user.getId(), List.of(card.getId()));
 
-        // avatarmedium vide -> le renderer n'essaie aucun appel réseau pour l'avatar
         when(steamService.getUserData(anyString())).thenReturn(Map.of(
                 "steamid", STEAM_ID,
                 "personaname", "Joueuse",
@@ -99,21 +96,17 @@ class DeckSharingTest {
     }
 
     @Test
-    void le_deck_est_servi_en_image_svg() throws Exception {
+    void theDeckIsServedAsAnSvgImage() throws Exception {
         mvc.perform(get("/deck/" + STEAM_ID))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("image/svg+xml"));
     }
 
-    /**
-     * Le template doit rester un SVG ouvrable seul (Inkscape) : XML bien formé, racine {@code <svg>},
-     * {@code viewBox} présent et namespace {@code th} déclaré (sans quoi le parseur rejette les th:*).
-     */
     @Test
-    void le_template_svg_est_un_fichier_svg_valide() throws Exception {
+    void theDeckTemplateIsAValidSvgFile() throws Exception {
         String svg;
         try (InputStream in = getClass().getResourceAsStream("/templates/deck/svg/deck.svg")) {
-            assertTrue(in != null, "templates/deck/svg/deck.svg introuvable");
+            assertNotNull(in, "templates/deck/svg/deck.svg introuvable");
             svg = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -126,14 +119,12 @@ class DeckSharingTest {
     }
 
     @Test
-    void le_profil_affiche_l_image_du_deck_sans_iframe() throws Exception {
+    void theProfileShowsTheDeckImageWithoutAnIframe() throws Exception {
         String html = mvc.perform(get("/steam/profile/" + STEAM_ID))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        org.junit.jupiter.api.Assertions.assertTrue(html.contains("/deck/" + STEAM_ID),
-                "l'image du deck doit pointer sur /deck/{steamId}");
-        org.junit.jupiter.api.Assertions.assertFalse(html.contains("<iframe"),
-                "plus aucune iframe : l'ancien widget HTML est supprimé");
+        assertTrue(html.contains("/deck/" + STEAM_ID), "l'image du deck doit pointer sur /deck/{steamId}");
+        assertFalse(html.contains("<iframe"), "plus aucune iframe : l'ancien widget HTML est supprimé");
     }
 }

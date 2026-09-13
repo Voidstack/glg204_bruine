@@ -1,18 +1,20 @@
-package com.enosistudio.bruine.gacha.service;
+package com.enosistudio.bruine.level.service;
 
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
 import com.enosistudio.bruine.card.UserCard;
+import com.enosistudio.bruine.card.UserCardService;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaConfigRepository;
 import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
+import com.enosistudio.bruine.gacha.service.GachaRewardService;
+import com.enosistudio.bruine.gacha.service.GachaService;
 import com.enosistudio.bruine.level.dto.ConvertRequestDTO;
 import com.enosistudio.bruine.level.dto.ConvertResultDTO;
 import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
-import com.enosistudio.bruine.level.service.LevelUpService;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.market.service.MarketService;
@@ -31,15 +33,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Règles de conversion des cartes en expérience.
- * <p>
- * La conversion détruit définitivement des cartes : ce qu'elle refuse compte donc autant
- * que ce qu'elle accorde.
- */
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({LevelUpService.class, SteamUserService.class, com.enosistudio.bruine.card.UserCardService.class,
+@Import({LevelUpService.class, SteamUserService.class, UserCardService.class,
         MarketService.class, DeckService.class, GachaService.class, GachaRewardService.class})
 class LevelUpServiceTest {
 
@@ -93,11 +89,6 @@ class LevelUpServiceTest {
         assertEquals(10, convert(ECardRarity.COMMON, ECardFinish.NORMAL).xpGained());
     }
 
-
-    /**
-     * Un administrateur peut mettre un multiplicateur à zéro dans la configuration.
-     * Le barème le ramène à 1 : une carte détruite rapporte toujours quelque chose.
-     */
     @Test
     void aMultiplierOfZeroStillPaysTheRarityBase() {
         GachaConfig config = new GachaConfig();
@@ -129,9 +120,6 @@ class LevelUpServiceTest {
         assertEquals(0, result.xpGained());
     }
 
-    /**
-     * Le nom de finition vient du navigateur : une valeur inventée est écartée, pas fatale.
-     */
     @Test
     void anUnknownFinishNameIsIgnored() {
         UserCard card = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
@@ -158,9 +146,6 @@ class LevelUpServiceTest {
         assertEquals(0, userCardRepository.count(), "les deux exemplaires sont détruits");
     }
 
-    /**
-     * Une conversion vide reste une opération valide : elle ne crédite rien.
-     */
     @Test
     void convertingNothingChangesNothing() {
         owner.setTotalExperience(1000);
@@ -171,9 +156,6 @@ class LevelUpServiceTest {
         assertEquals(1000, result.newTotalExperience());
     }
 
-    /**
-     * La page annonce l'expérience avant destruction : elle doit annoncer le vrai barème.
-     */
     @Test
     void theOfferedCardsCarryTheExperienceTheyWillPay() {
         createCard(ECardRarity.EPIC, ECardFinish.NORMAL);
@@ -222,19 +204,12 @@ class LevelUpServiceTest {
         return levelUpService.convert(reloadOwner(), List.of(new ConvertRequestDTO(rewardId, finish.name())));
     }
 
-    /**
-     * La conversion reçoit le joueur sans sa collection : elle supprime des cartes, et
-     * Hibernate tenterait sinon de fusionner une collection contenant des lignes détruites.
-     */
     private SteamUser reloadOwner() {
         entityManager.flush();
         entityManager.clear();
         return steamUserRepository.findById(owner.getId()).orElseThrow();
     }
 
-    /**
-     * L'affichage, lui, a besoin de la collection chargée.
-     */
     private SteamUser reloadOwnerWithCards() {
         SteamUser reloaded = reloadOwner();
         reloaded.getCards().size();

@@ -21,16 +21,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Règles du tirage gacha : ce qu'il coûte, ce qu'il donne, et ce qu'il refuse.
- * <p>
- * Le tirage étant aléatoire, les tests ne devinent pas son résultat : ils vérifient ce
- * qui est vrai à tous les coups. Une rareté de poids nul ne peut jamais sortir, et une
- * configuration entièrement à zéro ne doit pas faire échouer le tirage.
- */
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({GachaService.class, SteamUserService.class, com.enosistudio.bruine.gacha.service.GachaRewardService.class})
+@Import({GachaService.class, SteamUserService.class, GachaRewardService.class})
 class GachaServiceTest {
 
     @Autowired
@@ -75,9 +68,6 @@ class GachaServiceTest {
         assertEquals(15, player.getTotalPulls());
     }
 
-    /**
-     * Le refus doit précéder le débit : un joueur trop pauvre ne perd rien.
-     */
     @Test
     void spinningIsRefusedWhenTheScoreDoesNotCoverTheCost() {
         player.setScore(25);
@@ -127,10 +117,6 @@ class GachaServiceTest {
                 "une rareté de poids nul ne doit jamais sortir : " + result.results());
     }
 
-    /**
-     * Les poids de finition sont tous à zéro dans cette configuration : le tirage doit
-     * retomber sur la finition simple au lieu de diviser par zéro.
-     */
     @Test
     void finishesWithoutAnyWeightFallBackToThePlainOne() {
         GachaResultDTO result = gachaService.spin(player, 10);
@@ -150,10 +136,6 @@ class GachaServiceTest {
                 "sans aucun poids, le tirage retombe sur la rareté la plus basse");
     }
 
-    /**
-     * Une rareté dont l'administrateur n'a créé aucune carte : le joueur paie son tirage
-     * et reçoit une carte de repli, mais rien n'entre dans sa collection.
-     */
     @Test
     void aRarityWithoutAnyCardStillCostsThePull() {
         gachaRewardRepository.deleteAll();
@@ -165,9 +147,6 @@ class GachaServiceTest {
         assertEquals(0, userCardRepository.count());
     }
 
-    /**
-     * La configuration est une ligne unique ; son absence ne doit pas bloquer le jeu.
-     */
     @Test
     void aMissingConfigurationFallsBackToTheDefaults() {
         gachaConfigRepository.deleteAll();
@@ -194,9 +173,6 @@ class GachaServiceTest {
         gachaRewardRepository.save(reward);
     }
 
-    /**
-     * Ne laisse qu'une rareté possible, pour que le tirage reste prévisible.
-     */
     private void onlyEpicCanBeDrawn() {
         GachaConfig config = new GachaConfig();
         config.setRarityEpic(100);

@@ -10,11 +10,6 @@ class TotpGeneratorTest {
 
     private final TotpGenerator generator = new TotpGenerator();
 
-    /**
-     * Vecteur de test officiel RFC 6238 (Appendix B), variante SHA1.
-     * Seed ASCII "12345678901234567890" = Base32 "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ".
-     * À T=59s → fenêtre 1 → TOTP 8 chiffres = 94287082 → 6 chiffres = 287082.
-     */
     @Test
     void matchesRfc6238ReferenceVector() {
         String secret = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ";

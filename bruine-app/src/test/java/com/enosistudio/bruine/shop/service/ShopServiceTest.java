@@ -19,13 +19,6 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Règles de la boutique côté service.
- * <p>
- * Le dialogue avec Stripe n'est pas joué ici : ce sont des appels statiques du SDK. Sont
- * vérifiées les décisions que la boutique prend seule, avant d'appeler Stripe ou sans
- * l'appeler du tout. Le calcul des prix vit sur l'entité et se teste dans ShopPackTest.
- */
 @DataJpaTest
 @ActiveProfiles("test")
 @Import({ShopService.class, SteamUserService.class})
@@ -85,10 +78,6 @@ class ShopServiceTest {
         assertEquals("Premier", shopService.findAllOrdered().get(0).getName());
     }
 
-    /**
-     * La page de retour Stripe est une simple URL : le joueur peut la recharger, la mettre
-     * en favori, y revenir le lendemain. Le deuxième passage ne doit rien créditer.
-     */
     @Test
     void aPaymentAlreadyCreditedIsNotCreditedAgain() throws StripeException {
         SteamUser player = createPlayer(100);

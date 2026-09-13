@@ -26,12 +26,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Règles du deck vitrine.
- * <p>
- * Le deck est public : il est affiché sur le profil et partageable en image ailleurs. Ce
- * qu'il accepte doit donc appartenir au joueur, et lui appartenir encore.
- */
 @DataJpaTest
 @ActiveProfiles("test")
 @Import(DeckService.class)
@@ -114,9 +108,6 @@ class DeckServiceTest {
         assertEquals(Set.of(mine), deckService.findDeckCardIds(owner.getId()));
     }
 
-    /**
-     * Une carte en vente peut changer de propriétaire : elle n'a rien à faire en vitrine.
-     */
     @Test
     void aCardListedOnTheMarketIsRejected() {
         Long kept = createCard(owner).getId();
@@ -158,10 +149,6 @@ class DeckServiceTest {
         assertEquals(10, deckService.findDeckCardIds(owner.getId()).size());
     }
 
-    /**
-     * MarketService interroge cette méthode avant chaque vente. Un joueur sans deck ne
-     * doit pas s'y voir refuser une vente, l'absence de deck valant deck vide.
-     */
     @Test
     void aPlayerWithoutADeckHoldsNoCard() {
         assertTrue(deckService.findDeckCardIds(owner.getId()).isEmpty());

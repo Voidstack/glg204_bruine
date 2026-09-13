@@ -27,22 +27,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Opérations simultanées sur le score d'un même joueur.
- * <p>
- * Sans verrou, chaque transaction lit le même score puis réécrit le sien : la dernière écrite
- * efface les autres, et le joueur dépense plus qu'il ne possède. Les tests lancent donc
- * plusieurs opérations au même instant et vérifient ce qui doit rester vrai quel que soit
- * l'ordre d'exécution : aucun point créé ni perdu, jamais plus d'achats que le score ne permet.
- * <p>
- * Les transactions doivent réellement se chevaucher : la transaction englobante de
- * {@code @DataJpaTest} est désactivée, et les données sont nettoyées à la main après chaque test.
- */
 @DataJpaTest
 @ActiveProfiles("test")
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -77,10 +71,6 @@ class ScoreConcurrencyTest {
         gachaRewardRepository.deleteAll();
     }
 
-    /**
-     * Dix annonces à 10 💧 achetées au même instant par un joueur qui n'a que 50 💧 :
-     * cinq achats passent, cinq sont refusés, et les points passent tous au vendeur.
-     */
     @Test
     void simultaneousPurchasesNeverSpendMoreThanTheBuyerOwns() throws Exception {
         SteamUser seller = createUser("76561190000000101", 0);
@@ -97,7 +87,7 @@ class ScoreConcurrencyTest {
             try {
                 marketService.buy(buyer, listingIds.get(i));
                 bought.incrementAndGet();
-            } catch (BusinessRuleException scoreInsuffisant) {
+            } catch (BusinessRuleException insufficientScore) {
                 refused.incrementAndGet();
             }
         });
@@ -113,9 +103,6 @@ class ScoreConcurrencyTest {
                 .count(), "l'acheteur reçoit une carte par achat payé");
     }
 
-    /**
-     * Dix tirages à 10 💧 lancés au même instant avec 50 💧 : cinq tirages seulement.
-     */
     @Test
     void simultaneousSpinsNeverSpendMoreThanThePlayerOwns() throws Exception {
         SteamUser player = createUser("76561190000000103", 50);
@@ -126,7 +113,7 @@ class ScoreConcurrencyTest {
             try {
                 gachaService.spin(player, 1);
                 spun.incrementAndGet();
-            } catch (InsufficientScoreException scoreInsuffisant) {
+            } catch (InsufficientScoreException insufficientScore) {
                 refused.incrementAndGet();
             }
         });
@@ -138,10 +125,6 @@ class ScoreConcurrencyTest {
         assertEquals(5, after.getTotalPulls(), "chaque tirage payé est compté, aucun n'est écrasé");
     }
 
-    /**
-     * Lance {@link #SIMULTANEOUS} opérations qui démarrent toutes au même signal.
-     * Toute exception autre que celles attrapées par l'opération fait échouer le test.
-     */
     private void runSimultaneously(IntConsumer operation) throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(SIMULTANEOUS);
         CountDownLatch start = new CountDownLatch(1);
@@ -162,11 +145,6 @@ class ScoreConcurrencyTest {
         } finally {
             pool.shutdownNow();
         }
-    }
-
-    @FunctionalInterface
-    private interface IntConsumer {
-        void accept(int index);
     }
 
     private SteamUser createUser(String steamId, int score) {

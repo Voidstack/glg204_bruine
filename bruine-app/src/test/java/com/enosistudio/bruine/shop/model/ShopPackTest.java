@@ -8,12 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Prix d'un pack de la boutique.
- *
- * Le pack porte lui-même son calcul : points bonus compris, promotion déduite, et fenêtre
- * de validité de cette promotion. C'est le montant réellement facturé au joueur.
- */
 class ShopPackTest {
 
     @Test
@@ -40,7 +34,6 @@ class ShopPackTest {
         assertEquals(400, discounted.getEffectivePriceCents());
     }
 
-    /** Une promo sans bornes de dates court en permanence : c'est le cas le plus courant. */
     @Test
     void aPromoWithoutDatesIsAlwaysRunning() {
         assertTrue(pack(500, 20).isPromoActive());
@@ -64,7 +57,6 @@ class ShopPackTest {
         assertEquals(500, over.getEffectivePriceCents());
     }
 
-    /** Le prix catalogue reste affiché à côté du prix promotionnel. */
     @Test
     void bothPricesAreFormattedWithTwoDecimals() {
         ShopPack discounted = pack(500, 20);

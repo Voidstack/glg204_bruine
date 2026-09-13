@@ -24,12 +24,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Règles du marché entre joueurs.
- * <p>
- * Ces règles décident qui perd une carte et qui perd des points : une erreur y est
- * irréversible pour le joueur, contrairement à un défaut d'affichage.
- */
 @DataJpaTest
 @ActiveProfiles("test")
 @Import({MarketService.class, DeckService.class})
@@ -92,10 +86,6 @@ class MarketServiceTest {
         assertTrue(marketListingRepository.findAll().isEmpty());
     }
 
-    /**
-     * Un deck vitrine ne doit pas pouvoir se vider sous les yeux de son propriétaire :
-     * la carte posée dans le deck est bloquée tant qu'elle y est.
-     */
     @Test
     void sellingRefusesACardPlacedInTheDeck() {
         deckService.saveDeck(seller.getId(), List.of(card.getId()));
@@ -105,9 +95,6 @@ class MarketServiceTest {
         assertTrue(marketListingRepository.findAll().isEmpty());
     }
 
-    /**
-     * Le blocage vise l'exemplaire posé, pas la carte : un doublon reste vendable.
-     */
     @Test
     void sellingAllowsAnotherCopyOfACardInTheDeck() {
         UserCard spare = createCard(seller);
@@ -142,9 +129,6 @@ class MarketServiceTest {
         assertThrows(BusinessRuleException.class, () -> marketService.buy(seller, listingId));
     }
 
-    /**
-     * Le refus doit précéder tout mouvement : ni points débités, ni carte transférée.
-     */
     @Test
     void buyingRefusesWhenTheScoreIsTooLow() {
         Long listingId = publish(80);
@@ -202,9 +186,6 @@ class MarketServiceTest {
         return userCardRepository.save(copy);
     }
 
-    /**
-     * Publie l'annonce du vendeur et renvoie son identifiant.
-     */
     private Long publish(int price) {
         MarketListing listing = new MarketListing();
         listing.setSeller(seller);
