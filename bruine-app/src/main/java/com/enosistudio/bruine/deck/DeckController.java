@@ -29,19 +29,22 @@ public class DeckController {
     private final UserCardService userCardService;
     private final SteamService steamService;
     private final DeckSvgRenderer deckSvgRenderer;
+    private final RestTemplate restTemplate;
 
     public DeckController(CurrentSteamUser currentSteamUser,
                           SteamUserService steamUserService,
                           DeckService deckService,
                           UserCardService userCardService,
                           SteamService steamService,
-                          DeckSvgRenderer deckSvgRenderer) {
+                          DeckSvgRenderer deckSvgRenderer,
+                          RestTemplate restTemplate) {
         this.currentSteamUser = currentSteamUser;
         this.steamUserService = steamUserService;
         this.deckService = deckService;
         this.userCardService = userCardService;
         this.steamService = steamService;
         this.deckSvgRenderer = deckSvgRenderer;
+        this.restTemplate = restTemplate;
     }
 
     @GetMapping
@@ -64,7 +67,7 @@ public class DeckController {
 
     /**
      * Deck d'un joueur rendu en image SVG, servi sans layout ni authentification
-     * (chaîne {@code deckWidgetFilterChain}). C'est la seule façon de partager un deck :
+     * (route publique déclarée dans {@code WebSecurityConfig}). C'est la seule façon de partager un deck :
      * elle s'intègre dans une page web ou un fichier Markdown via une balise {@code <img>}.
      *
      * @param steamId ID Steam (17 chiffres, format {@code 7656119...})
@@ -91,7 +94,7 @@ public class DeckController {
         try {
             Object url = steamService.getUserData(steamId).get("avatarmedium");
             if (!(url instanceof String s) || s.isBlank()) return null;
-            byte[] bytes = new RestTemplate().getForObject(s, byte[].class);
+            byte[] bytes = restTemplate.getForObject(s, byte[].class);
             if (bytes == null || bytes.length == 0) return null;
             return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(bytes);
         } catch (SteamException | RestClientException avatarIndisponible) {

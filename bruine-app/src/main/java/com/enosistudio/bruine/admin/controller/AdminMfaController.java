@@ -25,7 +25,7 @@ import java.util.List;
  * Contrôleur MFA (TOTP) pour les comptes admin.
  * /admin/mfa - 2e étape de connexion : saisie du code (état {@code ROLE_PRE_MFA})
  * /admin/mfa/setup - enrôlement : QR code + confirmation (admin déjà connecté)
- * /admin/mfa/disable} - désactivation de sa propre MFA
+ * /admin/mfa/disable - désactivation de sa propre MFA
  *
  * <p>Les rôles requis sont posés par la chaîne de sécurité admin :
  * {@code /admin/mfa} accepte {@code ROLE_ADMIN} ou {@code ROLE_PRE_MFA},

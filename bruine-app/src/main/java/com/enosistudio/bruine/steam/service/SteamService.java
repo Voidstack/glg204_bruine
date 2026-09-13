@@ -22,10 +22,19 @@ import java.util.regex.Pattern;
 @Service
 public class SteamService {
 
-    @Value("${steam.token}")
-    private String steamApiToken;
     private static final String STEAM_API_URL = "https://api.steampowered.com";
     private static final String OPENID_NAMESPACE = "http://specs.openid.net/auth/2.0";
+
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+    private final String steamApiToken;
+
+    public SteamService(RestTemplate restTemplate, ObjectMapper objectMapper,
+                        @Value("${steam.token}") String steamApiToken) {
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
+        this.steamApiToken = steamApiToken;
+    }
 
     public Map<String, Object> getUserData(String steamUserId) throws SteamException {
         String url = String.format("%s/ISteamUser/GetPlayerSummaries/v2/?key=%s&format=json&steamids=%s", STEAM_API_URL, steamApiToken, steamUserId);
@@ -37,7 +46,7 @@ public class SteamService {
             throw new SteamException("Aucun profil Steam pour l'identifiant " + steamUserId);
         }
 
-        return new ObjectMapper().convertValue(players.get(0), new TypeReference<>() {
+        return objectMapper.convertValue(players.get(0), new TypeReference<>() {
         });
     }
 
@@ -88,7 +97,7 @@ public class SteamService {
     private JsonNode get(String api, String url) throws SteamException {
         ResponseEntity<String> response;
         try {
-            response = new RestTemplate().getForEntity(url, String.class);
+            response = restTemplate.getForEntity(url, String.class);
         } catch (RestClientException steamInjoignable) {
             throw new SteamException(api + " est injoignable", steamInjoignable);
         }
@@ -98,7 +107,7 @@ public class SteamService {
         }
 
         try {
-            return new ObjectMapper().readTree(response.getBody());
+            return objectMapper.readTree(response.getBody());
         } catch (JsonProcessingException reponseIllisible) {
             throw new SteamException(api + " a renvoyé un JSON illisible", reponseIllisible);
         }
@@ -140,7 +149,6 @@ public class SteamService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(openidRequest, headers);
-        RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<String> response = restTemplate.postForEntity("https://steamcommunity.com/openid/login", request, String.class);
         if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
