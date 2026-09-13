@@ -116,7 +116,6 @@ body {
 
 .mkt-card {
     --card-height: 172px;
-    cursor: default;
 }
 
 .mkt-card:hover {

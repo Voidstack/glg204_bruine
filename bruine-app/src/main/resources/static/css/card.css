@@ -1,12 +1,12 @@
-@import url("finition.css"); /* effets de finition partagés */
+@import url("finition.css");
 
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card) {
+.card {
     --r-inset-alpha: 0.05;
     --r-artwork-alpha: 0.50;
     --r-artwork-inset-alpha: 0.10;
 }
 
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).common {
+.card.common {
     --r-color: var(--grey);
     --r-text: var(--card-common-text);
     --r-border: var(--card-common-border);
@@ -20,7 +20,7 @@
     --r-artwork-inset-alpha: 0.06;
 }
 
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).uncommon {
+.card.uncommon {
     --r-color: var(--green);
     --r-text: var(--card-uncommon-text);
     --r-border: var(--card-uncommon-border);
@@ -32,7 +32,7 @@
     --r-inset-alpha: 0.04;
 }
 
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).rare {
+.card.rare {
     --r-color: var(--blue);
     --r-text: var(--card-rare-text);
     --r-border: var(--card-rare-border);
@@ -43,7 +43,7 @@
     --r-hover-alpha: 0.48;
 }
 
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).epic {
+.card.epic {
     --r-color: var(--purple);
     --r-text: var(--card-epic-text);
     --r-border: var(--card-epic-border);
@@ -54,7 +54,7 @@
     --r-hover-alpha: 0.50;
 }
 
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).legendary {
+.card.legendary {
     --r-color: var(--orange);
     --r-text: var(--card-legendary-text);
     --r-border: var(--card-legendary-border);
@@ -66,30 +66,30 @@
 }
 
 /* Les quatre règles qui consomment la rareté */
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card):is(.common, .uncommon, .rare, .epic, .legendary) {
+.card:is(.common, .uncommon, .rare, .epic, .legendary) {
     border-color: var(--r-border);
     color: var(--r-text);
     box-shadow: 0 0 calc(var(--r-glow) * var(--card-fx-scale)) rgb(from var(--r-color) r g b / var(--r-glow-alpha)),
     inset 0 0 50px rgb(from var(--r-color) r g b / var(--r-inset-alpha));
 }
 
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card):is(.common, .uncommon, .rare, .epic, .legendary) .card-header {
+.card:is(.common, .uncommon, .rare, .epic, .legendary) .card-header {
     background: linear-gradient(90deg, var(--r-strip));
 }
 
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card):is(.common, .uncommon, .rare, .epic, .legendary) .card-artwork {
+.card:is(.common, .uncommon, .rare, .epic, .legendary) .card-artwork {
     border-color: rgb(from var(--r-color) r g b / var(--r-artwork-alpha));
     box-shadow: inset 0 0 28px rgb(from var(--r-color) r g b / var(--r-artwork-inset-alpha));
 }
 
 /* Le gacha est absent : ses cartes se révèlent, elles ne se survolent pas. */
-:is(.inv-card, .balatro-card, .mkt-card):is(.common, .uncommon, .rare, .epic, .legendary):hover {
+.card:not(.gacha-card):is(.common, .uncommon, .rare, .epic, .legendary):hover {
     box-shadow: 0 0 calc(var(--r-hover-glow) * var(--card-fx-scale)) rgb(from var(--r-color) r g b / var(--r-hover-alpha)),
     inset 0 0 50px rgb(from var(--r-color) r g b / var(--r-inset-alpha)) !important;
 }
 
 /* Scintillement des légendaires */
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).legendary::before {
+.card.legendary::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -135,7 +135,7 @@
 
 /* Anatomie */
 
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card) {
+.card {
     width: var(--card-width);
     height: var(--card-height);
     border-radius: var(--card-radius);
@@ -270,15 +270,6 @@
 
 /* Mouvement, piloté par js/card-motion.js */
 
-/* Le glisser se fait au pointeur, il faut donc annoncer soi-même l'affordance. */
-:is(.inv-card, .balatro-card, .mkt-card) {
-    cursor: grab;
-}
-
-:is(.inv-card, .balatro-card, .mkt-card):active {
-    cursor: grabbing;
-}
-
 /* Reflet qui suit le curseur, peint par le script de survol. */
 .card-shine {
     position: absolute;
@@ -289,7 +280,7 @@
 }
 
 /* Carte d'origine pendant le glisser : elle reste en place, presque effacée. */
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card).ghost {
+.card.ghost {
     opacity: 0.18;
     pointer-events: none;
 }
@@ -302,7 +293,7 @@
  * La transition de la carte est neutralisée, elle freinerait l'animation.
  */
 .drag-clone,
-:is(.inv-card, .balatro-card, .gacha-card, .mkt-card, .pack-card).drag-clone {
+:is(.card, .pack-card).drag-clone {
     position: fixed;
     margin: 0;
     transition: none;

@@ -3,11 +3,14 @@
 <body>
 
 <!--
-  Rendu unique d'une carte, partagé par l'inventaire.
-  Toute modification du visuel d'une carte se fait ici ou card.css ou card-motion.js
+  Rendu unique d'une carte, partagé par l'inventaire, le deck, le gacha, le marché et la conversion.
+  Toute modification du visuel se fait ici, dans card.css ou dans card-motion.js.
+
+  La classe « card » porte tout l'aspect commun (card.css) ; baseClass n'ajoute que le
+  crochet propre à la page, pour son CSS de mise en page et son JavaScript.
 -->
 <div th:fragment="card(view, baseClass, dataId, showDescription, showCount, showShine)"
-     th:class="${baseClass} + ' ' + ${view.cssClasses}"
+     th:class="'card ' + ${baseClass} + ' ' + ${view.cssClasses}"
      th:attr="data-id=${dataId}">
 
 	<div th:if="${showShine}" class="card-shine"></div>

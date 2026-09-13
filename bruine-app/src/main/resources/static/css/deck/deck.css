@@ -93,7 +93,7 @@ body {
     gap: 0.7rem;
 }
 
-.balatro-card {
+.deck-card {
     cursor: grab;
     will-change: transform;
     transform-style: preserve-3d;
@@ -101,12 +101,16 @@ body {
     touch-action: none;
 }
 
-.balatro-card[hidden] {
+.deck-card:active {
+    cursor: grabbing;
+}
+
+.deck-card[hidden] {
     display: none;
 }
 
 /* Empêche le drag natif sur les enfants */
-.balatro-card * {
+.deck-card * {
     -webkit-user-drag: none;
     user-select: none;
     pointer-events: none;

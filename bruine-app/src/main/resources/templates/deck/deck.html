@@ -51,7 +51,7 @@
 			<th:block th:each="stack : ${inventoryStacks}">
 				<div th:replace="~{fragments/card :: card(
                          view            = ${stack.view},
-                         baseClass       = 'balatro-card',
+                         baseClass       = 'deck-card',
                          dataId          = ${#strings.listJoin(stack.cardIds, ',')},
                          showDescription = true,
                          showCount       = ${stack.count > 1},
@@ -99,7 +99,7 @@
     });
 
     function stacks() {
-        return Array.from(document.querySelectorAll('#inv-cards .balatro-card'));
+        return Array.from(document.querySelectorAll('#inv-cards .deck-card'));
     }
 
     function ids(card) {
@@ -195,7 +195,7 @@
     }
 
     function deckSize() {
-        return deckZone().querySelectorAll('.balatro-card').length;
+        return deckZone().querySelectorAll('.deck-card').length;
     }
 
     function updateUI() {
@@ -211,7 +211,7 @@
         /* On repart des cartes réellement posées, en gardant le jeton CSRF. */
         form.querySelectorAll('input[name="cardIds"]').forEach(i => i.remove());
 
-        document.querySelectorAll('#deck-zone .balatro-card').forEach(card => {
+        document.querySelectorAll('#deck-zone .deck-card').forEach(card => {
             const input = document.createElement('input');
             input.type = 'hidden';
             input.name = 'cardIds';
