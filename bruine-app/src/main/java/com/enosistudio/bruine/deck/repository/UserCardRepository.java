@@ -1,12 +1,11 @@
 package com.enosistudio.bruine.deck.repository;
 
-import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.UserCard;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 /**
  * Voir la doc
@@ -15,7 +14,9 @@ import java.util.Optional;
 @Repository
 public interface UserCardRepository extends JpaRepository<UserCard, Long> {
 
+    /**
+     * Toutes les cartes du joueur avec leur récompense, dans l'ordre d'obtention.
+     */
     @EntityGraph(attributePaths = {"gachaReward"})
-    Optional<UserCard> findFirstBySteamUserIdAndGachaRewardIdAndFinish(
-            Long steamUserId, Long gachaRewardId, ECardFinish finish);
+    List<UserCard> findBySteamUserIdOrderById(Long steamUserId);
 }

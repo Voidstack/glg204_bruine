@@ -1,14 +1,11 @@
 package com.enosistudio.bruine.steam.model;
 
-import com.enosistudio.bruine.card.UserCard;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Setter
 @Getter
@@ -53,9 +50,6 @@ public class SteamUser {
      */
     @Column(name = "current_playtime_minutes")
     private Long currentPlaytimeMinutes;
-
-    @OneToMany(mappedBy = "steamUser", fetch = FetchType.LAZY)
-    private List<UserCard> cards = new ArrayList<>();
 
     public SteamUser() {
     }

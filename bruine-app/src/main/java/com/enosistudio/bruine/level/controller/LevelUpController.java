@@ -30,9 +30,9 @@ public class LevelUpController {
 
     @GetMapping
     public ModelAndView levelUpPage() {
-        SteamUser user = currentSteamUser.requireWithRewards();
+        SteamUser user = currentSteamUser.require();
 
-        List<ConvertibleCardDTO> cards = levelUpService.findConvertibleCards(user);
+        List<ConvertibleCardDTO> cards = levelUpService.findConvertibleCards(user.getId());
         long totalCards = cards.stream().mapToLong(ConvertibleCardDTO::count).sum();
 
         ModelAndView mav = new ModelAndView("levelup/levelup");
@@ -42,10 +42,6 @@ public class LevelUpController {
         return mav;
     }
 
-    /**
-     * Le joueur est chargé sans sa collection : la conversion supprime des cartes, et
-     * Hibernate tenterait sinon de fusionner une collection contenant des lignes détruites.
-     */
     @PostMapping("/convert")
     @ResponseBody
     public ResponseEntity<ConvertResultDTO> convert(@RequestBody List<ConvertRequestDTO> items) {

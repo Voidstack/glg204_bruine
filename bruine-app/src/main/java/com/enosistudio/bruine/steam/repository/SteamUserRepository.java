@@ -2,7 +2,6 @@ package com.enosistudio.bruine.steam.repository;
 
 import com.enosistudio.bruine.steam.model.SteamUser;
 import jakarta.persistence.LockModeType;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -31,12 +30,6 @@ public interface SteamUserRepository extends JpaRepository<SteamUser, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<SteamUser> findForUpdateBySteamId(String steamId);
-
-    /**
-     * Joueur et sa collection déjà chargée, pour les pages qui parcourent ses cartes.
-     */
-    @EntityGraph(attributePaths = {"cards", "cards.gachaReward"})
-    Optional<SteamUser> findWithRewardsBySteamId(String steamId);
 
     /**
      * Classement par temps de jeu. Un temps inconnu (profil privé) vaut null et se range en fin

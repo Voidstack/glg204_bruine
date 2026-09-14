@@ -3,6 +3,7 @@ package com.enosistudio.bruine.market.service;
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
 import com.enosistudio.bruine.card.UserCard;
+import com.enosistudio.bruine.card.UserCardService;
 import com.enosistudio.bruine.common.BusinessRuleException;
 import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({MarketService.class, DeckService.class})
+@Import({MarketService.class, DeckService.class, UserCardService.class})
 class MarketServiceTest {
 
     @Autowired

@@ -72,6 +72,8 @@
 - `eachRarityHasItsOwnBase` : chaque rareté a sa propre base.
 - `aMultiplierOfZeroStillPaysTheRarityBase` : un multiplicateur à 0 rapporte quand même la base.
 - `aCardListedOnTheMarketIsNotDestroyed` : une carte en vente n'est pas convertie.
+- `aCardPlacedInTheDeckIsNotDestroyed` : une carte posée dans le deck n'est pas convertie.
+- `theFreeCopyIsConvertedWhileTheDeckCopyStays` : quand un exemplaire est dans le deck, c'est l'exemplaire libre de la même carte qui est converti.
 - `aCardThePlayerDoesNotOwnIsIgnored` : une carte non possédée ne rapporte rien.
 - `anUnknownFinishNameIsIgnored` : une finition inconnue est ignorée.
 - `severalRequestsAreAddedUpAndCreditedToThePlayer` : plusieurs conversions s'additionnent et sont créditées.

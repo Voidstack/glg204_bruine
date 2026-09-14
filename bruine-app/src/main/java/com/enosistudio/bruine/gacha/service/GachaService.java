@@ -63,7 +63,6 @@ public class GachaService {
     /**
      * Configuration courante, ou une configuration par défaut si la ligne est absente.
      */
-    @Transactional(readOnly = true)
     public GachaConfig currentConfig() {
         return gachaConfigRepository.findById(CONFIG_ID).orElseGet(GachaConfig::new);
     }

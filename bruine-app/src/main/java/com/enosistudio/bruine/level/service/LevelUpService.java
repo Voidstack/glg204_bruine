@@ -10,15 +10,14 @@ import com.enosistudio.bruine.gacha.service.GachaService;
 import com.enosistudio.bruine.level.dto.ConvertRequestDTO;
 import com.enosistudio.bruine.level.dto.ConvertResultDTO;
 import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
-import com.enosistudio.bruine.market.service.MarketService;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Conversion de cartes en expérience.
@@ -31,31 +30,26 @@ public class LevelUpService {
 
     private final SteamUserService steamUserService;
     private final UserCardRepository userCardRepository;
-    private final MarketService marketService;
     private final UserCardService userCardService;
     private final GachaService gachaService;
 
     public LevelUpService(SteamUserService steamUserService,
                           UserCardRepository userCardRepository,
-                          MarketService marketService,
                           UserCardService userCardService,
                           GachaService gachaService) {
         this.steamUserService = steamUserService;
         this.userCardRepository = userCardRepository;
-        this.marketService = marketService;
         this.userCardService = userCardService;
         this.gachaService = gachaService;
     }
 
     /**
-     * Cartes convertibles du joueur, avec l'expérience que rapporte chaque exemplaire.
-     *
-     * @param user joueur chargé avec sa collection
+     * Cartes convertibles du joueur (ni en vente, ni dans le deck), avec l'expérience que rapporte chaque exemplaire.
      */
     @Transactional(readOnly = true)
-    public List<ConvertibleCardDTO> findConvertibleCards(SteamUser user) {
+    public List<ConvertibleCardDTO> findConvertibleCards(Long userId) {
         GachaConfig config = gachaService.currentConfig();
-        return userCardService.findOwnedCards(user).stream()
+        return userCardService.findFreeCards(userId).stream()
                 .map(card -> new ConvertibleCardDTO(
                         card.reward(),
                         card.finish(),
@@ -65,22 +59,22 @@ public class LevelUpService {
     }
 
     /**
-     * Détruit un exemplaire par demande recevable et crédite l'expérience correspondante.
+     * Détruit un exemplaire libre par demande recevable et crédite l'expérience correspondante.
      * <p>
-     * Une demande est ignorée si sa finition est inconnue, si le joueur ne possède plus
-     * la carte, ou si l'exemplaire est mis en vente sur le marché.
-     * il est relu sous verrou avant toute modification,  ne détruisent pas deux fois le même exemplaire.
+     * Une demande est ignorée si sa finition est inconnue ou si le joueur n'a plus d'exemplaire libre
+     * (ni en vente, ni dans le deck) de cette carte.
      */
     @Transactional
     public ConvertResultDTO convert(SteamUser user, List<ConvertRequestDTO> requests) {
         // verrou pris en premier : les lectures suivantes voient l'état laissé par une conversion concurrente
         SteamUser player = steamUserService.lock(user.getId());
         GachaConfig config = gachaService.currentConfig();
-        Set<Long> listedCardIds = marketService.findAllListedCardIds();
+        List<UserCard> freeCards = new ArrayList<>(userCardService.findFree(player.getId()));
         long xpGained = 0;
 
         for (ConvertRequestDTO request : requests) {
-            Optional<UserCard> convertible = findConvertible(player, request, listedCardIds);
+            Optional<UserCard> convertible = parseFinish(request.finish())
+                    .flatMap(finish -> takeFreeCard(freeCards, request.rewardId(), finish));
             if (convertible.isEmpty()) {
                 continue;
             }
@@ -93,11 +87,16 @@ public class LevelUpService {
         return new ConvertResultDTO(xpGained, player.getTotalExperience());
     }
 
-    private Optional<UserCard> findConvertible(SteamUser user, ConvertRequestDTO request, Set<Long> listedCardIds) {
-        return parseFinish(request.finish())
-                .flatMap(finish -> userCardRepository
-                        .findFirstBySteamUserIdAndGachaRewardIdAndFinish(user.getId(), request.rewardId(), finish))
-                .filter(card -> !listedCardIds.contains(card.getId()));
+    /**
+     * Retire des cartes libres le premier exemplaire correspondant, pour qu'une demande suivante n'y touche plus.
+     */
+    private Optional<UserCard> takeFreeCard(List<UserCard> freeCards, Long rewardId, ECardFinish finish) {
+        Optional<UserCard> card = freeCards.stream()
+                .filter(candidate -> candidate.getGachaReward().getId().equals(rewardId)
+                        && candidate.getFinish() == finish)
+                .findFirst();
+        card.ifPresent(freeCards::remove);
+        return card;
     }
 
     private Optional<ECardFinish> parseFinish(String finish) {

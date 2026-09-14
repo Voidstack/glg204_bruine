@@ -47,11 +47,6 @@ public class SteamUserService {
         return repository.findBySteamId(steamId);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<SteamUser> findBySteamIdWithRewards(String steamId) {
-        return repository.findWithRewardsBySteamId(steamId);
-    }
-
     @Transactional
     public SteamUser save(SteamUser user) {
         return repository.save(user);

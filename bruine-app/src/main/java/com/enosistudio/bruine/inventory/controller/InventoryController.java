@@ -33,9 +33,9 @@ public class InventoryController {
 
     @GetMapping
     public ModelAndView inventory() {
-        SteamUser user = currentSteamUser.requireWithRewards();
+        SteamUser user = currentSteamUser.require();
 
-        List<CardStackDTO> cards = userCardService.findOwnedCards(user);
+        List<CardStackDTO> cards = userCardService.findOwnedCards(user.getId());
 
         ModelAndView mav = new ModelAndView("inventory/inventory");
         mav.addObject("cards", cards);

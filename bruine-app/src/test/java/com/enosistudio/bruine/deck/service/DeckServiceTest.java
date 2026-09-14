@@ -3,6 +3,7 @@ package com.enosistudio.bruine.deck.service;
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
 import com.enosistudio.bruine.card.UserCard;
+import com.enosistudio.bruine.card.UserCardService;
 import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
@@ -22,14 +23,13 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(DeckService.class)
+@Import({DeckService.class, UserCardService.class})
 class DeckServiceTest {
 
     @Autowired
@@ -71,7 +71,7 @@ class DeckServiceTest {
 
         deckService.saveDeck(owner.getId(), List.of(first, second));
 
-        assertEquals(Set.of(first, second), deckService.findDeckCardIds(owner.getId()));
+        assertEquals(List.of(first, second), deckService.findDeckCardIds(owner.getId()));
     }
 
     @Test
@@ -99,7 +99,7 @@ class DeckServiceTest {
 
         deckService.saveDeck(owner.getId(), List.of(after));
 
-        assertEquals(Set.of(after), deckService.findDeckCardIds(owner.getId()));
+        assertEquals(List.of(after), deckService.findDeckCardIds(owner.getId()));
     }
 
     @Test
@@ -118,7 +118,7 @@ class DeckServiceTest {
 
         deckService.saveDeck(owner.getId(), List.of(mine, theirs));
 
-        assertEquals(Set.of(mine), deckService.findDeckCardIds(owner.getId()));
+        assertEquals(List.of(mine), deckService.findDeckCardIds(owner.getId()));
     }
 
     @Test
@@ -129,7 +129,7 @@ class DeckServiceTest {
 
         deckService.saveDeck(owner.getId(), List.of(kept, onSale.getId()));
 
-        assertEquals(Set.of(kept), deckService.findDeckCardIds(owner.getId()));
+        assertEquals(List.of(kept), deckService.findDeckCardIds(owner.getId()));
     }
 
     @Test
@@ -138,7 +138,7 @@ class DeckServiceTest {
 
         deckService.saveDeck(owner.getId(), List.of(existing, 999999L));
 
-        assertEquals(Set.of(existing), deckService.findDeckCardIds(owner.getId()));
+        assertEquals(List.of(existing), deckService.findDeckCardIds(owner.getId()));
     }
 
     @Test

@@ -5,12 +5,10 @@ import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Voir la doc
@@ -37,9 +35,6 @@ public interface MarketListingRepository extends JpaRepository<MarketListing, Lo
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<MarketListing> findForUpdateById(Long id);
-
-    @Query("SELECT ml.userCard.id FROM MarketListing ml")
-    Set<Long> findAllListedCardIds();
 
     /**
      * Une annonce court-elle déjà pour cet exemplaire ? La colonne est unique en base,

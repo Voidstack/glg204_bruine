@@ -1,38 +1,73 @@
 package com.enosistudio.bruine.card;
 
+import com.enosistudio.bruine.deck.model.Deck;
+import com.enosistudio.bruine.deck.repository.DeckRepository;
+import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.gacha.model.GachaReward;
-import com.enosistudio.bruine.market.service.MarketService;
-import com.enosistudio.bruine.steam.model.SteamUser;
+import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Vue de la collection d'un joueur, regroupée et triée pour l'affichage.
+ * Collection d'un joueur : seul endroit qui décide quelles cartes sont en vente, dans le deck ou libres.
  */
 @Service
 public class UserCardService {
 
-    private final MarketService marketService;
+    private final UserCardRepository userCardRepository;
+    private final MarketListingRepository marketListingRepository;
+    private final DeckRepository deckRepository;
 
-    public UserCardService(MarketService marketService) {
-        this.marketService = marketService;
+    public UserCardService(UserCardRepository userCardRepository,
+                           MarketListingRepository marketListingRepository,
+                           DeckRepository deckRepository) {
+        this.userCardRepository = userCardRepository;
+        this.marketListingRepository = marketListingRepository;
+        this.deckRepository = deckRepository;
     }
 
     /**
-     * Cartes que le joueur détient réellement, triées par rareté décroissante.
-     * Les cartes mises en vente sont exclues : elles sont bloquées tant que l'annonce court.
-     *
-     * @param user joueur chargé avec sa collection
+     * Cartes du joueur qui ne sont pas en vente : elles sont bloquées tant que l'annonce court.
+     * Les cartes du deck en font partie.
      */
-    @Transactional(readOnly = true)
-    public List<CardStackDTO> findOwnedCards(SteamUser user) {
-        Set<Long> listedCardIds = marketService.findAllListedCardIds();
-        List<UserCard> owned = user.getCards().stream()
-                .filter(card -> !listedCardIds.contains(card.getId()))
+    public List<UserCard> findNotListed(Long userId) {
+        Set<Long> listedIds = marketListingRepository.findBySellerIdOrderByCreatedAtDesc(userId).stream()
+                .map(listing -> listing.getUserCard().getId())
+                .collect(Collectors.toSet());
+        return userCardRepository.findBySteamUserIdOrderById(userId).stream()
+                .filter(card -> !listedIds.contains(card.getId()))
                 .toList();
-        return groupByCardSortedByRarity(owned);
+    }
+
+    /**
+     * Cartes libres du joueur, ni en vente ni dans son deck : les seules qui peuvent être vendues ou converties.
+     */
+    public List<UserCard> findFree(Long userId) {
+        Set<Long> deckIds = deckRepository.findWithCardsBySteamUserId(userId)
+                .map(Deck::getCards)
+                .orElse(List.of())
+                .stream()
+                .map(UserCard::getId)
+                .collect(Collectors.toSet());
+        return findNotListed(userId).stream()
+                .filter(card -> !deckIds.contains(card.getId()))
+                .toList();
+    }
+
+    /**
+     * Cartes non vendues du joueur, empilées et triées par rareté décroissante.
+     */
+    public List<CardStackDTO> findOwnedCards(Long userId) {
+        return groupByCardSortedByRarity(findNotListed(userId));
+    }
+
+    /**
+     * Cartes libres du joueur, empilées et triées par rareté décroissante.
+     */
+    public List<CardStackDTO> findFreeCards(Long userId) {
+        return groupByCardSortedByRarity(findFree(userId));
     }
 
     /**
@@ -67,8 +102,7 @@ public class UserCardService {
         }
 
         // De la plus rare à la plus commune, soit l'ordre de déclaration de l'enum inversé
-        List<ECardRarity> rarities = new ArrayList<>(List.of(ECardRarity.values()));
-        Collections.reverse(rarities);
+        List<ECardRarity> rarities = new ArrayList<>(List.of(ECardRarity.values())).reversed();
 
         List<CardStackDTO> sorted = new ArrayList<>(rewardByKey.size());
         for (ECardRarity rarity : rarities) {

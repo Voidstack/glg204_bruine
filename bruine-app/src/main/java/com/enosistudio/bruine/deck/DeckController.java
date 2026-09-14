@@ -49,17 +49,17 @@ public class DeckController {
 
     @GetMapping
     public ModelAndView page() {
-        SteamUser user = currentSteamUser.requireWithRewards();
+        SteamUser user = currentSteamUser.require();
 
         ModelAndView mav = new ModelAndView("deck/deck");
-        mav.addObject("inventoryStacks", userCardService.findOwnedCards(user));
+        mav.addObject("inventoryStacks", userCardService.findOwnedCards(user.getId()));
         mav.addObject("deckCardIds", deckService.findDeckCardIds(user.getId()));
         return mav;
     }
 
     @PostMapping
     public String save(@RequestParam(required = false) List<Long> cardIds) {
-        SteamUser user = currentSteamUser.requireWithRewards();
+        SteamUser user = currentSteamUser.require();
 
         deckService.saveDeck(user.getId(), cardIds);
         return "redirect:/deck";

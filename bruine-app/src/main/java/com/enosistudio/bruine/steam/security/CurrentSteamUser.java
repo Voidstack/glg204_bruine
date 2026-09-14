@@ -24,19 +24,10 @@ public class CurrentSteamUser {
     }
 
     /**
-     * Joueur connecté, sans sa collection de cartes.
+     * Joueur connecté.
      */
     public Optional<SteamUser> find() {
         return steamId().flatMap(steamUserService::findBySteamId);
-    }
-
-    /**
-     * Joueur connecté avec sa collection de cartes déjà chargée.
-     * À réserver aux pages qui parcourent la collection, pour éviter une initialisation
-     * paresseuse hors transaction.
-     */
-    public Optional<SteamUser> findWithRewards() {
-        return steamId().flatMap(steamUserService::findBySteamIdWithRewards);
     }
 
     /**
@@ -46,13 +37,6 @@ public class CurrentSteamUser {
      */
     public SteamUser require() {
         return find().orElseThrow(SteamSessionExpiredException::new);
-    }
-
-    /**
-     * Variante de {@link #require()} avec la collection de cartes déjà chargée.
-     */
-    public SteamUser requireWithRewards() {
-        return findWithRewards().orElseThrow(SteamSessionExpiredException::new);
     }
 
     /**

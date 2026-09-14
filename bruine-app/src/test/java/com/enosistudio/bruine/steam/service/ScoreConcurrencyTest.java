@@ -3,6 +3,7 @@ package com.enosistudio.bruine.steam.service;
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
 import com.enosistudio.bruine.card.UserCard;
+import com.enosistudio.bruine.card.UserCardService;
 import com.enosistudio.bruine.common.BusinessRuleException;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
@@ -40,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 @ActiveProfiles("test")
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import({MarketService.class, DeckService.class, GachaService.class, GachaRewardService.class, SteamUserService.class})
+@Import({MarketService.class, DeckService.class, UserCardService.class, GachaService.class, GachaRewardService.class, SteamUserService.class})
 class ScoreConcurrencyTest {
 
     private static final int SIMULTANEOUS = 10;

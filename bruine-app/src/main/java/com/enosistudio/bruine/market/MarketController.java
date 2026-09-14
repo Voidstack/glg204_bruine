@@ -22,10 +22,10 @@ public class MarketController {
 
     @GetMapping
     public ModelAndView page() {
-        SteamUser user = currentSteamUser.requireWithRewards();
+        SteamUser user = currentSteamUser.require();
 
         ModelAndView mav = new ModelAndView("market/market");
-        mav.addObject("myInventory", marketService.findSellableCards(user));
+        mav.addObject("myInventory", marketService.findSellableCards(user.getId()));
         mav.addObject("allListings", marketService.findOtherListings(user.getId()));
         mav.addObject("myListings", marketService.findMyListings(user.getId()));
         return mav;
@@ -35,7 +35,7 @@ public class MarketController {
     public String sell(@RequestParam Long cardId,
                        @RequestParam int price,
                        RedirectAttributes redirectAttributes) {
-        SteamUser user = currentSteamUser.requireWithRewards();
+        SteamUser user = currentSteamUser.require();
 
         marketService.sell(user, cardId, price);
         redirectAttributes.addFlashAttribute("successMessage", "Carte mise en vente avec succès !");
@@ -44,7 +44,7 @@ public class MarketController {
 
     @PostMapping("/buy/{id}")
     public String buy(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        SteamUser user = currentSteamUser.requireWithRewards();
+        SteamUser user = currentSteamUser.require();
 
         marketService.buy(user, id);
         redirectAttributes.addFlashAttribute("successMessage", "Carte achetée avec succès !");
@@ -53,7 +53,7 @@ public class MarketController {
 
     @PostMapping("/cancel/{id}")
     public String cancel(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        SteamUser user = currentSteamUser.requireWithRewards();
+        SteamUser user = currentSteamUser.require();
 
         marketService.cancel(user, id);
         redirectAttributes.addFlashAttribute("successMessage", "Annonce annulée, carte récupérée dans votre inventaire.");

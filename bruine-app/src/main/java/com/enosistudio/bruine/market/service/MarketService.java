@@ -1,6 +1,7 @@
 package com.enosistudio.bruine.market.service;
 
 import com.enosistudio.bruine.card.UserCard;
+import com.enosistudio.bruine.card.UserCardService;
 import com.enosistudio.bruine.common.BusinessRuleException;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class MarketService {
@@ -22,15 +22,18 @@ public class MarketService {
     private final UserCardRepository userCardRepository;
     private final SteamUserRepository steamUserRepository;
     private final DeckService deckService;
+    private final UserCardService userCardService;
 
     public MarketService(MarketListingRepository marketListingRepository,
                          UserCardRepository userCardRepository,
                          SteamUserRepository steamUserRepository,
-                         DeckService deckService) {
+                         DeckService deckService,
+                         UserCardService userCardService) {
         this.marketListingRepository = marketListingRepository;
         this.userCardRepository = userCardRepository;
         this.steamUserRepository = steamUserRepository;
         this.deckService = deckService;
+        this.userCardService = userCardService;
     }
 
     /**
@@ -52,22 +55,10 @@ public class MarketService {
 
     /**
      * Cartes que le joueur peut mettre en vente : ni déjà en vente, ni dans son deck.
-     *
-     * @param user joueur chargé avec sa collection
      */
     @Transactional(readOnly = true)
-    public List<UserCard> findSellableCards(SteamUser user) {
-        Set<Long> listedIds = findAllListedCardIds();
-        Set<Long> deckCardIds = deckService.findDeckCardIds(user.getId());
-        return user.getCards().stream()
-                .filter(card -> !listedIds.contains(card.getId()))
-                .filter(card -> !deckCardIds.contains(card.getId()))
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public Set<Long> findAllListedCardIds() {
-        return marketListingRepository.findAllListedCardIds();
+    public List<UserCard> findSellableCards(Long userId) {
+        return userCardService.findFree(userId);
     }
 
     @Transactional
@@ -90,9 +81,7 @@ public class MarketService {
             throw new BusinessRuleException("Cette carte est déjà en vente.");
         }
 
-        // Bloquer la vente si cette carte précise est dans le deck
-        Set<Long> deckCardIds = deckService.findDeckCardIds(seller.getId());
-        if (deckCardIds.contains(card.getId())) {
+        if (deckService.findDeckCardIds(seller.getId()).contains(card.getId())) {
             throw new BusinessRuleException(
                     "Cette carte est dans votre deck, retirez-la du deck avant de la vendre.");
         }

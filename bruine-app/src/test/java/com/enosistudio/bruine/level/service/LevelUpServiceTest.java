@@ -4,6 +4,8 @@ import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
 import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.card.UserCardService;
+import com.enosistudio.bruine.deck.model.Deck;
+import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
@@ -17,7 +19,6 @@ import com.enosistudio.bruine.level.dto.ConvertResultDTO;
 import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
-import com.enosistudio.bruine.market.service.MarketService;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import com.enosistudio.bruine.steam.service.SteamUserService;
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 @ActiveProfiles("test")
 @Import({LevelUpService.class, SteamUserService.class, UserCardService.class,
-        MarketService.class, DeckService.class, GachaService.class, GachaRewardService.class})
+        DeckService.class, GachaService.class, GachaRewardService.class})
 class LevelUpServiceTest {
 
     @Autowired
@@ -59,6 +60,12 @@ class LevelUpServiceTest {
 
     @Autowired
     private TestEntityManager entityManager;
+
+    @Autowired
+    private DeckService deckService;
+
+    @Autowired
+    private DeckRepository deckRepository;
 
     private SteamUser owner;
 
@@ -108,6 +115,34 @@ class LevelUpServiceTest {
 
         assertEquals(0, result.xpGained());
         assertEquals(1, userCardRepository.count());
+    }
+
+    @Test
+    void aCardPlacedInTheDeckIsNotDestroyed() {
+        UserCard inDeck = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+        deckService.saveDeck(owner.getId(), List.of(inDeck.getId()));
+
+        ConvertResultDTO result = convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+
+        assertEquals(0, result.xpGained());
+        assertEquals(1, userCardRepository.count());
+    }
+
+    @Test
+    void theFreeCopyIsConvertedWhileTheDeckCopyStays() {
+        UserCard inDeck = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+        UserCard spare = new UserCard();
+        spare.setSteamUser(owner);
+        spare.setGachaReward(inDeck.getGachaReward());
+        spare.setFinish(ECardFinish.NORMAL);
+        userCardRepository.save(spare);
+        deckService.saveDeck(owner.getId(), List.of(inDeck.getId()));
+
+        ConvertResultDTO result = levelUpService.convert(reloadOwner(),
+                List.of(new ConvertRequestDTO(inDeck.getGachaReward().getId(), "NORMAL")));
+
+        assertEquals(500, result.xpGained());
+        assertEquals(List.of(inDeck.getId()), userCardRepository.findAll().stream().map(UserCard::getId).toList());
     }
 
     @Test
@@ -161,7 +196,7 @@ class LevelUpServiceTest {
         createCard(ECardRarity.EPIC, ECardFinish.NORMAL);
         createCard(ECardRarity.EPIC, ECardFinish.NEGATIVE);
 
-        List<ConvertibleCardDTO> offered = levelUpService.findConvertibleCards(reloadOwnerWithCards());
+        List<ConvertibleCardDTO> offered = levelUpService.findConvertibleCards(reloadOwner().getId());
 
         assertEquals(2, offered.size());
         assertEquals(200, offered.get(0).xp(), "épique en finition simple");
@@ -172,7 +207,9 @@ class LevelUpServiceTest {
         SteamUser user = new SteamUser();
         user.setSteamId("76561190000000001");
         user.setUsername("joueur");
-        return steamUserRepository.save(user);
+        steamUserRepository.save(user);
+        deckRepository.save(new Deck(user));
+        return user;
     }
 
     private GachaReward createReward(ECardRarity rarity) {
@@ -208,11 +245,5 @@ class LevelUpServiceTest {
         entityManager.flush();
         entityManager.clear();
         return steamUserRepository.findById(owner.getId()).orElseThrow();
-    }
-
-    private SteamUser reloadOwnerWithCards() {
-        SteamUser reloaded = reloadOwner();
-        reloaded.getCards().size();
-        return reloaded;
     }
 }
