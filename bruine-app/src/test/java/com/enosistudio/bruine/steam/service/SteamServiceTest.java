@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
@@ -14,10 +13,8 @@ import java.net.SocketTimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class SteamServiceTest {
 
@@ -29,23 +26,6 @@ class SteamServiceTest {
 
     private final SteamService steamService = new SteamService(new RestTemplate(), new ObjectMapper(),
             Validation.buildDefaultValidatorFactory().getValidator(), "cle-factice");
-
-    @Test
-    void aPlayerIsOnlineOnlyWhenHisPersonaStateIsNotZero() throws SteamException {
-        RestTemplate restTemplate = new RestTemplate();
-        MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
-        server.expect(anything()).andRespond(withSuccess(
-                "{\"response\": {\"players\": [{\"steamid\": \"76561198000000001\", \"personastate\": 3}]}}",
-                MediaType.APPLICATION_JSON));
-        server.expect(anything()).andRespond(withSuccess(
-                "{\"response\": {\"players\": [{\"steamid\": \"76561198000000002\", \"personastate\": 0}]}}",
-                MediaType.APPLICATION_JSON));
-        SteamService service = new SteamService(restTemplate, new ObjectMapper(),
-                Validation.buildDefaultValidatorFactory().getValidator(), "cle-factice");
-
-        assertTrue(service.isOnline("76561198000000001"));
-        assertFalse(service.isOnline("76561198000000002"));
-    }
 
     @Test
     void aSteamApiFailureNeverExposesTheApiKey() {

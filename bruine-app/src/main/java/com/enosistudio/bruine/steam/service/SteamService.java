@@ -62,13 +62,6 @@ public class SteamService {
     }
 
     /**
-     * Vrai si le joueur est en ligne sur Steam ({@code personastate} différent de 0).
-     */
-    public boolean isOnline(String steamId) throws SteamException {
-        return getUserData(steamId).get("personastate") instanceof Number state && state.intValue() != 0;
-    }
-
-    /**
      * Retourne tous les jeux possédés par le joueur.
      */
     public List<SteamGameDTO> getOwnedGames(String steamId) throws SteamException {

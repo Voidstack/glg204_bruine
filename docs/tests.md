@@ -31,7 +31,6 @@
 
 ## steam.service.SteamServiceTest
 
-- `aPlayerIsOnlineOnlyWhenHisPersonaStateIsNotZero` : un joueur est « en ligne sur Steam » seulement quand son `personastate` n'est pas 0 (réponses Steam simulées).
 - `aSteamApiFailureNeverExposesTheApiKey` : une panne réseau de l'API Steam (simulée) ne fait apparaître la clé d'API dans aucun message d'exception.
 - `anIncompleteAssertionIsRejectedBeforeContactingSteam` : une assertion OpenID incomplète (signature vide) est refusée par la validation, sans appel à Steam.
 - `anAssertionMeantForAnotherSiteIsRejected` : une assertion OpenID avec un autre `return_to` est refusée.

@@ -18,7 +18,6 @@
 			<table class="table is-fullwidth is-hoverable">
 				<thead>
 				<tr>
-					<th></th>
 					<th>Pseudo Steam</th>
 					<th>Steam ID</th>
 					<th>Inscription</th>
@@ -29,15 +28,9 @@
 				</thead>
 				<tbody>
 				<tr th:if="${steamUsers.empty}">
-					<td colspan="7" class="has-text-centered has-text-grey">Aucun utilisateur inscrit.</td>
+					<td colspan="6" class="has-text-centered has-text-grey">Aucun utilisateur inscrit.</td>
 				</tr>
 				<tr th:each="u : ${steamUsers}">
-					<td class="is-vcentered has-text-centered" style="width: 2.5rem;">
-                            <span th:if="${onlineSteamIds.contains(u.steamId)}"
-                                  class="has-text-success" title="En ligne sur Steam">&#9679;</span>
-						<span th:unless="${onlineSteamIds.contains(u.steamId)}"
-						      class="has-text-danger" title="Hors ligne sur Steam">&#9679;</span>
-					</td>
 					<td class="is-vcentered" th:text="${u.username}"></td>
 					<td class="is-vcentered">
 						<a th:href="@{/steam/profile/{id}(id=${u.steamId})}"
