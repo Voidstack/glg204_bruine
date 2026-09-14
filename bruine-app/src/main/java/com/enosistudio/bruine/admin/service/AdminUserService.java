@@ -1,6 +1,7 @@
 package com.enosistudio.bruine.admin.service;
 
 import com.enosistudio.bruine.admin.exception.UsernameAlreadyExistsException;
+import com.enosistudio.bruine.admin.mfa.EAdminRole;
 import com.enosistudio.bruine.admin.model.AdminUser;
 import com.enosistudio.bruine.admin.repository.AdminUserRepository;
 import org.springframework.security.core.userdetails.User;
@@ -33,7 +34,7 @@ public class AdminUserService implements UserDetailsService {
             return User.builder()
                     .username(username)
                     .password(optAdminUser.get().getUserPassword())
-                    .roles("ADMIN")
+                    .authorities(EAdminRole.ADMIN.authority())
                     .build();
         } else {
             throw new UsernameNotFoundException(username);

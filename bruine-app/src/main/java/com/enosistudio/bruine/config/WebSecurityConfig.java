@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.config;
 
-import com.enosistudio.bruine.admin.mfa.AdminRoles;
 import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
+import com.enosistudio.bruine.admin.mfa.EAdminRole;
 import com.enosistudio.bruine.admin.mfa.MfaAuthenticationSuccessHandler;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationProvider;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -58,9 +58,9 @@ public class WebSecurityConfig {
                         // page de login (LoginController décide login vs dashboard selon l'auth)
                         .requestMatchers("/admin").permitAll()
                         // 2e facteur : accessible tant qu'on n'a pas fini le MFA
-                        .requestMatchers("/admin/mfa").hasAnyAuthority(AdminRoles.ADMIN, AdminRoles.PRE_MFA)
+                        .requestMatchers("/admin/mfa").hasAnyAuthority(EAdminRole.ADMIN.authority(), EAdminRole.PRE_MFA.authority())
                         // tout le reste de /admin/** exige un admin complet
-                        .anyRequest().hasAuthority(AdminRoles.ADMIN)
+                        .anyRequest().hasAuthority(EAdminRole.ADMIN.authority())
                 )
                 // non connecté -> page de login ; connecté sans le bon rôle (ex. PRE_MFA) -> /admin
                 .exceptionHandling(e -> e.accessDeniedHandler(

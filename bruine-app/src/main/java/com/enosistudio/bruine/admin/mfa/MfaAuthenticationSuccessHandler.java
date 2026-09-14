@@ -38,7 +38,7 @@ public class MfaAuthenticationSuccessHandler implements AuthenticationSuccessHan
 
         if (adminUserService.isMfaEnabled(username)) {
             Authentication preMfa = UsernamePasswordAuthenticationToken.authenticated(
-                    username, null, List.of(new SimpleGrantedAuthority(AdminRoles.PRE_MFA)));
+                    username, null, List.of(new SimpleGrantedAuthority(EAdminRole.PRE_MFA.authority())));
             adminSecurityContext.save(preMfa, request, response);
             response.sendRedirect(request.getContextPath() + "/admin/mfa");
         } else {

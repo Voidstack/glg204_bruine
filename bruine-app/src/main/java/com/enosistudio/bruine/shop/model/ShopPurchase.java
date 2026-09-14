@@ -35,19 +35,27 @@ public class ShopPurchase {
     @Column(name = "pack_emoji", nullable = false)
     private String packEmoji;
 
-    /** Points réellement crédités (base + bonus). */
+    /**
+     * Points réellement crédités (base + bonus).
+     */
     @Column(name = "points_credited", nullable = false)
     private int pointsCredited;
 
-    /** Montant payé en centimes (promo déduite). */
+    /**
+     * Montant payé en centimes (promo déduite).
+     */
     @Column(name = "price_cents_paid", nullable = false)
     private int priceCentsPaid;
 
-    /** Réduction promo appliquée au moment de l'achat (0 = aucune). */
+    /**
+     * Réduction promo appliquée au moment de l'achat (0 = aucune).
+     */
     @Column(name = "promo_percent", nullable = false)
     private int promoPercent;
 
-    /** Session Stripe Checkout à l'origine de l'achat (garde-fou d'idempotence). */
+    /**
+     * Session Stripe Checkout à l'origine de l'achat (garde-fou d'idempotence).
+     */
     @Column(name = "stripe_session_id", unique = true)
     private String stripeSessionId;
 
@@ -57,6 +65,6 @@ public class ShopPurchase {
 
     @Transient
     public String getPricePaidEuros() {
-        return String.format(Locale.US, "%.2f", priceCentsPaid / 100.0);
+        return String.format(Locale.FRANCE, "%.2f", priceCentsPaid / 100.0);
     }
 }

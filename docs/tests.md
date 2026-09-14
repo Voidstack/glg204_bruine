@@ -114,7 +114,7 @@
 - `aPromoWithoutDatesIsAlwaysRunning` : une promo sans dates est toujours active.
 - `aPromoIsIgnoredBeforeItStarts` : une promo pas encore commencée est ignorée.
 - `aPromoIsIgnoredOnceItIsOver` : une promo terminée est ignorée.
-- `bothPricesAreFormattedWithTwoDecimals` : les prix sont affichés avec deux décimales.
+- `bothPricesAreFormattedTheFrenchWayWithTwoDecimals` : les prix sont affichés au format français, virgule décimale et deux décimales.
 
 ## shop.service.ShopServiceTest
 

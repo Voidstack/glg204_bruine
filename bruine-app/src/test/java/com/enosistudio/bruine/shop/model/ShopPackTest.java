@@ -21,7 +21,7 @@ class ShopPackTest {
 
         assertFalse(plain.isPromoActive());
         assertEquals(499, plain.getEffectivePriceCents());
-        assertEquals("4.99", plain.getEffectivePriceEuros());
+        assertEquals("4,99", plain.getEffectivePriceEuros());
     }
 
     @Test
@@ -58,11 +58,11 @@ class ShopPackTest {
     }
 
     @Test
-    void bothPricesAreFormattedWithTwoDecimals() {
+    void bothPricesAreFormattedTheFrenchWayWithTwoDecimals() {
         ShopPack discounted = pack(500, 20);
 
-        assertEquals("5.00", discounted.getPriceEuros());
-        assertEquals("4.00", discounted.getEffectivePriceEuros());
+        assertEquals("5,00", discounted.getPriceEuros());
+        assertEquals("4,00", discounted.getEffectivePriceEuros());
     }
 
     private ShopPack pack(int priceCents, int promoPercent) {

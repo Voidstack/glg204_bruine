@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.admin.controller;
 
-import com.enosistudio.bruine.admin.mfa.AdminRoles;
 import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
+import com.enosistudio.bruine.admin.mfa.EAdminRole;
 import com.enosistudio.bruine.admin.service.AdminUserService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import jakarta.servlet.http.HttpSession;
@@ -29,7 +29,7 @@ public class AdminDashboardController {
                         Authentication authentication,
                         Model model) {
         boolean isAdmin = authentication != null
-                && authentication.getAuthorities().contains(new SimpleGrantedAuthority(AdminRoles.ADMIN));
+                && authentication.getAuthorities().contains(new SimpleGrantedAuthority(EAdminRole.ADMIN.authority()));
         if (isAdmin) {
             model.addAttribute("steamUsers", steamUserService.findAll());
             model.addAttribute("mfaEnabled", adminUserService.isMfaEnabled(authentication.getName()));
