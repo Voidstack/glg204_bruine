@@ -12,10 +12,7 @@ import java.util.Optional;
 /**
  * Accès au joueur Steam authentifié pour la requête en cours.
  * <p>
- * Ce composant existe pour ne plus recopier dans chaque contrôleur le même bloc de
- * vérification du jeton, qui doit distinguer une session Steam d'une session admin.
- * Un {@link Optional} vide signifie qu'aucun joueur n'est connecté, au contrôleur de
- * décider s'il redirige vers la connexion ou s'il répond une erreur.
+ * Un Optional vide signifie qu'aucun joueur n'est connecté, le contrôleur décide.
  */
 @Component
 public class CurrentSteamUser {

@@ -47,8 +47,7 @@ public class SteamService {
         String url = String.format("%s/ISteamUser/GetPlayerSummaries/v2/?key=%s&format=json&steamids=%s", STEAM_API_URL, steamApiToken, steamUserId);
         JsonNode players = get("GetPlayerSummaries", url).path("response").path("players");
 
-        // Steam répond 200 avec un tableau vide quand l'identifiant ne correspond à personne :
-        // sans ce contrôle, le cas partait en NoSuchElementException au premier next().
+        // Steam répond 200 avec un tableau vide quand l'identifiant ne correspond à personne
         if (!players.isArray() || players.isEmpty()) {
             throw new SteamException("Aucun profil Steam pour l'identifiant " + steamUserId);
         }
@@ -59,7 +58,6 @@ public class SteamService {
 
     /**
      * Retourne tous les jeux possédés par le joueur.
-     * Renvoie une liste vide si le profil est privé ou si l'API ne répond pas.
      */
     public List<SteamGameDTO> getOwnedGames(String steamId) throws SteamException {
         String url = String.format(
@@ -92,12 +90,7 @@ public class SteamService {
 
     /**
      * Interroge une API Steam et rend l'arbre JSON de sa réponse.
-     * <p>
-     * Panne réseau, code d'erreur HTTP et JSON illisible aboutissent tous à une
-     * {@link SteamException}. C'est ce qui permet aux appelants de ne plus attraper
-     * {@code Exception} pour se protéger d'une indisponibilité de Steam : la
-     * {@link RestClientException} d'un délai dépassé n'étant pas vérifiée, elle leur
-     * échapperait autrement.
+     * Panne réseau, code d'erreur HTTP et JSON illisible aboutissent tous à une SteamException.
      *
      * @param api nom de l'API interrogée, pour que le message dise laquelle a échoué
      */

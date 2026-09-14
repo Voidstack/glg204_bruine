@@ -7,13 +7,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.URI;
 
-/**
- * Affiche à l'utilisateur une action que les règles lui refusent.
- * Chaque contrôleur enveloppait auparavant ses appels dans le même try/catch pour reverser
- * le message en attribut flash. La règle est maintenant écrite une fois : le message est
- * déposé, et l'utilisateur revient sur la page d'où il venait.
- * La bannière est rendue par layout.html, donc le message s'affiche quelle que soit la page.
- */
 @ControllerAdvice
 public class BusinessRuleExceptionHandler {
 

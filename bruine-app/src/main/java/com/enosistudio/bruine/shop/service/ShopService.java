@@ -72,9 +72,6 @@ public class ShopService {
      * Crée une session Stripe Checkout pour l'achat d'un pack et renvoie l'URL de paiement
      * (page hébergée par Stripe). Le pack et l'utilisateur sont passés en metadata pour être
      * retrouvés au moment du crédit des points.
-     * <p>
-     * Aucune transaction ici : la méthode ne touche pas la base, et ouvrir une transaction
-     * autour d'un appel réseau immobiliserait une connexion JDBC le temps de la réponse Stripe.
      *
      * @param baseUrl base publique de l'application (ex. http://localhost:8080) pour les URLs de retour
      */

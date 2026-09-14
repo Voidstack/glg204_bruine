@@ -55,7 +55,7 @@ public class WebSecurityConfig {
                 .securityMatcher("/admin", "/admin/**")
                 .securityContext(sc -> sc.securityContextRepository(adminSecurityContext.repository()))
                 .authorizeHttpRequests(a -> a
-                        // page de login (LoginController décide login vs dashboard selon l'auth)
+                        // page de login
                         .requestMatchers("/admin").permitAll()
                         // 2e facteur : accessible tant qu'on n'a pas fini le MFA
                         .requestMatchers("/admin/mfa").hasAnyAuthority(EAdminRole.ADMIN.authority(), EAdminRole.PRE_MFA.authority())
