@@ -3,6 +3,8 @@ package com.enosistudio.bruine.deck;
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
 import com.enosistudio.bruine.card.UserCard;
+import com.enosistudio.bruine.deck.model.Deck;
+import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.gacha.model.GachaReward;
@@ -61,6 +63,9 @@ class DeckSharingTest {
     @Autowired
     private DeckService deckService;
 
+    @Autowired
+    private DeckRepository deckRepository;
+
     @MockitoBean
     private SteamService steamService;
 
@@ -71,6 +76,7 @@ class DeckSharingTest {
         user.setUsername("Joueuse");
         user.setScore(0);
         user = steamUserRepository.save(user);
+        deckRepository.save(new Deck(user));
 
         GachaReward reward = new GachaReward();
         reward.setRarity(ECardRarity.EPIC);

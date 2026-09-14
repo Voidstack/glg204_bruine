@@ -7,12 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Ancrage du deck vitrine d'un joueur au plus un par {@link SteamUser}.
- * Le deck ne porte pas la liste de ses cartes : c'est chaque {@link UserCard} qui pointe
- * vers son deck via sa propre colonne {@code deck_id}, ou vers rien si elle est hors
- * deck. Une carte n'appartenant qu'à un seul deck à la fois, une table de jointure N-N
- * n'aurait aucun sens ici.
+ * Deck vitrine d'un joueur, chaque SteamUser en possède exactement un, créé à son inscription.
+ * Il référence de 0 à 10 cartes du joueur, dans l'ordre choisi (table {@code deck_card}, colonne {@code slot}).
  */
 @Getter
 @Setter
@@ -21,6 +21,8 @@ import lombok.Setter;
 @Table(name = "deck")
 public class Deck {
 
+    public static final int MAX_CARDS = 10;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,4 +30,15 @@ public class Deck {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "steam_user_id", nullable = false, unique = true)
     private SteamUser steamUser;
+
+    @ManyToMany
+    @JoinTable(name = "deck_card",
+            joinColumns = @JoinColumn(name = "deck_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_card_id", unique = true))
+    @OrderColumn(name = "slot")
+    private List<UserCard> cards = new ArrayList<>();
+
+    public Deck(SteamUser steamUser) {
+        this.steamUser = steamUser;
+    }
 }

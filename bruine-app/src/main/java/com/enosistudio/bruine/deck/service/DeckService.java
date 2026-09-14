@@ -5,11 +5,10 @@ import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
-import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,33 +16,30 @@ import java.util.stream.Collectors;
 @Service
 public class DeckService {
 
-    private static final int MAX_DECK_SIZE = 10;
-
     private final DeckRepository deckRepository;
-    private final SteamUserRepository steamUserRepository;
     private final UserCardRepository userCardRepository;
     private final MarketListingRepository marketListingRepository;
 
     public DeckService(DeckRepository deckRepository,
-                       SteamUserRepository steamUserRepository,
                        UserCardRepository userCardRepository,
                        MarketListingRepository marketListingRepository) {
         this.deckRepository = deckRepository;
-        this.steamUserRepository = steamUserRepository;
         this.userCardRepository = userCardRepository;
         this.marketListingRepository = marketListingRepository;
     }
 
     /**
-     * Retourne les cartes actuellement dans le deck du user.
+     * Cartes du deck du joueur, dans l'ordre choisi.
      */
     @Transactional(readOnly = true)
     public List<UserCard> findDeckCards(Long userId) {
-        return userCardRepository.findBySteamUserIdAndDeckIsNotNull(userId);
+        return deckRepository.findWithCardsBySteamUserId(userId)
+                .map(deck -> List.copyOf(deck.getCards()))
+                .orElse(List.of());
     }
 
     /**
-     * Retourne les IDs des cartes actuellement dans le deck du user.
+     * Identifiants des cartes du deck du joueur.
      */
     @Transactional(readOnly = true)
     public Set<Long> findDeckCardIds(Long userId) {
@@ -53,37 +49,25 @@ public class DeckService {
     }
 
     /**
-     * Crée ou met à jour le deck avec les cartes sélectionnées.
-     * Vérifie que chaque carte appartient bien à l'utilisateur et n'est pas en vente.
+     * Remplace le contenu du deck par les cartes sélectionnées, dans l'ordre reçu.
+     * Ne sont retenues que les 10 premières cartes existantes, appartenant au joueur et hors marché.
      */
     @Transactional
     public void saveDeck(Long userId, List<Long> cardIds) {
-        SteamUser user = steamUserRepository.findById(userId).orElseThrow();
+        Deck deck = deckRepository.findBySteamUserId(userId).orElseThrow();
+        Set<Long> listedCardIds = marketListingRepository.findAllListedCardIds();
 
-        Deck deck = deckRepository.findBySteamUserId(userId).orElseGet(() -> {
-            Deck d = new Deck();
-            d.setSteamUser(user);
-            return deckRepository.save(d);
-        });
+        List<UserCard> cards = cardIds == null ? List.of() : cardIds.stream()
+                .distinct()
+                .map(id -> userCardRepository.findById(id).orElse(null))
+                .filter(card -> card != null
+                        && card.getSteamUser().getId().equals(userId)
+                        && !listedCardIds.contains(card.getId()))
+                .limit(Deck.MAX_CARDS)
+                .toList();
 
-        // Vide d'abord le deck : la sélection est recomposée en entier à chaque sauvegarde,
-        // jamais fusionnée avec l'ancienne. Une carte reposée juste après ne produira aucun
-        // UPDATE, Hibernate comparant l'état final à l'état initial.
-        userCardRepository.findBySteamUserIdAndDeckIsNotNull(userId)
-                .forEach(card -> card.setDeck(null));
-
-        if (cardIds != null) {
-            Set<Long> listedCardIds = marketListingRepository.findAllListedCardIds();
-            cardIds.stream()
-                    .limit(MAX_DECK_SIZE)
-                    .distinct()
-                    .map(id -> userCardRepository.findById(id).orElse(null))
-                    .filter(card -> card != null
-                            && card.getSteamUser().getId().equals(userId)
-                            && !listedCardIds.contains(card.getId()))
-                    .forEach(card -> card.setDeck(deck));
-            // Chaque carte est une entité gérée par la transaction en cours : poser son
-            // deck suffit, Hibernate écrit la mise à jour au flush sans save() explicite.
-        }
+        // Nouvelle liste plutôt que clear() : Hibernate supprime les anciennes lignes de deck_card avant
+        // d'insérer les nouvelles, sans conflit sur l'unicité d'une carte quand l'ordre change.
+        deck.setCards(new ArrayList<>(cards));
     }
 }

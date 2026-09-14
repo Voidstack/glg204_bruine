@@ -1,5 +1,7 @@
 package com.enosistudio.bruine.steam.service;
 
+import com.enosistudio.bruine.deck.model.Deck;
+import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import org.springframework.stereotype.Service;
@@ -15,9 +17,11 @@ import java.util.Optional;
 public class SteamUserService {
 
     private final SteamUserRepository repository;
+    private final DeckRepository deckRepository;
 
-    public SteamUserService(SteamUserRepository repository) {
+    public SteamUserService(SteamUserRepository repository, DeckRepository deckRepository) {
         this.repository = repository;
+        this.deckRepository = deckRepository;
     }
 
     @Transactional(readOnly = true)
@@ -54,8 +58,8 @@ public class SteamUserService {
     }
 
     /**
-     * Enregistre une connexion : crée le joueur à sa première visite, sinon met à jour sa date
-     * de connexion et son temps de jeu sans toucher au reste (score, expérience).
+     * Enregistre une connexion : crée le joueur et son deck vide à sa première visite, sinon met à jour
+     * sa date de connexion et son temps de jeu sans toucher au reste (score, expérience).
      *
      * @param totalPlaytimeMinutes temps de jeu Steam, {@code null} si le profil est privé
      */
@@ -63,6 +67,7 @@ public class SteamUserService {
     public SteamUser recordLogin(String steamId, String username, Long totalPlaytimeMinutes) {
         SteamUser user = repository.findForUpdateBySteamId(steamId)
                 .orElseGet(() -> new SteamUser(null, steamId, username));
+        boolean firstVisit = user.getId() == null;
         user.setLastLoginAt(LocalDateTime.now());
         if (totalPlaytimeMinutes != null) {
             if (user.getInitialPlaytimeMinutes() == null) {
@@ -70,7 +75,11 @@ public class SteamUserService {
             }
             user.setCurrentPlaytimeMinutes(totalPlaytimeMinutes);
         }
-        return repository.save(user);
+        SteamUser saved = repository.save(user);
+        if (firstVisit) {
+            deckRepository.save(new Deck(saved));
+        }
+        return saved;
     }
 
     /**

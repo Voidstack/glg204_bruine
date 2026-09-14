@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -49,6 +50,9 @@ class DeckServiceTest {
     @Autowired
     private GachaRewardRepository gachaRewardRepository;
 
+    @Autowired
+    private TestEntityManager entityManager;
+
     private SteamUser owner;
     private SteamUser stranger;
     private GachaReward dragon;
@@ -71,11 +75,20 @@ class DeckServiceTest {
     }
 
     @Test
-    void theDeckIsCreatedOnFirstSaveAndBelongsToItsOwner() {
-        deckService.saveDeck(owner.getId(), List.of(createCard(owner).getId()));
+    void theDeckKeepsTheOrderChosenByThePlayer() {
+        Long first = createCard(owner).getId();
+        Long second = createCard(owner).getId();
+        Long third = createCard(owner).getId();
+        deckService.saveDeck(owner.getId(), List.of(first, second, third));
+        entityManager.flush();
+        entityManager.clear();
 
-        Deck deck = deckRepository.findBySteamUserId(owner.getId()).orElseThrow();
-        assertEquals(owner.getId(), deck.getSteamUser().getId());
+        deckService.saveDeck(owner.getId(), List.of(third, first, second));
+        entityManager.flush();
+        entityManager.clear();
+
+        assertEquals(List.of(third, first, second),
+                deckService.findDeckCards(owner.getId()).stream().map(UserCard::getId).toList());
     }
 
     @Test
@@ -150,7 +163,7 @@ class DeckServiceTest {
     }
 
     @Test
-    void aPlayerWithoutADeckHoldsNoCard() {
+    void aNewDeckHoldsNoCard() {
         assertTrue(deckService.findDeckCardIds(owner.getId()).isEmpty());
         assertTrue(deckService.findDeckCards(owner.getId()).isEmpty());
     }
@@ -159,7 +172,9 @@ class DeckServiceTest {
         SteamUser user = new SteamUser();
         user.setSteamId(steamId);
         user.setUsername("joueur " + steamId);
-        return steamUserRepository.save(user);
+        steamUserRepository.save(user);
+        deckRepository.save(new Deck(user));
+        return user;
     }
 
     private GachaReward createReward(ECardRarity rarity) {

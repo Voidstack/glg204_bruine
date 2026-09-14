@@ -82,7 +82,7 @@
 ## deck.service.DeckServiceTest
 
 - `savingKeepsTheChosenCards` : les cartes choisies sont enregistrées.
-- `theDeckIsCreatedOnFirstSaveAndBelongsToItsOwner` : le deck est créé au premier enregistrement pour son propriétaire.
+- `theDeckKeepsTheOrderChosenByThePlayer` : les cartes sont relues dans l'ordre choisi, y compris après un réordonnancement écrit en base.
 - `savingReplacesThePreviousContent` : un enregistrement remplace le contenu précédent.
 - `savingWithoutAnyCardEmptiesTheDeck` : enregistrer sans carte vide le deck.
 - `aCardBelongingToSomeoneElseIsRejected` : la carte d'un autre joueur est écartée.
@@ -90,7 +90,12 @@
 - `anUnknownCardIsIgnored` : une carte inexistante est ignorée.
 - `theSameCardCannotBePlacedTwice` : un même exemplaire n'occupe qu'une place.
 - `theDeckHoldsTenCardsAtMost` : le deck garde 10 cartes au maximum.
-- `aPlayerWithoutADeckHoldsNoCard` : un joueur sans deck a un deck vide.
+- `aNewDeckHoldsNoCard` : un deck qui vient d'être créé ne contient aucune carte.
+
+## steam.service.SteamUserServiceTest
+
+- `aNewPlayerGetsAnEmptyDeck` : la première connexion d'un joueur lui crée un deck vide.
+- `aReturningPlayerKeepsHisSingleDeck` : les connexions suivantes ne créent pas de second deck.
 
 ## deck.DeckSharingTest
 
