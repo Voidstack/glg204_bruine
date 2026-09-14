@@ -1,13 +1,10 @@
 package com.enosistudio.bruine.steam.dto;
 
-import jakarta.validation.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
-
-import java.util.Set;
 
 @Setter
 @Getter
@@ -58,17 +55,5 @@ public class SteamOpenidLoginDTO {
         this.assocHandle = assocHandle;
         this.signed = signed;
         this.sig = sig;
-
-        this.validate();
-    }
-
-    private void validate() {
-        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-            Validator validator = factory.getValidator();
-            Set<ConstraintViolation<SteamOpenidLoginDTO>> violations = validator.validate(this);
-            if (!violations.isEmpty()) {
-                throw new ConstraintViolationException(violations);
-            }
-        }
     }
 }

@@ -7,6 +7,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -34,12 +37,14 @@ public class SteamService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final Validator validator;
     private final String steamApiToken;
 
-    public SteamService(RestTemplate restTemplate, ObjectMapper objectMapper,
+    public SteamService(RestTemplate restTemplate, ObjectMapper objectMapper, Validator validator,
                         @Value("${steam.token}") String steamApiToken) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.validator = validator;
         this.steamApiToken = steamApiToken;
     }
 
@@ -54,6 +59,13 @@ public class SteamService {
 
         return objectMapper.convertValue(players.get(0), new TypeReference<>() {
         });
+    }
+
+    /**
+     * Vrai si le joueur est en ligne sur Steam ({@code personastate} différent de 0).
+     */
+    public boolean isOnline(String steamId) throws SteamException {
+        return getUserData(steamId).get("personastate") instanceof Number state && state.intValue() != 0;
     }
 
     /**
@@ -144,6 +156,11 @@ public class SteamService {
      * Steam signe aussi les assertions destinées à d'autres sites.
      */
     public String validateLoginParameters(SteamOpenidLoginDTO dto, String baseUrl) throws IllegalArgumentException {
+        Set<ConstraintViolation<SteamOpenidLoginDTO>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+
         if (!STEAM_OPENID_ENDPOINT.equals(dto.getOpEndpoint())) {
             throw new IllegalArgumentException(
                     "Assertion OpenID émise par un fournisseur inattendu : " + dto.getOpEndpoint());

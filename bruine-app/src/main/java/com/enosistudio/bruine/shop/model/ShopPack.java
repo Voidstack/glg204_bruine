@@ -120,7 +120,7 @@ public class ShopPack {
      */
     @Transient
     public String getPriceEuros() {
-        return String.format(Locale.FRANCE, "%.2f", priceCents / 100.0);
+        return String.format(Locale.US, "%.2f", priceCents / 100.0);
     }
 
     /**
@@ -128,6 +128,6 @@ public class ShopPack {
      */
     @Transient
     public String getEffectivePriceEuros() {
-        return String.format(Locale.FRANCE, "%.2f", getEffectivePriceCents() / 100.0);
+        return String.format(Locale.US, "%.2f", getEffectivePriceCents() / 100.0);
     }
 }

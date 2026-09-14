@@ -65,6 +65,6 @@ public class ShopPurchase {
 
     @Transient
     public String getPricePaidEuros() {
-        return String.format(Locale.FRANCE, "%.2f", priceCentsPaid / 100.0);
+        return String.format(Locale.US, "%.2f", priceCentsPaid / 100.0);
     }
 }

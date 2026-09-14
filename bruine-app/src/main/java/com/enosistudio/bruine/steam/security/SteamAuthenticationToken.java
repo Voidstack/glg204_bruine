@@ -1,44 +1,61 @@
 package com.enosistudio.bruine.steam.security;
 
+import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
 import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
-
+/**
+ * Authentification Steam, sur le modèle de {@code UsernamePasswordAuthenticationToken} :
+ * non authentifiée, elle porte l'assertion OpenID renvoyée par Steam ; authentifiée, le joueur.
+ */
 public class SteamAuthenticationToken extends AbstractAuthenticationToken {
 
     private final SteamUserPrincipal principal;
-    @Getter
-    private final String steamId;
+    private final SteamOpenidLoginDTO assertion;
 
     /**
-     * Jeton de demande : on n'a que l'identifiant Steam, le provider fera le reste.
+     * Adresse publique du site attendue dans le {@code return_to} de l'assertion.
      */
-    public SteamAuthenticationToken(String steamId) {
+    @Getter
+    private final String baseUrl;
+
+    private SteamAuthenticationToken(SteamOpenidLoginDTO assertion, String baseUrl) {
         super(null);
-        this.steamId = steamId;
         this.principal = null;
-        this.setAuthenticated(false);
+        this.assertion = assertion;
+        this.baseUrl = baseUrl;
+        setAuthenticated(false);
+    }
+
+    private SteamAuthenticationToken(SteamUserPrincipal principal) {
+        super(principal.getAuthorities());
+        this.principal = principal;
+        this.assertion = null;
+        this.baseUrl = null;
+        setAuthenticated(true);
     }
 
     /**
-     * Jeton authentifié, produit par {@link SteamAuthenticationProvider}.
+     * Demande d'authentification construite par {@link SteamOpenIdAuthenticationFilter}.
      */
-    public SteamAuthenticationToken(String steamId, SteamUserPrincipal principal, Collection<? extends GrantedAuthority> authorities) {
-        super(authorities);
-        this.principal = principal;
-        this.steamId = steamId;
-        this.setAuthenticated(true);
+    public static SteamAuthenticationToken unauthenticated(SteamOpenidLoginDTO assertion, String baseUrl) {
+        return new SteamAuthenticationToken(assertion, baseUrl);
+    }
+
+    /**
+     * Joueur authentifié, produit par {@link SteamAuthenticationProvider}.
+     */
+    public static SteamAuthenticationToken authenticated(SteamUserPrincipal principal) {
+        return new SteamAuthenticationToken(principal);
     }
 
     @Override
-    public Object getCredentials() {
-        return null;
+    public SteamOpenidLoginDTO getCredentials() {
+        return assertion;
     }
 
     @Override
     public SteamUserPrincipal getPrincipal() {
-        return this.principal;
+        return principal;
     }
 }

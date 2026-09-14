@@ -956,7 +956,8 @@ Entités et services liés à l'identité des joueurs. Ce groupe est transverse 
 - `SteamUser`, entité principale du joueur (score, XP, temps de jeu)
 - `SteamUserService`, façade CRUD et requêtes spécialisées
 - `UserRepository`, accès JPA avec requêtes personnalisées (classements, transfert UGR)
-- `SteamAuthenticationProvider`, intégration OpenID 2.0
+- `SteamOpenIdAuthenticationFilter`, réception de l'assertion OpenID 2.0 au retour de Steam
+- `SteamAuthenticationProvider`, vérification de l'assertion auprès de Steam et enregistrement de la connexion
 
 ### 7.2. Groupe gacha
 
@@ -1001,6 +1002,12 @@ session admin active.
 
 Il faudra donc n'effacer que l'attribut de contexte Steam, sans invalider la session HTTP globale. Cette
 contrainte d'implémentation doit être documentée, car pas évidente.
+
+En pratique, la déconnexion Steam utilise le mécanisme standard de Spring Security (`.logout()` de la chaîne
+principale) configuré avec `invalidateHttpSession(false)` : le `SecurityContextLogoutHandler` retire alors seulement
+le contexte stocké sous la clé de la chaîne principale. La connexion suit elle aussi le schéma standard : un filtre d'authentification
+(`SteamOpenIdAuthenticationFilter`) transmet l'assertion OpenID au `SteamAuthenticationProvider`, qui la fait vérifier
+par Steam.
 
 ### 8.2. Gestion des associations paresseuses (LazyInit)
 

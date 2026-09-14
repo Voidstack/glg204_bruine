@@ -4,6 +4,7 @@ import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
 import com.enosistudio.bruine.admin.mfa.EAdminRole;
 import com.enosistudio.bruine.admin.mfa.MfaAuthenticationSuccessHandler;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationProvider;
+import com.enosistudio.bruine.steam.security.SteamOpenIdAuthenticationFilter;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,20 +12,20 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
@@ -100,7 +101,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/steam/profile", "/steam/profile/*", "/steam/profile/*/games").permitAll()
                         // image SVG du deck d'un joueur, partageable via <img>
                         .requestMatchers(HttpMethod.GET, "/deck/7656119*").permitAll()
-                        // tout le reste (gacha, inventaire, deck, market, shop, levelup, /steam/logout, delete...) exige une session Steam
+                        // tout le reste (gacha, inventaire, deck, market, shop, levelup, delete...) exige une session Steam
                         .anyRequest().authenticated()
                 )
                 .anonymous(Customizer.withDefaults())
@@ -111,39 +112,46 @@ public class WebSecurityConfig {
                     e.defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), jsonRequest);
                     e.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/steam/login"), AnyRequestMatcher.INSTANCE);
                 })
-                // on ne fait pas  .logout(l -> l.logoutSuccessUrl("/")) pour éviter de déco l'admin en même temps que le user
-                .logout(AbstractHttpConfigurer::disable)
-                .authenticationProvider(steamAuthenticationProvider)
-                .sessionManagement(sm ->
-                        sm.sessionConcurrency(sc ->
-                                sc.maximumSessions(-1)
-                                .sessionRegistry(sessionRegistry())
-                        )
-                )
+                .addFilterBefore(steamOpenIdAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                // session conservée : elle porte aussi le contexte admin
+                .logout(l -> l
+                        .logoutUrl("/steam/logout")
+                        .invalidateHttpSession(false)
+                        .logoutSuccessUrl("/"))
         ;
         // @formatter:on
 
         return http.build();
     }
 
+    /**
+     * Connexion Steam : ce filtre n'étant pas posé par un configurer de Spring Security, il reçoit
+     * explicitement le dépôt de contexte en session et le changement d'identifiant de session
+     * contre la fixation.
+     */
+    private SteamOpenIdAuthenticationFilter steamOpenIdAuthenticationFilter() {
+        SteamOpenIdAuthenticationFilter filter =
+                new SteamOpenIdAuthenticationFilter(new ProviderManager(steamAuthenticationProvider));
+        filter.setSecurityContextRepository(new HttpSessionSecurityContextRepository());
+        filter.setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
+        filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/steam/failed"));
+        return filter;
+    }
+
+    /**
+     * Déconnexion Steam hors de {@code /steam/logout} (compte supprimé ou disparu), avec la même règle :
+     * la session est conservée, elle porte aussi le contexte admin.
+     */
+    @Bean
+    public SecurityContextLogoutHandler steamLogoutHandler() {
+        SecurityContextLogoutHandler handler = new SecurityContextLogoutHandler();
+        handler.setInvalidateHttpSession(false);
+        return handler;
+    }
+
     private DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
-    }
-
-    @Bean
-    public SessionRegistry sessionRegistry() {
-        return new SessionRegistryImpl();
-    }
-
-    @Bean
-    public HttpSessionEventPublisher httpSessionEventPublisher() {
-        return new HttpSessionEventPublisher();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
     }
 }

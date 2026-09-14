@@ -4,13 +4,12 @@ import com.enosistudio.bruine.steam.exception.SteamSessionExpiredException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.security.core.context.SecurityContextHolder;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
-
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 /**
  * Ce que toutes les pages du site ont en commun, posé une fois pour toutes :
@@ -21,9 +20,11 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 public class SteamControllerAdvice {
 
     private final CurrentSteamUser currentSteamUser;
+    private final SecurityContextLogoutHandler steamLogoutHandler;
 
-    public SteamControllerAdvice(CurrentSteamUser currentSteamUser) {
+    public SteamControllerAdvice(CurrentSteamUser currentSteamUser, SecurityContextLogoutHandler steamLogoutHandler) {
         this.currentSteamUser = currentSteamUser;
+        this.steamLogoutHandler = steamLogoutHandler;
     }
 
     /**
@@ -36,16 +37,13 @@ public class SteamControllerAdvice {
     }
 
     /**
-     * La session pointe vers un compte Steam supprimé entre-temps : on retire l'authentification
-     * Steam (sans toucher à une éventuelle session admin) et on renvoie à l'accueil.
+     * La session pointe vers un compte Steam supprimé entre-temps : on déconnecte le joueur
+     * (sans toucher à une éventuelle session admin) et on renvoie à l'accueil.
      */
     @ExceptionHandler(SteamSessionExpiredException.class)
-    public String onSteamSessionExpired(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.removeAttribute(SPRING_SECURITY_CONTEXT_KEY);
-        }
-        SecurityContextHolder.clearContext();
+    public String onSteamSessionExpired(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) {
+        steamLogoutHandler.logout(request, response, authentication);
         return "redirect:/";
     }
 }

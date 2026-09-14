@@ -19,6 +19,9 @@
 - `anonymousJsonRequestGetsUnauthorizedInsteadOfARedirect` : une requête JSON anonyme reçoit un 401, pas une redirection.
 - `anonymousIsRedirectedToAdminLoginFromAdminPages` : les pages admin redirigent vers le login admin.
 - `anonymousCanOpenTheAdminLoginPage` : la page de login admin est accessible.
+- `aValidSteamAssertionSignsThePlayerInWithAFreshSession` : une assertion acceptée (Steam simulé) connecte le joueur : contexte sauvegardé en session, identifiant de session changé.
+- `aSteamAssertionRefusedLeadsToTheLoginFailurePage` : une assertion refusée renvoie vers `/steam/failed`.
+- `steamLogoutKeepsTheAdminSignedIn` : la déconnexion Steam retire le contexte Steam et conserve le contexte admin de la même session.
 
 ## config.ThymeleafSvgConfigTest
 
@@ -28,6 +31,9 @@
 
 ## steam.service.SteamServiceTest
 
+- `aPlayerIsOnlineOnlyWhenHisPersonaStateIsNotZero` : un joueur est « en ligne sur Steam » seulement quand son `personastate` n'est pas 0 (réponses Steam simulées).
+- `aSteamApiFailureNeverExposesTheApiKey` : une panne réseau de l'API Steam (simulée) ne fait apparaître la clé d'API dans aucun message d'exception.
+- `anIncompleteAssertionIsRejectedBeforeContactingSteam` : une assertion OpenID incomplète (signature vide) est refusée par la validation, sans appel à Steam.
 - `anAssertionMeantForAnotherSiteIsRejected` : une assertion OpenID avec un autre `return_to` est refusée.
 - `anAssertionFromAnotherProviderIsRejected` : une assertion d'un autre fournisseur que Steam est refusée.
 - `aClaimedIdDifferentFromTheIdentityIsRejected` : `claimed_id` différent de `identity` est refusé.
@@ -114,7 +120,7 @@
 - `aPromoWithoutDatesIsAlwaysRunning` : une promo sans dates est toujours active.
 - `aPromoIsIgnoredBeforeItStarts` : une promo pas encore commencée est ignorée.
 - `aPromoIsIgnoredOnceItIsOver` : une promo terminée est ignorée.
-- `bothPricesAreFormattedTheFrenchWayWithTwoDecimals` : les prix sont affichés au format français, virgule décimale et deux décimales.
+- `bothPricesAreFormattedWithADecimalPointForTheNumberInputs` : les prix sont formatés avec un point décimal et deux décimales, seul format accepté par les champs `<input type="number">` du formulaire admin.
 
 ## shop.service.ShopServiceTest
 

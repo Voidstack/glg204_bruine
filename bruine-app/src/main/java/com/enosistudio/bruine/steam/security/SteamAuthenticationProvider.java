@@ -4,16 +4,22 @@ import com.enosistudio.bruine.steam.exception.SteamException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 
 import java.util.Map;
 
+/**
+ * Vérifie auprès de Steam l'assertion OpenID du jeton, puis enregistre la connexion du joueur.
+ */
 @Component
 public class SteamAuthenticationProvider implements AuthenticationProvider {
 
@@ -29,11 +35,9 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String steamId = ((SteamAuthenticationToken) authentication).getSteamId();
+        String steamId = verifiedSteamId((SteamAuthenticationToken) authentication);
 
         // Le profil est indispensable : sans lui on ne sait ni nommer le joueur, ni le créer.
-        // On lève plutôt que de retourner null, qui signifierait « ce provider ne sait pas
-        // traiter ce jeton » et ferait remonter une ProviderNotFoundException trompeuse.
         Map<String, Object> userAttributes;
         try {
             userAttributes = steamService.getUserData(steamId);
@@ -47,20 +51,34 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
             totalPlaytime = steamService.getTotalPlaytimeMinutes(steamId);
         } catch (SteamException tempsDeJeuIndisponible) {
             // Profil privé ou API muette : les compteurs restent inchangés, la connexion continue.
-            // Contrairement au profil ci-dessus, le temps de jeu n'est pas indispensable au login.
             totalPlaytime = null;
         }
 
         // Les appels Steam sont faits avant : le joueur n'est relu et verrouillé qu'au moment
         // d'écrire, pour ne pas écraser un score modifié pendant ces appels réseau.
         SteamUser user = userService.recordLogin(steamId, (String) userAttributes.get("personaname"), totalPlaytime);
-        SteamUserPrincipal steamUserPrincipal = SteamUserPrincipal.create(user, (String) userAttributes.get("avatar"));
+        return SteamAuthenticationToken.authenticated(
+                SteamUserPrincipal.create(user, (String) userAttributes.get("avatar")));
+    }
 
-        return new SteamAuthenticationToken(steamId, steamUserPrincipal, steamUserPrincipal.getAuthorities());
+    /**
+     * Identifiant Steam garanti par l'assertion, une fois celle-ci confirmée par Steam.
+     */
+    private String verifiedSteamId(SteamAuthenticationToken token) {
+        try {
+            return steamService.validateLoginParameters(token.getCredentials(), token.getBaseUrl());
+        } catch (IllegalArgumentException | ConstraintViolationException assertionRefusee) {
+            log.warn("Assertion OpenID Steam refusée : {}", assertionRefusee.getMessage());
+            throw new BadCredentialsException("Assertion OpenID Steam refusée.", assertionRefusee);
+        } catch (RestClientException steamInjoignable) {
+            log.warn("Vérification de l'assertion OpenID impossible", steamInjoignable);
+            throw new AuthenticationServiceException("Steam injoignable, connexion impossible pour le moment.",
+                    steamInjoignable);
+        }
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return authentication.equals(SteamAuthenticationToken.class);
+        return SteamAuthenticationToken.class.isAssignableFrom(authentication);
     }
 }

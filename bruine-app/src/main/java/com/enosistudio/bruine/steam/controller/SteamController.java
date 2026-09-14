@@ -3,24 +3,15 @@ package com.enosistudio.bruine.steam.controller;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.steam.dto.SteamGameDTO;
 import com.enosistudio.bruine.steam.exception.SteamException;
-import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
-import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
+import com.enosistudio.bruine.steam.security.SteamOpenIdAuthenticationFilter;
 import com.enosistudio.bruine.steam.service.SteamService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AuthenticationManager;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -29,84 +20,34 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
-
+/**
+ * Pages Steam. Le retour de connexion ({@code /steam/login/redirect}) est traité par
+ * {@link SteamOpenIdAuthenticationFilter}, la déconnexion ({@code /steam/logout}) par le
+ * {@code .logout()} de la chaîne de sécurité.
+ */
 @Controller
 @RequestMapping("/steam")
 public class SteamController {
 
-    private static final Logger log = LoggerFactory.getLogger(SteamController.class);
-
-    private final AuthenticationManager authenticationManager;
     private final SteamService steamService;
     private final SteamUserService steamUserService;
-    private final SessionRegistry sessionRegistry;
     private final DeckService deckService;
     private final CurrentSteamUser currentSteamUser;
+    private final SecurityContextLogoutHandler steamLogoutHandler;
 
-    public SteamController(AuthenticationManager authenticationManager, SteamService steamService,
-                           SteamUserService steamUserService, SessionRegistry sessionRegistry,
-                           DeckService deckService, CurrentSteamUser currentSteamUser) {
-        this.authenticationManager = authenticationManager;
+    public SteamController(SteamService steamService, SteamUserService steamUserService,
+                           DeckService deckService, CurrentSteamUser currentSteamUser,
+                           SecurityContextLogoutHandler steamLogoutHandler) {
         this.steamService = steamService;
         this.steamUserService = steamUserService;
-        this.sessionRegistry = sessionRegistry;
         this.deckService = deckService;
         this.currentSteamUser = currentSteamUser;
+        this.steamLogoutHandler = steamLogoutHandler;
     }
 
     @GetMapping("/login")
     public String login(HttpServletRequest request) {
-        return "redirect:" + steamService.buildSteamLoginUrl(baseUrl(request));
-    }
-
-    /**
-     * Base publique du site, calculée de la même façon à l'aller et au retour de Steam
-     * pour que le {@code return_to} de l'assertion puisse être comparé.
-     */
-    private static String baseUrl(HttpServletRequest request) {
-        return ServletUriComponentsBuilder.fromRequestUri(request)
-                .replacePath(null)
-                .replaceQuery(null)
-                .toUriString();
-    }
-
-    @GetMapping("/login/redirect")
-    public ModelAndView loginRedirect(HttpServletRequest request, @RequestParam Map<String, String> allRequestParams) {
-        try {
-            // construit dans le try : des paramètres OpenID absents ou malformés sont un échec de connexion, pas une 500
-            SteamOpenidLoginDTO dto = new SteamOpenidLoginDTO(
-                    allRequestParams.get("openid.ns"),
-                    allRequestParams.get("openid.op_endpoint"),
-                    allRequestParams.get("openid.claimed_id"),
-                    allRequestParams.get("openid.identity"),
-                    allRequestParams.get("openid.return_to"),
-                    allRequestParams.get("openid.response_nonce"),
-                    allRequestParams.get("openid.assoc_handle"),
-                    allRequestParams.get("openid.signed"),
-                    allRequestParams.get("openid.sig")
-            );
-
-            String steamUserId = steamService.validateLoginParameters(dto, baseUrl(request));
-            SteamAuthenticationToken authReq = new SteamAuthenticationToken(steamUserId);
-            Authentication auth = authenticationManager.authenticate(authReq);
-            SecurityContext sc = SecurityContextHolder.createEmptyContext();
-            sc.setAuthentication(auth);
-            SecurityContextHolder.setContext(sc);
-            HttpSession session = request.getSession(true);
-            // Protection contre la fixation de session : nouvel identifiant, attributs conservés
-            // (dont le contexte admin). Pas de session.invalidate(), cf. isolation des deux chaînes.
-            request.changeSessionId();
-            session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
-            sessionRegistry.registerNewSession(session.getId(), auth.getPrincipal());
-
-        } catch (IllegalArgumentException | ConstraintViolationException | RestClientException
-                 | AuthenticationException echecOpenid) {
-            log.warn("Échec de la connexion Steam", echecOpenid);
-            return new ModelAndView("redirect:/steam/failed");
-        }
-
-        return new ModelAndView("redirect:/");
+        return "redirect:" + steamService.buildSteamLoginUrl(SteamOpenIdAuthenticationFilter.baseUrl(request));
     }
 
     @GetMapping("/profile")
@@ -165,29 +106,15 @@ public class SteamController {
     }
 
     @PostMapping("/profile/{steamId}/delete")
-    public String deleteMyAccount(@PathVariable String steamId, HttpServletRequest request) {
+    public String deleteMyAccount(@PathVariable String steamId, HttpServletRequest request,
+                                  HttpServletResponse response, Authentication authentication) {
         // On ne supprime que son propre compte, jamais celui d'un autre joueur.
         if (currentSteamUser.steamId().filter(steamId::equals).isEmpty()) {
             return "redirect:/steam/failed";
         }
         steamUserService.findBySteamId(steamId)
                 .ifPresent(user -> steamUserService.deleteById(user.getId()));
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            // on ne fait pas session.invalidate() pour éviter déco l'admin en même temps que le steamUser
-            session.removeAttribute(SPRING_SECURITY_CONTEXT_KEY);
-        }
-        SecurityContextHolder.clearContext();
-        return "redirect:/";
-    }
-
-    @PostMapping("/logout")
-    public String logout(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.removeAttribute(SPRING_SECURITY_CONTEXT_KEY);
-        }
-        SecurityContextHolder.clearContext();
+        steamLogoutHandler.logout(request, response, authentication);
         return "redirect:/";
     }
 

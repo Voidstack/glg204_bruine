@@ -35,9 +35,7 @@ public class AdminImpersonationController {
         if (user == null) return "redirect:/admin";
 
         SteamUserPrincipal principal = SteamUserPrincipal.create(user, avatarUrl(user.getSteamId()));
-        SteamAuthenticationToken token = new SteamAuthenticationToken(
-                user.getSteamId(), principal, principal.getAuthorities()
-        );
+        SteamAuthenticationToken token = SteamAuthenticationToken.authenticated(principal);
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(token);

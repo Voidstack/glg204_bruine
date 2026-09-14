@@ -33,10 +33,10 @@
 				</tr>
 				<tr th:each="u : ${steamUsers}">
 					<td class="is-vcentered has-text-centered" style="width: 2.5rem;">
-                            <span th:if="${activeSteamIds.contains(u.steamId)}"
-                                  class="has-text-success" title="Connecté">&#9679;</span>
-						<span th:unless="${activeSteamIds.contains(u.steamId)}"
-						      class="has-text-danger" title="Déconnecté">&#9679;</span>
+                            <span th:if="${onlineSteamIds.contains(u.steamId)}"
+                                  class="has-text-success" title="En ligne sur Steam">&#9679;</span>
+						<span th:unless="${onlineSteamIds.contains(u.steamId)}"
+						      class="has-text-danger" title="Hors ligne sur Steam">&#9679;</span>
 					</td>
 					<td class="is-vcentered" th:text="${u.username}"></td>
 					<td class="is-vcentered">
