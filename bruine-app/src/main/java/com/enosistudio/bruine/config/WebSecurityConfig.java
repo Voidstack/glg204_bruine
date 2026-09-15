@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -19,15 +17,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.util.matcher.AnyRequestMatcher;
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 @Configuration
 public class WebSecurityConfig {
@@ -105,13 +100,7 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .anonymous(Customizer.withDefaults())
-                // requête API (Accept: application/json) -> 401 ; navigation navigateur -> page de connexion Steam
-                .exceptionHandling(e -> {
-                    MediaTypeRequestMatcher jsonRequest = new MediaTypeRequestMatcher(MediaType.APPLICATION_JSON);
-                    jsonRequest.setUseEquals(true);
-                    e.defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), jsonRequest);
-                    e.defaultAuthenticationEntryPointFor(new LoginUrlAuthenticationEntryPoint("/steam/login"), AnyRequestMatcher.INSTANCE);
-                })
+                .exceptionHandling(e -> e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/steam/login")))
                 .addFilterBefore(steamOpenIdAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 // session conservée : elle porte aussi le contexte admin
                 .logout(l -> l

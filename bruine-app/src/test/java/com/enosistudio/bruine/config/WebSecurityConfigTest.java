@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -131,15 +130,6 @@ class WebSecurityConfigTest {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrlPattern("**/steam/login"));
         }
-    }
-
-    @Test
-    void anonymousJsonRequestGetsUnauthorizedInsteadOfARedirect() throws Exception {
-        mvc.perform(post("/levelup/convert").with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content("[]"))
-                .andExpect(status().isUnauthorized());
     }
 
     @Test

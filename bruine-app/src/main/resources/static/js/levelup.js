@@ -1,17 +1,18 @@
 /* Level Up - drag & drop des cartes vers la Steam Machine + conversion en XP */
 (function () {
-    const csrf = document.querySelector('meta[name="_csrf"]').content;
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-
     const queue = document.getElementById('machine-queue');
     const xpPreview = document.getElementById('xp-preview');
     const activateBtn = document.getElementById('activate-btn');
     const machineBody = document.getElementById('machine-body');
     const resultEl = document.getElementById('machine-result');
-    const xpTotalEl = document.getElementById('xp-total');
+    const convertForm = document.getElementById('convert-form');
 
     // Page sans machine (inventaire vide) : rien à câbler.
     if (!machineBody) return;
+
+    if (resultEl.classList.contains('show')) {
+        setTimeout(() => resultEl.classList.remove('show'), 3500);
+    }
 
     // pending[]: {rewardId, finish, xp, name, emoji}
     const pending = [];
@@ -79,6 +80,12 @@
             btn.addEventListener('click', () => removeFromQueue(parseInt(btn.dataset.idx)));
         });
 
+        convertForm.querySelectorAll('input[name^="items["]').forEach(n => n.remove());
+        pending.forEach((item, idx) => {
+            addHidden(`items[${idx}].rewardId`, item.rewardId);
+            addHidden(`items[${idx}].finish`, item.finish);
+        });
+
         // XP total
         const total = pending.reduce((s, i) => s + i.xp, 0);
         const prev = parseInt(xpPreview.textContent) || 0;
@@ -128,50 +135,14 @@
         if (countEl) countEl.textContent = '×' + remaining;
     }
 
-    /* Activate */
-    activateBtn.addEventListener('click', async () => {
-        if (pending.length === 0) return;
+    /* Activate : la conversion est un POST de formulaire classique, la page revient rechargée */
+    convertForm.addEventListener('submit', e => {
+        if (pending.length === 0) {
+            e.preventDefault();
+            return;
+        }
         activateBtn.classList.remove('ready');
         activateBtn.classList.add('firing');
-        activateBtn.disabled = true;
-        hideResult();
-
-        const payload = pending.map(p => ({rewardId: parseInt(p.rewardId), finish: p.finish}));
-
-        try {
-            const res = await fetch('/levelup/convert', {
-                method: 'POST', headers: {
-                    'Content-Type': 'application/json', 'Accept': 'application/json', [csrfHeader]: csrf
-                }, body: JSON.stringify(payload)
-            });
-            if (!res.ok) throw new Error('Erreur serveur');
-            const {xpGained, newTotalExperience} = await res.json();
-
-            // remove converted slots from grid
-            pending.forEach(item => {
-                const key = slotKey(item.rewardId, item.finish);
-                const slot = document.getElementById(`slot-${item.rewardId}-${item.finish}`);
-                if (!slot) return;
-                const newCount = parseInt(slot.dataset.count) - 1;
-                if (newCount <= 0) {
-                    slot.remove();
-                } else {
-                    slot.dataset.count = newCount;
-                    const countEl = slot.querySelector('.card-count');
-                    if (countEl) countEl.textContent = '×' + newCount;
-                }
-                usedCount[key] = 0;
-            });
-            pending.length = 0;
-
-            xpTotalEl.textContent = newTotalExperience;
-            showResult(`+${xpGained} XP gagnés !`, 'success');
-            renderQueue();
-        } catch {
-            showResult('Une erreur est survenue.', 'error');
-        } finally {
-            activateBtn.classList.remove('firing');
-        }
     });
 
     /* Helpers */
@@ -179,13 +150,11 @@
         return `${rewardId}_${finish}`;
     }
 
-    function showResult(msg, type) {
-        resultEl.textContent = msg;
-        resultEl.className = `machine-result show ${type}`;
-        setTimeout(() => resultEl.classList.remove('show'), 3500);
-    }
-
-    function hideResult() {
-        resultEl.className = 'machine-result';
+    function addHidden(name, value) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        convertForm.appendChild(input);
     }
 })();

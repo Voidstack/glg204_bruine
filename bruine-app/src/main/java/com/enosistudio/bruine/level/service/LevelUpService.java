@@ -8,7 +8,6 @@ import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.service.GachaService;
 import com.enosistudio.bruine.level.dto.ConvertRequestDTO;
-import com.enosistudio.bruine.level.dto.ConvertResultDTO;
 import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamUserService;
@@ -65,7 +64,7 @@ public class LevelUpService {
      * (ni en vente, ni dans le deck) de cette carte.
      */
     @Transactional
-    public ConvertResultDTO convert(SteamUser user, List<ConvertRequestDTO> requests) {
+    public long convert(SteamUser user, List<ConvertRequestDTO> requests) {
         // verrou pris en premier : les lectures suivantes voient l'état laissé par une conversion concurrente
         SteamUser player = steamUserService.lock(user.getId());
         GachaConfig config = gachaService.currentConfig();
@@ -84,7 +83,7 @@ public class LevelUpService {
         }
 
         player.setTotalExperience(player.getTotalExperience() + xpGained);
-        return new ConvertResultDTO(xpGained, player.getTotalExperience());
+        return xpGained;
     }
 
     /**

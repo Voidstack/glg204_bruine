@@ -31,7 +31,7 @@
 		<div class="sq-hero__cta">
 			<div sec:authorize="not isAuthenticated()">
 				<a href="/steam/login" class="btn-primary">
-					<i class="fa-brands fa-steam"></i> Commencer avec Steam
+					<i class="fa-brands fa-steam"></i> Se connecter via Steam
 				</a>
 			</div>
 			<div sec:authorize="isAuthenticated()">
@@ -186,12 +186,14 @@
 		<div class="sq-finish sq-finish--normal">
 			<span class="sq-finish_emoji">⬜</span>
 			<span class="sq-finish_name" style="color: var(--text-soft);">Normal</span>
-			<span class="sq-finish_mult" style="color: var(--text);" th:text="'×' + ${gachaConfig.xpMultNormal} + ' XP'">×1 XP</span>
+			<span class="sq-finish_mult" style="color: var(--text);"
+			      th:text="'×' + ${gachaConfig.xpMultNormal} + ' XP'">×1 XP</span>
 		</div>
 		<div class="sq-finish finish-holographic">
 			<span class="sq-finish_emoji">💠</span>
 			<span class="sq-finish_name" style="color: var(--purple-light);">Holographic</span>
-			<span class="sq-finish_mult" style="color: #a8d8f0;" th:text="'×' + ${gachaConfig.xpMultHolographic} + ' XP'">×2 XP</span>
+			<span class="sq-finish_mult" style="color: #a8d8f0;"
+			      th:text="'×' + ${gachaConfig.xpMultHolographic} + ' XP'">×2 XP</span>
 		</div>
 		<div class="sq-finish finish-foil">
 			<span class="sq-finish_emoji">✨</span>

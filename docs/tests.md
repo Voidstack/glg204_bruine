@@ -16,7 +16,6 @@
 - `anonymousCanOpenTheLegalPages` : mentions légales et politique de confidentialité sont publiques.
 - `anonymousCanLoadTheSiteImages` : les images sous `/img` sont publiques.
 - `anonymousIsRedirectedToSteamLoginFromPlayerPages` : les pages joueur redirigent vers la connexion Steam.
-- `anonymousJsonRequestGetsUnauthorizedInsteadOfARedirect` : une requête JSON anonyme reçoit un 401, pas une redirection.
 - `anonymousIsRedirectedToAdminLoginFromAdminPages` : les pages admin redirigent vers le login admin.
 - `anonymousCanOpenTheAdminLoginPage` : la page de login admin est accessible.
 - `aValidSteamAssertionSignsThePlayerInWithAFreshSession` : une assertion acceptée (Steam simulé) connecte le joueur : contexte sauvegardé en session, identifiant de session changé.

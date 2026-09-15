@@ -45,7 +45,7 @@ body {
 }
 
 .btn-save:hover {
-    box-shadow: 0 0 16px rgba(102, 192, 244, 0.35);
+    box-shadow: 0 0 7px rgba(102, 192, 244, 0.35);
 }
 
 /* Deck drop zone */

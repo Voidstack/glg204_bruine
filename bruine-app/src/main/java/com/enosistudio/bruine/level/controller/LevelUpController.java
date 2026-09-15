@@ -1,20 +1,19 @@
 package com.enosistudio.bruine.level.controller;
 
-import com.enosistudio.bruine.level.dto.ConvertRequestDTO;
-import com.enosistudio.bruine.level.dto.ConvertResultDTO;
+import com.enosistudio.bruine.level.dto.ConvertFormDTO;
 import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
 import com.enosistudio.bruine.level.service.LevelUpService;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
 /**
- * Page de conversion des cartes en expérience. Le calcul vit dans {@link LevelUpService}.
+ * Page de conversion des cartes en expérience.
  */
 @Controller
 @RequestMapping("/levelup")
@@ -43,9 +42,9 @@ public class LevelUpController {
     }
 
     @PostMapping("/convert")
-    @ResponseBody
-    public ResponseEntity<ConvertResultDTO> convert(@RequestBody List<ConvertRequestDTO> items) {
+    public String convert(@ModelAttribute ConvertFormDTO form, RedirectAttributes redirectAttributes) {
         SteamUser user = currentSteamUser.require();
-        return ResponseEntity.ok(levelUpService.convert(user, items));
+        redirectAttributes.addFlashAttribute("xpGained", levelUpService.convert(user, form.items()));
+        return "redirect:/levelup";
     }
 }

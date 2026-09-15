@@ -392,12 +392,6 @@
     color: var(--green);
 }
 
-.machine-result.error {
-    background: rgba(200, 60, 60, 0.1);
-    border: 1px solid rgba(200, 60, 60, 0.35);
-    color: #f88;
-}
-
 /* Responsive */
 @media (max-width: 700px) {
     .machine-panel {

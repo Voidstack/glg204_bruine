@@ -4,8 +4,6 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="_csrf" th:content="${_csrf.token}"/>
-	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 	<th:block th:replace="~{layout :: common-head('Bruine - Level Up')}"/>
 	<link rel="stylesheet" th:href="@{/css/levelup/levelup.css}">
 	<link rel="stylesheet" th:href="@{/css/levelup/steam_machine.css}">
@@ -22,7 +20,7 @@
 	<!-- XP totale -->
 	<div class="xp-total-bar">
 		<span>Expérience totale du compte :</span>
-		<strong id="xp-total" th:text="${totalExperience}">0</strong>
+		<strong th:text="${totalExperience}">0</strong>
 		<span>XP</span>
 	</div>
 
@@ -116,13 +114,16 @@
 				</div>
 
 				<!-- Résultat flash -->
-				<div class="machine-result" id="machine-result"></div>
+				<div class="machine-result" id="machine-result"
+				     th:classappend="${xpGained != null} ? 'show success'"
+				     th:text="${xpGained != null} ? '+' + ${xpGained} + ' XP gagnés !'"></div>
 
-				<!-- Bouton -->
-				<button class="machine-activate" id="activate-btn" disabled>
-					<span>&#9881;</span>
-					<span>ACTIVER LA MACHINE</span>
-				</button>
+				<form id="convert-form" method="post" th:action="@{/levelup/convert}">
+					<button type="submit" class="machine-activate" id="activate-btn" disabled>
+						<span>&#9881;</span>
+						<span>ACTIVER LA MACHINE</span>
+					</button>
+				</form>
 
 			</div>
 		</div>

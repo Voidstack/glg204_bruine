@@ -15,7 +15,6 @@ import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
 import com.enosistudio.bruine.gacha.service.GachaRewardService;
 import com.enosistudio.bruine.gacha.service.GachaService;
 import com.enosistudio.bruine.level.dto.ConvertRequestDTO;
-import com.enosistudio.bruine.level.dto.ConvertResultDTO;
 import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
@@ -78,14 +77,14 @@ class LevelUpServiceTest {
     void experienceIsTheRarityBaseWhenTheFinishIsPlain() {
         createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
 
-        assertEquals(500, convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL).xpGained());
+        assertEquals(500, convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL));
     }
 
     @Test
     void experienceScalesWithTheFinishMultiplier() {
         createCard(ECardRarity.LEGENDARY, ECardFinish.POLYCHROME);
 
-        assertEquals(2000, convert(ECardRarity.LEGENDARY, ECardFinish.POLYCHROME).xpGained(),
+        assertEquals(2000, convert(ECardRarity.LEGENDARY, ECardFinish.POLYCHROME),
                 "polychrome vaut quatre fois la base dans la configuration par défaut");
     }
 
@@ -93,7 +92,7 @@ class LevelUpServiceTest {
     void eachRarityHasItsOwnBase() {
         createCard(ECardRarity.COMMON, ECardFinish.NORMAL);
 
-        assertEquals(10, convert(ECardRarity.COMMON, ECardFinish.NORMAL).xpGained());
+        assertEquals(10, convert(ECardRarity.COMMON, ECardFinish.NORMAL));
     }
 
     @Test
@@ -103,7 +102,7 @@ class LevelUpServiceTest {
         gachaConfigRepository.save(config);
         createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
 
-        assertEquals(500, convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL).xpGained());
+        assertEquals(500, convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL));
     }
 
     @Test
@@ -111,9 +110,9 @@ class LevelUpServiceTest {
         UserCard listed = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
         putOnSale(listed);
 
-        ConvertResultDTO result = convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+        long xpGained = convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
 
-        assertEquals(0, result.xpGained());
+        assertEquals(0, xpGained);
         assertEquals(1, userCardRepository.count());
     }
 
@@ -122,9 +121,9 @@ class LevelUpServiceTest {
         UserCard inDeck = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
         deckService.saveDeck(owner.getId(), List.of(inDeck.getId()));
 
-        ConvertResultDTO result = convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+        long xpGained = convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
 
-        assertEquals(0, result.xpGained());
+        assertEquals(0, xpGained);
         assertEquals(1, userCardRepository.count());
     }
 
@@ -138,10 +137,10 @@ class LevelUpServiceTest {
         userCardRepository.save(spare);
         deckService.saveDeck(owner.getId(), List.of(inDeck.getId()));
 
-        ConvertResultDTO result = levelUpService.convert(reloadOwner(),
+        long xpGained = levelUpService.convert(reloadOwner(),
                 List.of(new ConvertRequestDTO(inDeck.getGachaReward().getId(), "NORMAL")));
 
-        assertEquals(500, result.xpGained());
+        assertEquals(500, xpGained);
         assertEquals(List.of(inDeck.getId()), userCardRepository.findAll().stream().map(UserCard::getId).toList());
     }
 
@@ -149,20 +148,20 @@ class LevelUpServiceTest {
     void aCardThePlayerDoesNotOwnIsIgnored() {
         GachaReward neverOwned = createReward(ECardRarity.LEGENDARY);
 
-        ConvertResultDTO result = levelUpService.convert(reloadOwner(),
+        long xpGained = levelUpService.convert(reloadOwner(),
                 List.of(new ConvertRequestDTO(neverOwned.getId(), "NORMAL")));
 
-        assertEquals(0, result.xpGained());
+        assertEquals(0, xpGained);
     }
 
     @Test
     void anUnknownFinishNameIsIgnored() {
         UserCard card = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
 
-        ConvertResultDTO result = levelUpService.convert(reloadOwner(),
+        long xpGained = levelUpService.convert(reloadOwner(),
                 List.of(new ConvertRequestDTO(card.getGachaReward().getId(), "PLASMA")));
 
-        assertEquals(0, result.xpGained());
+        assertEquals(0, xpGained);
         assertEquals(1, userCardRepository.count());
     }
 
@@ -172,12 +171,12 @@ class LevelUpServiceTest {
         UserCard legendary = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
         UserCard foil = createCard(ECardRarity.COMMON, ECardFinish.FOIL);
 
-        ConvertResultDTO result = levelUpService.convert(reloadOwner(), List.of(
+        long xpGained = levelUpService.convert(reloadOwner(), List.of(
                 new ConvertRequestDTO(legendary.getGachaReward().getId(), "NORMAL"),
                 new ConvertRequestDTO(foil.getGachaReward().getId(), "FOIL")));
 
-        assertEquals(530, result.xpGained(), "500 pour la légendaire, 10 fois 3 pour le foil commun");
-        assertEquals(1530, result.newTotalExperience());
+        assertEquals(530, xpGained, "500 pour la légendaire, 10 fois 3 pour le foil commun");
+        assertEquals(1530, reloadOwner().getTotalExperience());
         assertEquals(0, userCardRepository.count(), "les deux exemplaires sont détruits");
     }
 
@@ -185,10 +184,10 @@ class LevelUpServiceTest {
     void convertingNothingChangesNothing() {
         owner.setTotalExperience(1000);
 
-        ConvertResultDTO result = levelUpService.convert(reloadOwner(), List.of());
+        long xpGained = levelUpService.convert(reloadOwner(), List.of());
 
-        assertEquals(0, result.xpGained());
-        assertEquals(1000, result.newTotalExperience());
+        assertEquals(0, xpGained);
+        assertEquals(1000, reloadOwner().getTotalExperience());
     }
 
     @Test
@@ -236,7 +235,7 @@ class LevelUpServiceTest {
         marketListingRepository.save(listing);
     }
 
-    private ConvertResultDTO convert(ECardRarity rarity, ECardFinish finish) {
+    private long convert(ECardRarity rarity, ECardFinish finish) {
         Long rewardId = gachaRewardRepository.findByRarity(rarity).get(0).getId();
         return levelUpService.convert(reloadOwner(), List.of(new ConvertRequestDTO(rewardId, finish.name())));
     }
