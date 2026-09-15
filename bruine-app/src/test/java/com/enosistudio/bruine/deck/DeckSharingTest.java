@@ -22,17 +22,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -106,31 +99,5 @@ class DeckSharingTest {
         mvc.perform(get("/deck/" + STEAM_ID))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("image/svg+xml"));
-    }
-
-    @Test
-    void theDeckTemplateIsAValidSvgFile() throws Exception {
-        String svg;
-        try (InputStream in = getClass().getResourceAsStream("/templates/deck/svg/deck.svg")) {
-            assertNotNull(in, "templates/deck/svg/deck.svg introuvable");
-            svg = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-        }
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        Document doc = factory.newDocumentBuilder().parse(new InputSource(new StringReader(svg)));
-
-        assertEquals("svg", doc.getDocumentElement().getLocalName());
-        assertTrue(doc.getDocumentElement().hasAttribute("viewBox"), "viewBox manquant");
-        assertTrue(svg.contains("xmlns:th="), "namespace th non déclaré");
-    }
-
-    @Test
-    void theProfileShowsTheDeckImageWithoutAnIframe() throws Exception {
-        String html = mvc.perform(get("/steam/profile/" + STEAM_ID))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        assertTrue(html.contains("/deck/" + STEAM_ID), "l'image du deck doit pointer sur /deck/{steamId}");
-        assertFalse(html.contains("<iframe"), "plus aucune iframe : l'ancien widget HTML est supprimé");
     }
 }

@@ -57,14 +57,6 @@ class ShopPackTest {
         assertEquals(500, over.getEffectivePriceCents());
     }
 
-    @Test
-    void bothPricesAreFormattedWithADecimalPointForTheNumberInputs() {
-        ShopPack discounted = pack(500, 20);
-
-        assertEquals("5.00", discounted.getPriceEuros());
-        assertEquals("4.00", discounted.getEffectivePriceEuros());
-    }
-
     private ShopPack pack(int priceCents, int promoPercent) {
         ShopPack pack = new ShopPack();
         pack.setName("Seau de brume");

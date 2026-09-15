@@ -15,7 +15,7 @@
 <div class="shop-container">
 
 	<div class="shop-title">💧 Boutique Bruine</div>
-	<p class="shop-subtitle">Achète des points pour alimenter le gacha et enrichir ton deck.</p>
+	<p class="shop-subtitle">Acheter des 💧</p>
 
 	<div class="sandbox-banner">
 		<i class="fa-solid fa-flask"></i>
@@ -38,7 +38,7 @@
 			<div class="pack-icon" th:text="${pack.emoji}">💧</div>
 			<div class="pack-name" th:text="${pack.name}">Pack</div>
 			<div class="pack-points"><span
-					th:text="${#numbers.formatInteger(pack.totalPoints, 1, 'WHITESPACE')}">0</span> pts
+					th:text="${#numbers.formatInteger(pack.totalPoints, 1, 'WHITESPACE')}">0</span> 💧
 			</div>
 			<div th:if="${pack.bonusPoints > 0}" class="pack-bonus"
 			     th:text="'+' + ${#numbers.formatInteger(pack.bonusPoints, 1, 'WHITESPACE')} + ' offerts'">+0 offerts
@@ -61,15 +61,6 @@
 	<p th:if="${#lists.isEmpty(packs)}" class="history-empty" style="text-align:center;">
 		Aucun pack disponible pour le moment.
 	</p>
-
-	<!-- FAQ / info -->
-	<div class="shop-faq">
-		<p><strong>Comment ça marche ?</strong><br>
-			Chaque tirage au gacha coûte <strong>10 points</strong>. Les points achetés s'ajoutent directement à ton
-			score Bruine visible dans la barre de navigation.</p>
-		<p style="margin-top:0.8rem;"><strong>Remboursement</strong><br>
-			Trop tard, c'est à moi maintenant !</p>
-	</div>
 
 	<!-- Historique d'achat de l'utilisateur connecté -->
 	<div class="history-section">

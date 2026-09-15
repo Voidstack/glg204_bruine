@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Locale;
 
 /**
- * Pack achetable dans la boutique : un prix en euros crédite un certain nombre de points Bruine.
- * Géré entièrement depuis le back-office admin (CRUD + promos temporaires + drapeau « Populaire »).
+ * Pack achetable dans la boutique
  */
 @Getter
 @Setter
@@ -84,7 +83,6 @@ public class ShopPack {
     /**
      * Total de points réellement crédités (base + bonus).
      */
-    @Transient
     public int getTotalPoints() {
         return points + bonusPoints;
     }
@@ -92,7 +90,6 @@ public class ShopPack {
     /**
      * La promo est-elle active à l'instant présent ?
      */
-    @Transient
     public boolean isPromoActive() {
         if (promoPercent <= 0) {
             return false;
@@ -107,7 +104,6 @@ public class ShopPack {
     /**
      * Prix effectivement payé, promo éventuelle déduite.
      */
-    @Transient
     public int getEffectivePriceCents() {
         if (!isPromoActive()) {
             return priceCents;
@@ -118,7 +114,6 @@ public class ShopPack {
     /**
      * Prix catalogue formaté « 4.99 ».
      */
-    @Transient
     public String getPriceEuros() {
         return String.format(Locale.US, "%.2f", priceCents / 100.0);
     }
@@ -126,7 +121,6 @@ public class ShopPack {
     /**
      * Prix effectif formaté « 3.99 » (après promo).
      */
-    @Transient
     public String getEffectivePriceEuros() {
         return String.format(Locale.US, "%.2f", getEffectivePriceCents() / 100.0);
     }

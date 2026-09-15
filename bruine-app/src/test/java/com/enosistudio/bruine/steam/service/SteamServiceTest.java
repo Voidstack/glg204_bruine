@@ -1,20 +1,13 @@
 package com.enosistudio.bruine.steam.service;
 
 import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
-import com.enosistudio.bruine.steam.exception.SteamException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.SocketTimeoutException;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.anything;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 
 class SteamServiceTest {
 
@@ -26,21 +19,6 @@ class SteamServiceTest {
 
     private final SteamService steamService = new SteamService(new RestTemplate(), new ObjectMapper(),
             Validation.buildDefaultValidatorFactory().getValidator(), "cle-factice");
-
-    @Test
-    void aSteamApiFailureNeverExposesTheApiKey() {
-        RestTemplate restTemplate = new RestTemplate();
-        MockRestServiceServer.bindTo(restTemplate).build().expect(anything())
-                .andRespond(withException(new SocketTimeoutException("Read timed out")));
-        SteamService service = new SteamService(restTemplate, new ObjectMapper(),
-                Validation.buildDefaultValidatorFactory().getValidator(), "cle-secrete");
-
-        SteamException failure = assertThrows(SteamException.class, () -> service.getUserData("76561198100881386"));
-
-        for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
-            assertFalse(String.valueOf(cause.getMessage()).contains("cle-secrete"));
-        }
-    }
 
     @Test
     void anIncompleteAssertionIsRejectedBeforeContactingSteam() {

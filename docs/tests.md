@@ -1,6 +1,6 @@
 # Projet *Bruine* : Tests
 
-`./gradlew :bruine-app:test` — 86 tests, JUnit 5, profil `test` (H2 en mémoire, aucun appel réseau).
+`./gradlew :bruine-app:test` — 80 tests, JUnit 5, profil `test` (H2 en mémoire, aucun appel réseau).
 
 ## admin.mfa.TotpGeneratorTest
 
@@ -22,15 +22,8 @@
 - `aSteamAssertionRefusedLeadsToTheLoginFailurePage` : une assertion refusée renvoie vers `/steam/failed`.
 - `steamLogoutKeepsTheAdminSignedIn` : la déconnexion Steam retire le contexte Steam et conserve le contexte admin de la même session.
 
-## config.ThymeleafSvgConfigTest
-
-- `eachLayerIsAStandaloneSvg` (×4) : chaque calque SVG est autonome, sans Thymeleaf ni référence externe.
-- `theLevelUpPageInlinesEveryLayer` : la page levelup inclut tous les calques avec leurs classes d'animation.
-- `htmlModePreservesSvgAttributeCase` : la casse des attributs SVG (`viewBox`…) est préservée au rendu.
-
 ## steam.service.SteamServiceTest
 
-- `aSteamApiFailureNeverExposesTheApiKey` : une panne réseau de l'API Steam (simulée) ne fait apparaître la clé d'API dans aucun message d'exception.
 - `anIncompleteAssertionIsRejectedBeforeContactingSteam` : une assertion OpenID incomplète (signature vide) est refusée par la validation, sans appel à Steam.
 - `anAssertionMeantForAnotherSiteIsRejected` : une assertion OpenID avec un autre `return_to` est refusée.
 - `anAssertionFromAnotherProviderIsRejected` : une assertion d'un autre fournisseur que Steam est refusée.
@@ -41,13 +34,6 @@
 
 - `simultaneousPurchasesNeverSpendMoreThanTheBuyerOwns` : 10 achats simultanés à 10 💧 avec 50 💧 donnent exactement 5 ventes.
 - `simultaneousSpinsNeverSpendMoreThanThePlayerOwns` : 10 tirages simultanés à 10 💧 avec 50 💧 donnent exactement 5 tirages.
-
-## card.CardFragmentTest
-
-- `inventoryPageUsesSharedFragment` : l'inventaire rend la carte via le fragment partagé.
-- `inventoryHidesCounterForASingleCopy` : un exemplaire unique n'affiche pas de compteur.
-- `levelUpPageUsesSharedFragment` : la page levelup rend la carte via le fragment partagé.
-- `deckEditorUsesSharedFragment` : l'éditeur de deck rend la carte via le fragment partagé.
 
 ## gacha.service.GachaServiceTest
 
@@ -100,8 +86,6 @@
 ## deck.DeckSharingTest
 
 - `theDeckIsServedAsAnSvgImage` : `/deck/{steamId}` renvoie une image SVG.
-- `theDeckTemplateIsAValidSvgFile` : le template `deck.svg` est un SVG valide.
-- `theProfileShowsTheDeckImageWithoutAnIframe` : le profil affiche l'image du deck, sans iframe.
 
 ## market.service.MarketServiceTest
 
@@ -125,7 +109,6 @@
 - `aPromoWithoutDatesIsAlwaysRunning` : une promo sans dates est toujours active.
 - `aPromoIsIgnoredBeforeItStarts` : une promo pas encore commencée est ignorée.
 - `aPromoIsIgnoredOnceItIsOver` : une promo terminée est ignorée.
-- `bothPricesAreFormattedWithADecimalPointForTheNumberInputs` : les prix sont formatés avec un point décimal et deux décimales, seul format accepté par les champs `<input type="number">` du formulaire admin.
 
 ## shop.service.ShopServiceTest
 

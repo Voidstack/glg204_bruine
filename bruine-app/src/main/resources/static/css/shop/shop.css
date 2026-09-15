@@ -122,22 +122,6 @@
             padding: 0.1rem 0.55rem;
         }
 
-        /* FAQ strip */
-        .shop-faq {
-            margin-top: 3rem;
-            background: var(--bg-panel);
-            border: 1px solid var(--steam-blue-mid);
-            border-radius: 10px;
-            padding: 1.5rem 2rem;
-            color: var(--text-soft);
-            font-size: 0.88rem;
-            line-height: 1.7;
-        }
-
-        .shop-faq strong {
-            color: var(--text);
-        }
-
         /* Promo */
         .pack-card.promo {
             border-color: rgba(255, 99, 132, 0.45);
