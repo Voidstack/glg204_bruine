@@ -126,8 +126,8 @@ public class GachaService {
     }
 
     private CardViewDTO drawOne(SteamUser user, GachaConfig config) {
-        ECardRarity rarity = rollRarity(config);
-        ECardFinish finish = rollFinish(config);
+        ECardRarity rarity = ECardRarity.getRandomRarityFromConfig(config);
+        ECardFinish finish = ECardFinish.roll(config);
         GachaReward reward = pickReward(rarity);
 
         if (reward != null) {
@@ -148,43 +148,4 @@ public class GachaService {
         return pool.isEmpty() ? null : pool.get(ThreadLocalRandom.current().nextInt(pool.size()));
     }
 
-    /**
-     * Tirage pondéré de la rareté. Les poids de la configuration ne sont pas des
-     * pourcentages : on tire dans leur somme puis on retranche palier par palier.
-     */
-    private ECardRarity rollRarity(GachaConfig config) {
-        int draw = randomBelow(config.rarityWeightTotal());
-
-        if (draw < config.getRarityLegendary()) return ECardRarity.LEGENDARY;
-        draw -= config.getRarityLegendary();
-        if (draw < config.getRarityEpic()) return ECardRarity.EPIC;
-        draw -= config.getRarityEpic();
-        if (draw < config.getRarityRare()) return ECardRarity.RARE;
-        draw -= config.getRarityRare();
-        if (draw < config.getRarityUncommon()) return ECardRarity.UNCOMMON;
-        return ECardRarity.COMMON;
-    }
-
-    /**
-     * Tirage pondéré de la finition, sur le même principe que la rareté.
-     */
-    private ECardFinish rollFinish(GachaConfig config) {
-        int draw = randomBelow(config.finishWeightTotal());
-
-        if (draw < config.getFinishNegative()) return ECardFinish.NEGATIVE;
-        draw -= config.getFinishNegative();
-        if (draw < config.getFinishPolychrome()) return ECardFinish.POLYCHROME;
-        draw -= config.getFinishPolychrome();
-        if (draw < config.getFinishFoil()) return ECardFinish.FOIL;
-        draw -= config.getFinishFoil();
-        if (draw < config.getFinishHolographic()) return ECardFinish.HOLOGRAPHIC;
-        return ECardFinish.NORMAL;
-    }
-
-    /**
-     * Protège du cas où tous les poids seraient à zéro, qui ferait échouer le tirage.
-     */
-    private int randomBelow(int total) {
-        return ThreadLocalRandom.current().nextInt(Math.max(total, 1));
-    }
 }

@@ -1,5 +1,6 @@
 package com.enosistudio.bruine.gacha.model;
 
+import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -64,6 +65,26 @@ public class GachaConfig {
             case RARE -> xpBaseRare;
             case UNCOMMON -> xpBaseUncommon;
             case COMMON -> xpBaseCommon;
+        };
+    }
+
+    public int getRarityWeight(ECardRarity rarity) {
+        return switch (rarity) {
+            case LEGENDARY -> rarityLegendary;
+            case EPIC -> rarityEpic;
+            case RARE -> rarityRare;
+            case UNCOMMON -> rarityUncommon;
+            case COMMON -> rarityCommon;
+        };
+    }
+
+    public int getFinishWeight(ECardFinish finish) {
+        return switch (finish) {
+            case NEGATIVE -> finishNegative;
+            case POLYCHROME -> finishPolychrome;
+            case FOIL -> finishFoil;
+            case HOLOGRAPHIC -> finishHolographic;
+            case NORMAL -> finishNormal;
         };
     }
 }

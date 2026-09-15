@@ -1,6 +1,9 @@
 package com.enosistudio.bruine.card;
 
+import com.enosistudio.bruine.gacha.model.GachaConfig;
 import lombok.Getter;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Raretés, de la plus commune à la plus rare : l'ordre de déclaration sert au tri.
@@ -23,12 +26,24 @@ public enum ECardRarity {
         this.label = label;
     }
 
+    public static ECardRarity getRandomRarityFromConfig(GachaConfig config) {
+        // pas vraiment safe il faudrais utiliser SecureRandom..
+        int draw = ThreadLocalRandom.current().nextInt(Math.max(config.rarityWeightTotal(), 1));
+        ECardRarity[] rarities = values();
+        for (int i = rarities.length - 1; i > 0; i--) {
+            int weight = config.getRarityWeight(rarities[i]);
+            if (draw < weight) return rarities[i];
+            draw -= weight;
+        }
+        return COMMON;
+    }
+
     public static ECardRarity fromString(String code) {
         return valueOf(code.toUpperCase());
     }
 
     /**
-     * Code en minuscules : valeur stockée en base et classe CSS de la carte.
+     * Code en minuscules, valeur stockée en base et classe CSS de la carte. c'est pas super.
      */
     public String getCode() {
         return name().toLowerCase();
