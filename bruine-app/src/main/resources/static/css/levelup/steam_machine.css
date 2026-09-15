@@ -14,7 +14,7 @@
 }
 
 .machine-body.active {
-    box-shadow: 0 0 30px rgba(102, 192, 244, 0.08);
+    box-shadow: 0 0 10px rgba(102, 192, 244, 0.08);
 }
 
 /* Title bar */
@@ -172,10 +172,9 @@
     cursor: default;
 }
 
-/* La zone de dépôt est la machine entière : le surlignage porte sur .machine-body */
 .machine-body.drag-over {
     border-color: var(--accent);
-    box-shadow: 0 0 50px rgba(102, 192, 244, 0.25);
+    box-shadow: 0 0 10px rgba(102, 192, 244, 0.25);
 }
 
 .machine-body.drag-over .machine-dropzone {
@@ -233,23 +232,15 @@
     flex-shrink: 0;
 }
 
-.queue-info {
+.queue-name {
     flex: 1;
     min-width: 0;
-}
-
-.queue-name {
     font-size: 0.62rem;
     font-weight: bold;
     color: var(--text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.queue-meta {
-    font-size: 0.52rem;
-    color: var(--text-muted);
 }
 
 .queue-xp {
@@ -334,12 +325,11 @@
     background: linear-gradient(135deg, #0d3050, #1a4a70);
     color: var(--accent);
     cursor: pointer;
-    box-shadow: 0 0 18px rgba(102, 192, 244, 0.22);
 }
 
 .machine-activate.ready:hover {
     background: linear-gradient(135deg, #1a4a70, #2260a0);
-    box-shadow: 0 0 30px rgba(102, 192, 244, 0.42);
+    box-shadow: 0 0 7px rgba(102, 192, 244, 0.42);
     transform: translateY(-1px);
 }
 

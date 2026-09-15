@@ -66,10 +66,7 @@
             div.className = 'queue-item';
             div.innerHTML = `
                 <span class="queue-emoji">${item.emoji}</span>
-                <div class="queue-info">
-                    <div class="queue-name">${item.name}</div>
-                    <div class="queue-meta">${item.finish !== 'normal' ? item.finish.toUpperCase() + ' · ' : ''}${item.xp} XP</div>
-                </div>
+                <div class="queue-name">${item.name}</div>
                 <span class="queue-xp">+${item.xp}</span>
                 <button class="queue-remove" title="Retirer" data-idx="${idx}">&#10005;</button>`;
             queue.appendChild(div);
