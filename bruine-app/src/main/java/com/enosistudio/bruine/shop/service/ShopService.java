@@ -1,5 +1,6 @@
 package com.enosistudio.bruine.shop.service;
 
+import com.enosistudio.bruine.shop.dto.ShopPackFormDTO;
 import com.enosistudio.bruine.shop.model.ShopPack;
 import com.enosistudio.bruine.shop.model.ShopPurchase;
 import com.enosistudio.bruine.shop.repository.ShopPackRepository;
@@ -15,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Porte peut-être un peu trop de responsabilite...
- */
 @Service
 public class ShopService {
 
@@ -33,8 +31,6 @@ public class ShopService {
         this.steamUserService = steamUserService;
     }
 
-    // Packs
-
     /**
      * Packs triés pour l'affichage (ordre admin puis id).
      */
@@ -48,17 +44,63 @@ public class ShopService {
         return packRepository.findById(id);
     }
 
-    /**
-     * Sauvegarde un pack. Un seul pack peut être « Populaire » à la fois :
-     * si celui-ci l'est, on retire le drapeau des autres.
-     */
     @Transactional
     public ShopPack save(ShopPack pack) {
+        return persist(pack);
+    }
+
+    /**
+     * Crée un pack à partir du formulaire admin.
+     */
+    @Transactional
+    public ShopPack create(ShopPackFormDTO form) {
+        ShopPack pack = new ShopPack();
+        applyForm(pack, form);
+        return persist(pack);
+    }
+
+    /**
+     * Met à jour un pack existant à partir du formulaire admin ; sans effet si le pack n'existe plus.
+     */
+    @Transactional
+    public void update(Long id, ShopPackFormDTO form) {
+        packRepository.findById(id).ifPresent(pack -> {
+            applyForm(pack, form);
+            persist(pack);
+        });
+    }
+
+    /**
+     * Je passe tout ici pour la regle de pack populaire unique.
+     */
+    private ShopPack persist(ShopPack pack) {
         ShopPack saved = packRepository.save(pack);
         if (saved.isPopular()) {
             packRepository.clearPopularExcept(saved.getId());
         }
         return saved;
+    }
+
+    /**
+     * Recopie le formulaire dans le pack en ramenant les valeurs dans leurs bornes :
+     * pas de montant négatif, promotion entre 0 et 100 %, prix converti en centimes.
+     */
+    private void applyForm(ShopPack pack, ShopPackFormDTO form) {
+        pack.setName(form.name());
+        pack.setEmoji(form.emoji());
+        pack.setPoints(Math.max(orZero(form.points()), 0));
+        pack.setBonusPoints(Math.max(orZero(form.bonusPoints()), 0));
+        double euros = form.priceEuros() == null ? 0 : form.priceEuros();
+        pack.setPriceCents((int) Math.round(Math.max(euros, 0) * 100));
+        pack.setSortOrder(orZero(form.sortOrder()));
+        pack.setPopular(Boolean.TRUE.equals(form.popular()));
+        pack.setPromoPercent(Math.clamp(orZero(form.promoPercent()), 0, 100));
+        pack.setPromoStart(form.promoStart());
+        pack.setPromoEnd(form.promoEnd());
+    }
+
+    private static int orZero(Integer value) {
+        return value == null ? 0 : value;
     }
 
     @Transactional

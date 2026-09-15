@@ -31,31 +31,31 @@
 						<tbody>
 						<tr>
 							<td class="has-text-warning">⭐ Légendaire</td>
-							<td><input class="input is-small" type="number" name="rarityLegendary" min="0"
+							<td><input class="input is-small" type="number" required name="rarityLegendary" min="0"
 							           data-group="rarity" th:value="${gachaConfig.rarityLegendary}"></td>
 							<td><span class="tag" data-pct="rarity">—</span></td>
 						</tr>
 						<tr>
 							<td class="has-text-danger">🔮 Épique</td>
-							<td><input class="input is-small" type="number" name="rarityEpic" min="0"
+							<td><input class="input is-small" type="number" required name="rarityEpic" min="0"
 							           data-group="rarity" th:value="${gachaConfig.rarityEpic}"></td>
 							<td><span class="tag" data-pct="rarity">—</span></td>
 						</tr>
 						<tr>
 							<td class="has-text-info">💎 Rare</td>
-							<td><input class="input is-small" type="number" name="rarityRare" min="0"
+							<td><input class="input is-small" type="number" required name="rarityRare" min="0"
 							           data-group="rarity" th:value="${gachaConfig.rarityRare}"></td>
 							<td><span class="tag" data-pct="rarity">—</span></td>
 						</tr>
 						<tr>
 							<td class="has-text-success">🍃 Peu commun</td>
-							<td><input class="input is-small" type="number" name="rarityUncommon" min="0"
+							<td><input class="input is-small" type="number" required name="rarityUncommon" min="0"
 							           data-group="rarity" th:value="${gachaConfig.rarityUncommon}"></td>
 							<td><span class="tag" data-pct="rarity">—</span></td>
 						</tr>
 						<tr>
 							<td class="has-text-grey-light">🪨 Commun</td>
-							<td><input class="input is-small" type="number" name="rarityCommon" min="0"
+							<td><input class="input is-small" type="number" required name="rarityCommon" min="0"
 							           data-group="rarity" th:value="${gachaConfig.rarityCommon}"></td>
 							<td><span class="tag" data-pct="rarity">—</span></td>
 						</tr>
@@ -77,31 +77,31 @@
 						<tbody>
 						<tr>
 							<td>☯ Négatif</td>
-							<td><input class="input is-small" type="number" name="finishNegative" min="0"
+							<td><input class="input is-small" type="number" required name="finishNegative" min="0"
 							           data-group="finish" th:value="${gachaConfig.finishNegative}"></td>
 							<td><span class="tag" data-pct="finish">—</span></td>
 						</tr>
 						<tr>
 							<td class="has-text-warning">🌈 Polychrome</td>
-							<td><input class="input is-small" type="number" name="finishPolychrome" min="0"
+							<td><input class="input is-small" type="number" required name="finishPolychrome" min="0"
 							           data-group="finish" th:value="${gachaConfig.finishPolychrome}"></td>
 							<td><span class="tag" data-pct="finish">—</span></td>
 						</tr>
 						<tr>
 							<td class="has-text-info">✨ Foil</td>
-							<td><input class="input is-small" type="number" name="finishFoil" min="0"
+							<td><input class="input is-small" type="number" required name="finishFoil" min="0"
 							           data-group="finish" th:value="${gachaConfig.finishFoil}"></td>
 							<td><span class="tag" data-pct="finish">—</span></td>
 						</tr>
 						<tr>
 							<td class="has-text-link">💠 Holographique</td>
-							<td><input class="input is-small" type="number" name="finishHolographic" min="0"
+							<td><input class="input is-small" type="number" required name="finishHolographic" min="0"
 							           data-group="finish" th:value="${gachaConfig.finishHolographic}"></td>
 							<td><span class="tag" data-pct="finish">—</span></td>
 						</tr>
 						<tr>
 							<td class="has-text-grey-light">⬜ Normal</td>
-							<td><input class="input is-small" type="number" name="finishNormal" min="0"
+							<td><input class="input is-small" type="number" required name="finishNormal" min="0"
 							           data-group="finish" th:value="${gachaConfig.finishNormal}"></td>
 							<td><span class="tag" data-pct="finish">—</span></td>
 						</tr>
@@ -123,27 +123,27 @@
 						<tbody>
 						<tr>
 							<td class="has-text-warning">⭐ Légendaire</td>
-							<td><input class="input is-small" type="number" name="xpBaseLegendary" min="0"
+							<td><input class="input is-small" type="number" required name="xpBaseLegendary" min="0"
 							           th:value="${gachaConfig.xpBaseLegendary}"></td>
 						</tr>
 						<tr>
 							<td class="has-text-danger">🔮 Épique</td>
-							<td><input class="input is-small" type="number" name="xpBaseEpic" min="0"
+							<td><input class="input is-small" type="number" required name="xpBaseEpic" min="0"
 							           th:value="${gachaConfig.xpBaseEpic}"></td>
 						</tr>
 						<tr>
 							<td class="has-text-info">💎 Rare</td>
-							<td><input class="input is-small" type="number" name="xpBaseRare" min="0"
+							<td><input class="input is-small" type="number" required name="xpBaseRare" min="0"
 							           th:value="${gachaConfig.xpBaseRare}"></td>
 						</tr>
 						<tr>
 							<td class="has-text-success">🍃 Peu commun</td>
-							<td><input class="input is-small" type="number" name="xpBaseUncommon" min="0"
+							<td><input class="input is-small" type="number" required name="xpBaseUncommon" min="0"
 							           th:value="${gachaConfig.xpBaseUncommon}"></td>
 						</tr>
 						<tr>
 							<td class="has-text-grey-light">🪨 Commun</td>
-							<td><input class="input is-small" type="number" name="xpBaseCommon" min="0"
+							<td><input class="input is-small" type="number" required name="xpBaseCommon" min="0"
 							           th:value="${gachaConfig.xpBaseCommon}"></td>
 						</tr>
 						</tbody>
@@ -164,30 +164,30 @@
 						<tbody>
 						<tr>
 							<td>☯ Négatif</td>
-							<td><input class="input is-small" type="number" name="xpMultNegative" min="1"
+							<td><input class="input is-small" type="number" required name="xpMultNegative" min="1"
 							           th:value="${gachaConfig.xpMultNegative}"></td>
 						</tr>
 
 						<tr>
 							<td class="has-text-warning">🌈 Polychrome</td>
-							<td><input class="input is-small" type="number" name="xpMultPolychrome" min="1"
+							<td><input class="input is-small" type="number" required name="xpMultPolychrome" min="1"
 							           th:value="${gachaConfig.xpMultPolychrome}"></td>
 						</tr>
 						<tr>
 							<td class="has-text-info">✨ Foil</td>
-							<td><input class="input is-small" type="number" name="xpMultFoil" min="1"
+							<td><input class="input is-small" type="number" required name="xpMultFoil" min="1"
 							           th:value="${gachaConfig.xpMultFoil}"></td>
 						</tr>
 
 						<tr>
 							<td class="has-text-link">💠 Holographique</td>
-							<td><input class="input is-small" type="number" name="xpMultHolographic" min="1"
+							<td><input class="input is-small" type="number" required name="xpMultHolographic" min="1"
 							           th:value="${gachaConfig.xpMultHolographic}"></td>
 						</tr>
 
 						<tr>
 							<td class="has-text-grey-light">⬜ Normal</td>
-							<td><input class="input is-small" type="number" name="xpMultNormal" min="1"
+							<td><input class="input is-small" type="number" required name="xpMultNormal" min="1"
 							           th:value="${gachaConfig.xpMultNormal}"></td>
 						</tr>
 						</tbody>

@@ -7,19 +7,24 @@ import com.enosistudio.bruine.steam.security.SteamUserPrincipal;
 import com.enosistudio.bruine.steam.service.SteamService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
-
 @Controller
 @RequestMapping("/admin")
 public class AdminImpersonationController {
+
+    /**
+     * Même dépôt que la chaîne principale (clé de session par défaut), volontairement local :
+     * un bean global s'appliquerait aussi aux chaînes de sécurité.
+     */
+    private final HttpSessionSecurityContextRepository steamContextRepository = new HttpSessionSecurityContextRepository();
 
     private final SteamUserService steamUserService;
     private final SteamService steamService;
@@ -29,18 +34,22 @@ public class AdminImpersonationController {
         this.steamService = steamService;
     }
 
+    /**
+     * Ouvre une session Steam au nom du joueur. La requête passe par la chaîne admin, dont le
+     * contexte courant est celui de l'administrateur : le contexte Steam est donc écrit
+     * directement dans le dépôt en session de la chaîne principale, comme le fait la connexion Steam.
+     */
     @PostMapping("/impersonate/{id}")
-    public String impersonate(@PathVariable Long id, HttpServletRequest request, HttpSession session) {
+    public String impersonate(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) {
         SteamUser user = steamUserService.findById(id).orElse(null);
         if (user == null) return "redirect:/admin";
 
         SteamUserPrincipal principal = SteamUserPrincipal.create(user, avatarUrl(user.getSteamId()));
-        SteamAuthenticationToken token = SteamAuthenticationToken.authenticated(principal);
-
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(token);
+        context.setAuthentication(SteamAuthenticationToken.authenticated(principal));
+
         request.changeSessionId();
-        session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, context);
+        steamContextRepository.saveContext(context, request, response);
 
         return "redirect:/";
     }

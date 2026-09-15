@@ -37,8 +37,8 @@ public class GachaController {
         mav.addObject("costPerPull", GachaService.COST_PER_PULL);
         mav.addObject("userScore", user.getScore());
         mav.addObject("gachaConfig", config);
-        mav.addObject("rarityTotal", rarityTotal(config));
-        mav.addObject("finishTotal", finishTotal(config));
+        mav.addObject("rarityTotal", Math.max(config.rarityWeightTotal(), 1));
+        mav.addObject("finishTotal", Math.max(config.finishWeightTotal(), 1));
         return mav;
     }
 
@@ -58,23 +58,5 @@ public class GachaController {
                     "Score insuffisant ! Il vous faut au moins " + tooPoor.getRequiredScore() + " points.");
         }
         return "redirect:/gacha"; // rechargement de la page pour afficher le résultat du tirage
-    }
-
-    /**
-     * Somme des poids de rareté, ramenée à 1 au minimum pour servir de dénominateur d'affichage.
-     */
-    private int rarityTotal(GachaConfig config) {
-        int total = config.getRarityLegendary() + config.getRarityEpic() + config.getRarityRare()
-                + config.getRarityUncommon() + config.getRarityCommon();
-        return Math.max(total, 1);
-    }
-
-    /**
-     * Somme des poids de finition, ramenée à 1 au minimum pour servir de dénominateur d'affichage.
-     */
-    private int finishTotal(GachaConfig config) {
-        int total = config.getFinishNegative() + config.getFinishPolychrome() + config.getFinishFoil()
-                + config.getFinishHolographic() + config.getFinishNormal();
-        return Math.max(total, 1);
     }
 }

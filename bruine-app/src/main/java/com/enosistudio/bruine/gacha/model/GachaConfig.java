@@ -41,6 +41,20 @@ public class GachaConfig {
     private int xpMultNegative = 5;
 
     /**
+     * Somme des poids de rareté : le tirage se fait dans cet intervalle.
+     */
+    public int rarityWeightTotal() {
+        return rarityLegendary + rarityEpic + rarityRare + rarityUncommon + rarityCommon;
+    }
+
+    /**
+     * Somme des poids de finition : le tirage se fait dans cet intervalle.
+     */
+    public int finishWeightTotal() {
+        return finishNegative + finishPolychrome + finishFoil + finishHolographic + finishNormal;
+    }
+
+    /**
      * XP rapportée par une carte de cette rareté, avant multiplicateur de finition.
      */
     public int xpBaseFor(ECardRarity rarity) {

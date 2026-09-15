@@ -1,13 +1,11 @@
 package com.enosistudio.bruine.admin.controller;
 
-import com.enosistudio.bruine.shop.model.ShopPack;
+import com.enosistudio.bruine.shop.dto.ShopPackFormDTO;
 import com.enosistudio.bruine.shop.service.ShopService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/admin/shop-packs")
@@ -19,20 +17,6 @@ public class AdminShopPackController {
         this.shopService = shopService;
     }
 
-    /**
-     * Convertit un champ datetime-local (« 2026-07-05T14:30 ») en LocalDateTime, ou null si vide.
-     */
-    private LocalDateTime parseDateTime(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        return LocalDateTime.parse(value);
-    }
-
-    private int eurosToCents(double euros) {
-        return (int) Math.round(Math.max(euros, 0) * 100);
-    }
-
     @GetMapping
     public String list(Model model) {
         model.addAttribute("packs", shopService.findAllOrdered());
@@ -40,59 +24,16 @@ public class AdminShopPackController {
     }
 
     @PostMapping("/create")
-    public String create(@RequestParam String name,
-                         @RequestParam String emoji,
-                         @RequestParam int points,
-                         @RequestParam(defaultValue = "0") int bonusPoints,
-                         @RequestParam double priceEuros,
-                         @RequestParam(defaultValue = "0") int sortOrder,
-                         @RequestParam(defaultValue = "false") boolean popular,
-                         @RequestParam(defaultValue = "0") int promoPercent,
-                         @RequestParam(required = false) String promoStart,
-                         @RequestParam(required = false) String promoEnd,
-                         RedirectAttributes redirectAttributes) {
-        ShopPack pack = new ShopPack();
-        pack.setName(name);
-        pack.setEmoji(emoji);
-        pack.setPoints(Math.max(points, 0));
-        pack.setBonusPoints(Math.max(bonusPoints, 0));
-        pack.setPriceCents(eurosToCents(priceEuros));
-        pack.setSortOrder(sortOrder);
-        pack.setPopular(popular);
-        pack.setPromoPercent(Math.min(Math.max(promoPercent, 0), 100));
-        pack.setPromoStart(parseDateTime(promoStart));
-        pack.setPromoEnd(parseDateTime(promoEnd));
-        shopService.save(pack);
-        redirectAttributes.addFlashAttribute("success", "Pack « " + name + " » créé.");
+    public String create(@ModelAttribute ShopPackFormDTO form, RedirectAttributes redirectAttributes) {
+        shopService.create(form);
+        redirectAttributes.addFlashAttribute("success", "Pack « " + form.name() + " » créé.");
         return "redirect:/admin/shop-packs";
     }
 
     @PostMapping("/{id}/update")
-    public String update(@PathVariable Long id,
-                         @RequestParam String name,
-                         @RequestParam String emoji,
-                         @RequestParam int points,
-                         @RequestParam(defaultValue = "0") int bonusPoints,
-                         @RequestParam double priceEuros,
-                         @RequestParam(defaultValue = "0") int sortOrder,
-                         @RequestParam(defaultValue = "false") boolean popular,
-                         @RequestParam(defaultValue = "0") int promoPercent,
-                         @RequestParam(required = false) String promoStart,
-                         @RequestParam(required = false) String promoEnd,
+    public String update(@PathVariable Long id, @ModelAttribute ShopPackFormDTO form,
                          RedirectAttributes redirectAttributes) {
-        shopService.findById(id).ifPresent(pack -> {
-            pack.setName(name);
-            pack.setEmoji(emoji);
-            pack.setPoints(Math.max(points, 0));
-            pack.setBonusPoints(Math.max(bonusPoints, 0));
-            pack.setPriceCents(eurosToCents(priceEuros));
-            pack.setSortOrder(sortOrder);
-            pack.setPopular(popular);
-            pack.setPromoPercent(Math.min(Math.max(promoPercent, 0), 100));
-            pack.setPromoStart(parseDateTime(promoStart));
-            pack.setPromoEnd(parseDateTime(promoEnd));
-            shopService.save(pack);
-        });
+        shopService.update(id, form);
         redirectAttributes.addFlashAttribute("success", "Pack mis à jour.");
         return "redirect:/admin/shop-packs";
     }

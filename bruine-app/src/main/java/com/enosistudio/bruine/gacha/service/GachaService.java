@@ -5,6 +5,7 @@ import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
 import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.deck.repository.UserCardRepository;
+import com.enosistudio.bruine.gacha.dto.GachaConfigFormDTO;
 import com.enosistudio.bruine.gacha.dto.GachaResultDTO;
 import com.enosistudio.bruine.gacha.exception.InsufficientScoreException;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
@@ -68,6 +69,36 @@ public class GachaService {
     }
 
     /**
+     * Enregistre la configuration saisie par l'administrateur. Les poids et barèmes
+     * négatifs sont ramenés à 0, les multiplicateurs à 1 au minimum.
+     */
+    @Transactional
+    public GachaConfig saveConfig(GachaConfigFormDTO form) {
+        GachaConfig config = currentConfig();
+        config.setRarityLegendary(Math.max(form.rarityLegendary(), 0));
+        config.setRarityEpic(Math.max(form.rarityEpic(), 0));
+        config.setRarityRare(Math.max(form.rarityRare(), 0));
+        config.setRarityUncommon(Math.max(form.rarityUncommon(), 0));
+        config.setRarityCommon(Math.max(form.rarityCommon(), 0));
+        config.setFinishNegative(Math.max(form.finishNegative(), 0));
+        config.setFinishPolychrome(Math.max(form.finishPolychrome(), 0));
+        config.setFinishFoil(Math.max(form.finishFoil(), 0));
+        config.setFinishHolographic(Math.max(form.finishHolographic(), 0));
+        config.setFinishNormal(Math.max(form.finishNormal(), 0));
+        config.setXpBaseCommon(Math.max(form.xpBaseCommon(), 0));
+        config.setXpBaseUncommon(Math.max(form.xpBaseUncommon(), 0));
+        config.setXpBaseRare(Math.max(form.xpBaseRare(), 0));
+        config.setXpBaseEpic(Math.max(form.xpBaseEpic(), 0));
+        config.setXpBaseLegendary(Math.max(form.xpBaseLegendary(), 0));
+        config.setXpMultNormal(Math.max(form.xpMultNormal(), 1));
+        config.setXpMultHolographic(Math.max(form.xpMultHolographic(), 1));
+        config.setXpMultFoil(Math.max(form.xpMultFoil(), 1));
+        config.setXpMultNegative(Math.max(form.xpMultNegative(), 1));
+        config.setXpMultPolychrome(Math.max(form.xpMultPolychrome(), 1));
+        return gachaConfigRepository.save(config);
+    }
+
+    /**
      * Effectue un tirage pour le joueur et lui attribue les cartes obtenues.
      *
      * @param requestedPulls nombre de tirages demandé, ramené dans les bornes autorisées
@@ -75,7 +106,7 @@ public class GachaService {
      */
     @Transactional
     public GachaResultDTO spin(SteamUser user, int requestedPulls) {
-        int pulls = Math.min(Math.max(requestedPulls, 1), MAX_PULLS_PER_SPIN);
+        int pulls = Math.clamp(requestedPulls, 1, MAX_PULLS_PER_SPIN);
         int totalCost = pulls * COST_PER_PULL;
 
         SteamUser steanUser = steamUserService.lock(user.getId());
@@ -122,9 +153,7 @@ public class GachaService {
      * pourcentages : on tire dans leur somme puis on retranche palier par palier.
      */
     private ECardRarity rollRarity(GachaConfig config) {
-        int total = config.getRarityLegendary() + config.getRarityEpic() + config.getRarityRare()
-                + config.getRarityUncommon() + config.getRarityCommon();
-        int draw = randomBelow(total);
+        int draw = randomBelow(config.rarityWeightTotal());
 
         if (draw < config.getRarityLegendary()) return ECardRarity.LEGENDARY;
         draw -= config.getRarityLegendary();
@@ -140,9 +169,7 @@ public class GachaService {
      * Tirage pondéré de la finition, sur le même principe que la rareté.
      */
     private ECardFinish rollFinish(GachaConfig config) {
-        int total = config.getFinishNegative() + config.getFinishPolychrome() + config.getFinishFoil()
-                + config.getFinishHolographic() + config.getFinishNormal();
-        int draw = randomBelow(total);
+        int draw = randomBelow(config.finishWeightTotal());
 
         if (draw < config.getFinishNegative()) return ECardFinish.NEGATIVE;
         draw -= config.getFinishNegative();

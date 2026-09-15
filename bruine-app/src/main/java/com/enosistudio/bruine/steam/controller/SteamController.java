@@ -3,6 +3,7 @@ package com.enosistudio.bruine.steam.controller;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.steam.dto.SteamGameDTO;
 import com.enosistudio.bruine.steam.exception.SteamException;
+import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import com.enosistudio.bruine.steam.security.SteamOpenIdAuthenticationFilter;
 import com.enosistudio.bruine.steam.service.SteamService;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Pages Steam. Le retour de connexion ({@code /steam/login/redirect}) est traité par
@@ -64,10 +66,11 @@ public class SteamController {
         }
         try {
             Map<String, Object> userData = steamService.getUserData(steamId);
-            boolean registeredOnSite = steamUserService.findBySteamId(steamId).isPresent();
+            Optional<SteamUser> registeredUser = steamUserService.findBySteamId(steamId);
+            boolean registeredOnSite = registeredUser.isPresent();
             boolean isOwnProfile = currentSteamUser.steamId().filter(steamId::equals).isPresent();
 
-            boolean hasDeck = steamUserService.findBySteamId(steamId)
+            boolean hasDeck = registeredUser
                     .map(u -> !deckService.findDeckCardIds(u.getId()).isEmpty())
                     .orElse(false);
 
