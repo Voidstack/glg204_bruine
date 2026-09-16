@@ -1,16 +1,13 @@
 package com.enosistudio.bruine.admin.controller;
 
 import com.enosistudio.bruine.admin.EAdminRole;
-import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
 import com.enosistudio.bruine.admin.service.AdminUserService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -39,11 +36,5 @@ public class AdminDashboardController {
             model.addAttribute("loginError", true);
         }
         return "admin/login";
-    }
-
-    @PostMapping("/admin/logout")
-    public String adminLogout(HttpSession session) {
-        session.removeAttribute(AdminSecurityContextService.CONTEXT_KEY);
-        return "redirect:/admin";
     }
 }

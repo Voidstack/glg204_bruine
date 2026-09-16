@@ -61,7 +61,7 @@ public class AdminImpersonationController {
      */
     private String avatarUrl(String steamId) {
         try {
-            return (String) steamService.getUserData(steamId).get("avatar");
+            return steamService.getPlayer(steamId).avatarMedium();
         } catch (SteamException steamIndisponible) {
             return null;
         }

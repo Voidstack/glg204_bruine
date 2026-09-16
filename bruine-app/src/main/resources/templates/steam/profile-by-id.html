@@ -19,13 +19,13 @@
 
 		<!-- Bandeau avatar + nom -->
 		<div class="profile-banner">
-			<img th:src="${steamData['avatarfull']}"
-			     th:alt="${steamData['personaname']}"
+			<img th:src="${player.avatarFull}"
+			     th:alt="${player.personaName}"
 			     class="profile-avatar">
 			<div>
 				<div class="profile-identity">
 					<h1 class="title" style="color: var(--text); margin-bottom: 0;"
-					    th:text="${steamData['personaname']}">Pseudo</h1>
+					    th:text="${player.personaName}">Pseudo</h1>
 					<span th:if="${registeredOnSite}"
 					      class="tag is-success"
 					      title="Cet utilisateur a un compte sur Bruine">
@@ -38,10 +38,10 @@
                         Pas encore inscrit
                     </span>
 				</div>
-				<p th:if="${steamData['realname']}" style="color: var(--text-muted); font-size: 0.95rem;"
-				   th:text="${steamData['realname']}">Nom réel</p>
+				<p th:if="${player.realName}" style="color: var(--text-muted); font-size: 0.95rem;"
+				   th:text="${player.realName}">Nom réel</p>
 				<p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
-					Steam ID : <code style="color: var(--accent);" th:text="${steamData['steamid']}">0</code>
+					Steam ID : <code style="color: var(--accent);" th:text="${player.steamId}">0</code>
 				</p>
 			</div>
 		</div>
@@ -72,7 +72,7 @@
 			<!-- Statut -->
 			<div class="field is-horizontal" style="align-items: center; gap: 1rem;">
 				<span style="color: var(--text-muted); min-width: 140px; font-size: 0.9rem;">Statut</span>
-				<span th:switch="${steamData['personastate']}">
+				<span th:switch="${player.personaState}">
                     <span th:case="1" class="tag" style="background: #57cbde; color: var(--bg-deep);">En ligne</span>
                     <span th:case="2" class="tag" style="background: #c94f4f; color: white;">Occupé</span>
                     <span th:case="3" class="tag" style="background: #c9a84c; color: var(--bg-deep);">Absent</span>
@@ -87,34 +87,34 @@
 			<!-- Visibilité -->
 			<div class="field is-horizontal" style="align-items: center; gap: 1rem;">
 				<span style="color: var(--text-muted); min-width: 140px; font-size: 0.9rem;">Profil</span>
-				<span th:if="${steamData['communityvisibilitystate'] == 3}"
+				<span th:if="${player.communityVisibilityState == 3}"
 				      class="tag is-success is-light">Public</span>
-				<span th:unless="${steamData['communityvisibilitystate'] == 3}"
+				<span th:unless="${player.communityVisibilityState == 3}"
 				      class="tag" style="background: #3d3d3f; color: var(--text-muted);">Privé</span>
 			</div>
 
 			<!-- Pays -->
-			<div th:if="${steamData['loccountrycode']}"
+			<div th:if="${player.countryCode}"
 			     class="field is-horizontal" style="align-items: center; gap: 1rem;">
 				<span style="color: var(--text-muted); min-width: 140px; font-size: 0.9rem;">Pays</span>
-				<span style="color: var(--text);" th:text="${steamData['loccountrycode']}"></span>
+				<span style="color: var(--text);" th:text="${player.countryCode}"></span>
 			</div>
 
 			<!-- Lien profil Steam -->
-			<div th:if="${steamData['profileurl']}"
+			<div th:if="${player.profileUrl}"
 			     class="field is-horizontal" style="align-items: center; gap: 1rem;">
 				<span style="color: var(--text-muted); min-width: 140px; font-size: 0.9rem;">Profil Steam</span>
-				<a th:href="${steamData['profileurl']}" target="_blank" rel="noopener"
+				<a th:href="${player.profileUrl}" target="_blank" rel="noopener"
 				   style="color: var(--accent);">
 					<i class="fa-brands fa-steam"></i>
-					<span th:text="${steamData['profileurl']}"></span>
+					<span th:text="${player.profileUrl}"></span>
 				</a>
 			</div>
 
 		</div>
 
 		<!-- Jeux (chargement asynchrone) -->
-		<div class="profile-games" id="games-section" th:data-steamid="${steamData['steamid']}">
+		<div class="profile-games" id="games-section" th:data-steamid="${player.steamId}">
 
 			<!-- Temps total -->
 			<div class="profile-playtime">
@@ -177,7 +177,7 @@
 				        onclick="document.getElementById('modal-delete').classList.remove('is-active')">
 					Annuler
 				</button>
-				<form th:action="@{/steam/profile/{id}/delete(id=${steamData['steamid']})}" method="post">
+				<form th:action="@{/steam/profile/{id}/delete(id=${player.steamId})}" method="post">
 					<button type="submit" class="button is-danger">
 						<i class="fa-solid fa-trash"></i>&nbsp; Confirmer la suppression
 					</button>

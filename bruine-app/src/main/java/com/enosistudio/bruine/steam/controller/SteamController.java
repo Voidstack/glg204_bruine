@@ -2,6 +2,7 @@ package com.enosistudio.bruine.steam.controller;
 
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.steam.dto.SteamGameDTO;
+import com.enosistudio.bruine.steam.dto.SteamPlayerDTO;
 import com.enosistudio.bruine.steam.exception.SteamException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
@@ -17,9 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -59,13 +58,10 @@ public class SteamController {
                 .orElseGet(() -> new ModelAndView("redirect:/"));
     }
 
-    @GetMapping("/profile/{steamId}")
+    @GetMapping("/profile/{steamId:" + SteamService.STEAM_ID_PATTERN + "}")
     public ModelAndView profileById(@PathVariable String steamId) {
-        if (!steamId.matches("7656119\\d{10}")) {
-            return new ModelAndView("redirect:/steam/failed");
-        }
         try {
-            Map<String, Object> userData = steamService.getUserData(steamId);
+            SteamPlayerDTO player = steamService.getPlayer(steamId);
             Optional<SteamUser> registeredUser = steamUserService.findBySteamId(steamId);
             boolean registeredOnSite = registeredUser.isPresent();
             boolean isOwnProfile = currentSteamUser.steamId().filter(steamId::equals).isPresent();
@@ -79,7 +75,7 @@ public class SteamController {
                     .path("/deck/").path(steamId).toUriString();
 
             ModelAndView mav = new ModelAndView("steam/profile-by-id");
-            mav.addObject("steamData", userData);
+            mav.addObject("player", player);
             mav.addObject("registeredOnSite", registeredOnSite);
             mav.addObject("isOwnProfile", isOwnProfile);
             mav.addObject("hasDeck", hasDeck);
@@ -90,21 +86,13 @@ public class SteamController {
         }
     }
 
-    @GetMapping("/profile/{steamId}/games")
+    @GetMapping("/profile/{steamId:" + SteamService.STEAM_ID_PATTERN + "}/games")
     @ResponseBody
-    public Map<String, Object> gamesJson(@PathVariable String steamId) {
-        if (!steamId.matches("7656119\\d{10}")) {
-            return Map.of("games", List.of(), "totalPlaytimeMinutes", 0L);
-        }
+    public List<SteamGameDTO> gamesJson(@PathVariable String steamId) {
         try {
-            List<SteamGameDTO> games = steamService.getOwnedGames(steamId).stream()
-                    .filter(SteamService::isPlayed)
-                    .sorted(Comparator.comparingInt(SteamGameDTO::playtimeMinutes).reversed())
-                    .toList();
-            long total = games.stream().mapToLong(SteamGameDTO::playtimeMinutes).sum();
-            return Map.of("games", games, "totalPlaytimeMinutes", total);
-        } catch (SteamException steamIndisponible) {
-            return Map.of("games", List.of(), "totalPlaytimeMinutes", 0L);
+            return steamService.getPlayedGames(steamId);
+        } catch (SteamException profilPriveOuSteamMuet) {
+            return List.of();
         }
     }
 

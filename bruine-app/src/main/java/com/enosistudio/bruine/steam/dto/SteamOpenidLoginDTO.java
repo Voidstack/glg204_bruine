@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
 
+/** Paramètres {@code openid.*} renvoyés par Steam au retour de connexion. */
 @Setter
 @Getter
 public class SteamOpenidLoginDTO {

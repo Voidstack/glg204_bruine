@@ -1,5 +1,6 @@
 package com.enosistudio.bruine.steam.security;
 
+import com.enosistudio.bruine.steam.dto.SteamPlayerDTO;
 import com.enosistudio.bruine.steam.exception.SteamException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamService;
@@ -12,8 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
-
-import java.util.Map;
 
 /**
  * Vérifie auprès de Steam l'assertion OpenID du jeton, puis enregistre la connexion du joueur.
@@ -36,9 +35,9 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
         String steamId = verifiedSteamId((SteamAuthenticationToken) authentication);
 
         // Le profil est indispensable : sans lui on ne sait ni nommer le joueur, ni le créer.
-        Map<String, Object> userAttributes;
+        SteamPlayerDTO player;
         try {
-            userAttributes = steamService.getUserData(steamId);
+            player = steamService.getPlayer(steamId);
         } catch (SteamException steamIndisponible) {
             log.warn("Récupération du profil Steam impossible pour {}", steamId, steamIndisponible);
             throw new AuthenticationServiceException(
@@ -54,9 +53,8 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
 
         // Les appels Steam sont faits avant : le joueur n'est relu et verrouillé qu'au moment
         // d'écrire, pour ne pas écraser un score modifié pendant ces appels réseau.
-        SteamUser user = userService.recordLogin(steamId, (String) userAttributes.get("personaname"), totalPlaytime);
-        return SteamAuthenticationToken.authenticated(
-                SteamUserPrincipal.create(user, (String) userAttributes.get("avatar")));
+        SteamUser user = userService.recordLogin(steamId, player.personaName(), totalPlaytime);
+        return SteamAuthenticationToken.authenticated(SteamUserPrincipal.create(user, player.avatarMedium()));
     }
 
     /**

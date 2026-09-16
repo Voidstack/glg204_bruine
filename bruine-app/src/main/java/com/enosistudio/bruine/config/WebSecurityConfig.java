@@ -5,6 +5,7 @@ import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
 import com.enosistudio.bruine.admin.mfa.MfaAuthenticationSuccessHandler;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationProvider;
 import com.enosistudio.bruine.steam.security.SteamOpenIdAuthenticationFilter;
+import com.enosistudio.bruine.steam.service.SteamService;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 public class WebSecurityConfig {
 
     private static final String STRIPE_WEBHOOK = "/shop/webhook";
+    private static final String STEAM_ID = "{steamId:" + SteamService.STEAM_ID_PATTERN + "}";
 
     private final SteamAuthenticationProvider steamAuthenticationProvider;
     private final UserDetailsService userDetailsService;
@@ -68,6 +70,11 @@ public class WebSecurityConfig {
                         .loginProcessingUrl("/admin")
                         .successHandler(mfaSuccessHandler)
                         .failureUrl("/admin?error"))
+                // retire seulement le contexte admin (dépôt de la chaîne) : la session porte aussi le contexte Steam
+                .logout(l -> l
+                        .logoutUrl("/admin/logout")
+                        .invalidateHttpSession(false)
+                        .logoutSuccessUrl("/admin"))
                 .authenticationProvider(daoAuthenticationProvider())
         ;
         // @formatter:on
@@ -95,9 +102,10 @@ public class WebSecurityConfig {
                         // authentification Steam
                         .requestMatchers("/steam/login", "/steam/login/redirect", "/steam/failed").permitAll()
                         // profils Steam publics — mais pas la suppression de compte
-                        .requestMatchers(HttpMethod.GET, "/steam/profile", "/steam/profile/*", "/steam/profile/*/games").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/steam/profile", "/steam/profile/" + STEAM_ID,
+                                "/steam/profile/" + STEAM_ID + "/games").permitAll()
                         // image SVG du deck d'un joueur, partageable via <img>
-                        .requestMatchers(HttpMethod.GET, "/deck/7656119*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/deck/" + STEAM_ID).permitAll()
                         // webhook Stripe : appelé par les serveurs de Stripe, authentifié par la signature de l'événement
                         .requestMatchers(HttpMethod.POST, STRIPE_WEBHOOK).permitAll()
                         // tout le reste (gacha, inventaire, deck, market, shop, levelup, delete...) exige une session Steam

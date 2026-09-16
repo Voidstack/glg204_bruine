@@ -18,25 +18,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     fetch('/steam/profile/' + steamId + '/games')
         .then(r => r.json())
-        .then(data => {
+        .then(games => {
             // Mettre à jour le total
-            const h = Math.floor(data.totalPlaytimeMinutes / 60);
-            const m = data.totalPlaytimeMinutes % 60;
+            const total = games.reduce((sum, game) => sum + game.playtimeMinutes, 0);
+            const h = Math.floor(total / 60);
+            const m = total % 60;
             document.getElementById('total-playtime').textContent = h + 'h ' + m + 'min';
 
             document.getElementById('games-loading').style.display = 'none';
 
-            if (data.games.length === 0) {
+            if (games.length === 0) {
                 document.getElementById('games-empty').style.display = 'block';
                 return;
             }
 
             const countEl = document.getElementById('games-count');
-            countEl.textContent = data.games.length + ' jeu(x) avec plus d\'une heure de jeu';
+            countEl.textContent = games.length + ' jeu(x) avec plus d\'une heure de jeu';
             countEl.style.display = 'block';
 
             const list = document.getElementById('games-list');
-            data.games.forEach(function (game, i) {
+            games.forEach(function (game, i) {
                 const iconUrl = game.iconHash
                     ? 'https://media.steampowered.com/steamcommunity/public/images/apps/' + game.appId + '/' + game.iconHash + '.jpg'
                     : null;

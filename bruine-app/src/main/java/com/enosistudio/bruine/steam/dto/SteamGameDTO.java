@@ -1,6 +1,16 @@
 package com.enosistudio.bruine.steam.dto;
 
-public record SteamGameDTO(int appId, String name, int playtimeMinutes, String iconHash) {
+import com.fasterxml.jackson.annotation.JsonAlias;
+
+/**
+ * Jeu possédé par un joueur, lu dans {@code GetOwnedGames}. Alias et non JsonProperty : renvoyé au navigateur
+ * avec les noms Java.
+ */
+public record SteamGameDTO(
+        @JsonAlias("appid") int appId,
+        String name,
+        @JsonAlias("playtime_forever") int playtimeMinutes,
+        @JsonAlias("img_icon_url") String iconHash) {
 
     /**
      * Inutile mais a garder.

@@ -2,14 +2,13 @@ package com.enosistudio.bruine.steam.service;
 
 import com.enosistudio.bruine.steam.dto.SteamGameDTO;
 import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
+import com.enosistudio.bruine.steam.dto.SteamPlayerDTO;
 import com.enosistudio.bruine.steam.exception.SteamException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
@@ -25,40 +24,86 @@ import java.util.regex.Pattern;
 @Service
 public class SteamService {
 
+    /**
+     * SteamID64 d'un compte individuel, utilisable dans un mapping ({@code {steamId:...}}) comme dans une regex.
+     */
+    public static final String STEAM_ID_PATTERN = "7656119\\d{10}";
+
     private static final String STEAM_API_URL = "https://api.steampowered.com";
     private static final String OPENID_NAMESPACE = "http://specs.openid.net/auth/2.0";
     private static final String STEAM_OPENID_ENDPOINT = "https://steamcommunity.com/openid/login";
-    private static final Pattern STEAM_IDENTITY = Pattern.compile("^https?://steamcommunity\\.com/openid/id/(7656119\\d{10})/?$");
+    private static final Pattern STEAM_IDENTITY =
+            Pattern.compile("^https?://steamcommunity\\.com/openid/id/(" + STEAM_ID_PATTERN + ")/?$");
     /**
      * Champs que Steam doit avoir signés pour que l'assertion soit exploitable (OpenID 2.0 §10.1).
      */
     private static final Set<String> REQUIRED_SIGNED_FIELDS =
             Set.of("op_endpoint", "return_to", "response_nonce", "assoc_handle", "claimed_id", "identity");
 
+    // L'API Web Steam enveloppe chaque réponse dans {"response": {...}}
+    private record SteamResponse<T>(T response) {
+    }
+
+    private record Players(List<SteamPlayerDTO> players) {
+    }
+
+    private record OwnedGames(@JsonAlias("game_count") Integer gameCount, List<SteamGameDTO> games) {
+    }
+
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
     private final Validator validator;
     private final String steamApiToken;
 
-    public SteamService(RestTemplate restTemplate, ObjectMapper objectMapper, Validator validator,
+    public SteamService(RestTemplate restTemplate, Validator validator,
                         @Value("${steam.token}") String steamApiToken) {
         this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
         this.validator = validator;
         this.steamApiToken = steamApiToken;
     }
 
-    public Map<String, Object> getUserData(String steamUserId) {
-        String url = String.format("%s/ISteamUser/GetPlayerSummaries/v2/?key=%s&format=json&steamids=%s", STEAM_API_URL, steamApiToken, steamUserId);
-        JsonNode players = get("GetPlayerSummaries", url).path("response").path("players");
+    public SteamPlayerDTO getPlayer(String steamId) {
+        String url = String.format("%s/ISteamUser/GetPlayerSummaries/v2/?key=%s&format=json&steamids=%s", STEAM_API_URL, steamApiToken, steamId);
+        List<SteamPlayerDTO> players = get("GetPlayerSummaries", url,
+                new ParameterizedTypeReference<SteamResponse<Players>>() {
+                }).players();
 
-        // Steam répond 200 avec un tableau vide quand l'identifiant ne correspond à personne
-        if (!players.isArray() || players.isEmpty()) {
-            throw new SteamException("Aucun profil Steam pour l'identifiant " + steamUserId);
+        // Steam répond 200 avec une liste vide quand l'identifiant ne correspond à personne
+        if (players == null || players.isEmpty()) {
+            throw new SteamException("Aucun profil Steam pour l'identifiant " + steamId);
         }
+        return players.getFirst();
+    }
 
-        return objectMapper.convertValue(players.get(0), new TypeReference<>() {
-        });
+    /**
+     * Image de l'avatar moyen du joueur, téléchargée depuis le CDN Steam.
+     */
+    public byte[] getAvatarMedium(String steamId) {
+        String url = getPlayer(steamId).avatarMedium();
+        if (url == null || url.isBlank()) {
+            throw new SteamException("Aucun avatar pour l'identifiant " + steamId);
+        }
+        byte[] image;
+        try {
+            image = restTemplate.getForObject(url, byte[].class);
+        } catch (RestClientException avatarInjoignable) {
+            throw new SteamException("Avatar injoignable pour l'identifiant " + steamId, avatarInjoignable);
+        }
+        if (image == null || image.length == 0) {
+            throw new SteamException("Avatar vide pour l'identifiant " + steamId);
+        }
+        return image;
+    }
+
+    /**
+     * Jeux joués au moins une heure, du plus joué au moins joué.
+     *
+     * @throws SteamException aussi quand la liste des jeux est privée
+     */
+    public List<SteamGameDTO> getPlayedGames(String steamId) {
+        return getOwnedGames(steamId).stream()
+                .filter(game -> game.playtimeMinutes() >= 60)
+                .sorted(Comparator.comparingInt(SteamGameDTO::playtimeMinutes).reversed())
+                .toList();
     }
 
     /**
@@ -67,69 +112,39 @@ public class SteamService {
      * @throws SteamException aussi quand la liste des jeux est privée : Steam répond alors sans
      *                        {@code game_count}, à distinguer d'un profil public sans aucun jeu
      */
-    public List<SteamGameDTO> getOwnedGames(String steamId) {
+    private List<SteamGameDTO> getOwnedGames(String steamId) {
         String url = String.format(
                 "%s/IPlayerService/GetOwnedGames/v1/?key=%s&steamid=%s&include_appinfo=1&format=json",
                 STEAM_API_URL, steamApiToken, steamId);
-        JsonNode response = get("GetOwnedGames", url).path("response");
-        if (!response.has("game_count")) {
+        OwnedGames owned = get("GetOwnedGames", url, new ParameterizedTypeReference<SteamResponse<OwnedGames>>() {
+        });
+        if (owned.gameCount() == null) {
             throw new SteamException("Liste des jeux privée pour l'identifiant " + steamId);
         }
-
-        JsonNode gamesNode = response.path("games");
-        if (!gamesNode.isArray()) {
-            return List.of();
-        }
-
-        List<SteamGameDTO> games = new ArrayList<>();
-        for (JsonNode g : gamesNode) {
-            games.add(new SteamGameDTO(
-                    g.path("appid").asInt(),
-                    g.path("name").asText("Unknown"),
-                    g.path("playtime_forever").asInt(0),
-                    g.path("img_icon_url").asText("")
-            ));
-        }
-        return games;
+        return owned.games() == null ? List.of() : owned.games();
     }
 
     public long getTotalPlaytimeMinutes(String steamId) {
-        return getOwnedGames(steamId).stream()
-                .filter(SteamService::isPlayed)
-                .mapToLong(SteamGameDTO::playtimeMinutes)
-                .sum();
+        return getPlayedGames(steamId).stream().mapToLong(SteamGameDTO::playtimeMinutes).sum();
     }
 
     /**
-     * Interroge une API Steam et rend l'arbre JSON de sa réponse.
+     * Interroge une API Steam et rend le contenu de son enveloppe {@code response}.
      * Panne réseau, code d'erreur HTTP et JSON illisible aboutissent tous à une SteamException.
      *
      * @param api nom de l'API interrogée, pour que le message dise laquelle a échoué
      */
-    private JsonNode get(String api, String url) {
-        ResponseEntity<String> response;
+    private <T> T get(String api, String url, ParameterizedTypeReference<SteamResponse<T>> type) {
+        SteamResponse<T> body;
         try {
-            response = restTemplate.getForEntity(url, String.class);
-        } catch (RestClientException steamInjoignable) {
-            throw new SteamException(api + " est injoignable", steamInjoignable);
+            body = restTemplate.exchange(url, HttpMethod.GET, null, type).getBody();
+        } catch (RestClientException steamInjoignableOuIllisible) {
+            throw new SteamException(api + " a échoué", steamInjoignableOuIllisible);
         }
-
-        if (!response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
-            throw new SteamException(api + " a répondu " + response.getStatusCode());
+        if (body == null || body.response() == null) {
+            throw new SteamException(api + " a renvoyé une réponse vide");
         }
-
-        try {
-            return objectMapper.readTree(response.getBody());
-        } catch (JsonProcessingException reponseIllisible) {
-            throw new SteamException(api + " a renvoyé un JSON illisible", reponseIllisible);
-        }
-    }
-
-    /**
-     * En dessous d'une heure, un jeu ne compte ni dans la liste ni dans le total.
-     */
-    public static boolean isPlayed(SteamGameDTO game) {
-        return game.playtimeMinutes() >= 60;
+        return body.response();
     }
 
     public String buildSteamLoginUrl(String baseUrl) {

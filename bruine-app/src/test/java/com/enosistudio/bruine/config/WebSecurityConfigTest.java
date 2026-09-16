@@ -2,6 +2,8 @@ package com.enosistudio.bruine.config;
 
 import com.enosistudio.bruine.admin.EAdminRole;
 import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
+import com.enosistudio.bruine.steam.dto.SteamGameDTO;
+import com.enosistudio.bruine.steam.dto.SteamPlayerDTO;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
 import com.enosistudio.bruine.steam.security.SteamUserPrincipal;
@@ -25,7 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,7 +52,8 @@ class WebSecurityConfigTest {
     @Test
     void aValidSteamAssertionSignsThePlayerInWithAFreshSession() throws Exception {
         when(steamService.validateLoginParameters(any(), any())).thenReturn("76561198100881386");
-        when(steamService.getUserData("76561198100881386")).thenReturn(Map.of("personaname", "Joueur"));
+        when(steamService.getPlayer("76561198100881386")).thenReturn(
+                new SteamPlayerDTO("76561198100881386", "Joueur", null, null, null, 0, 0, null, null));
         MockHttpSession session = new MockHttpSession();
         String idBeforeLogin = session.getId();
 
@@ -83,6 +85,30 @@ class WebSecurityConfigTest {
 
         assertNull(session.getAttribute(SPRING_SECURITY_CONTEXT_KEY));
         assertNotNull(session.getAttribute(AdminSecurityContextService.CONTEXT_KEY));
+    }
+
+    @Test
+    void adminLogoutKeepsTheSteamPlayerSignedIn() throws Exception {
+        MockHttpSession session = sessionWithSteamAndAdminSignedIn();
+
+        mvc.perform(post("/admin/logout").session(session).with(csrf()))
+                .andExpect(redirectedUrl("/admin"));
+
+        assertNull(session.getAttribute(AdminSecurityContextService.CONTEXT_KEY));
+        assertNotNull(session.getAttribute(SPRING_SECURITY_CONTEXT_KEY));
+    }
+
+    @Test
+    void anAdminWaitingForTheirMfaCodeCanLogOut() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(AdminSecurityContextService.CONTEXT_KEY,
+                new SecurityContextImpl(UsernamePasswordAuthenticationToken.authenticated("admin", null,
+                        List.of(new SimpleGrantedAuthority(EAdminRole.PRE_MFA.authority())))));
+
+        mvc.perform(post("/admin/logout").session(session).with(csrf()))
+                .andExpect(redirectedUrl("/admin"));
+
+        assertNull(session.getAttribute(AdminSecurityContextService.CONTEXT_KEY));
     }
 
     private MockHttpSession sessionWithSteamAndAdminSignedIn() {
@@ -146,6 +172,30 @@ class WebSecurityConfigTest {
                         .header("Stripe-Signature", "t=1,v1=invalide")
                         .content("{}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void anonymousCanOpenASteamProfileAndItsGames() throws Exception {
+        when(steamService.getPlayer("76561198100881386")).thenReturn(
+                new SteamPlayerDTO("76561198100881386", "Joueur", null, null, null, 1, 3, "FR", null));
+        when(steamService.getPlayedGames("76561198100881386"))
+                .thenReturn(List.of(new SteamGameDTO(620, "Portal 2", 90, "abc")));
+
+        mvc.perform(get("/steam/profile/76561198100881386")).andExpect(status().isOk());
+        mvc.perform(get("/steam/profile/76561198100881386/games"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].appId").value(620))
+                .andExpect(jsonPath("$[0].playtimeMinutes").value(90))
+                .andExpect(jsonPath("$[0].iconHash").value("abc"));
+    }
+
+    @Test
+    void aMalformedSteamIdLeadsToNoPage() throws Exception {
+        MockHttpSession session = sessionWithSteamAndAdminSignedIn();
+
+        for (String url : new String[]{"/steam/profile/123", "/steam/profile/123/games", "/deck/123"}) {
+            mvc.perform(get(url).session(session)).andExpect(status().isNotFound());
+        }
     }
 
     @Test

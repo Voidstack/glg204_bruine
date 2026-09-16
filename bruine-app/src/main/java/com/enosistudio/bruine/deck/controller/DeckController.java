@@ -12,8 +12,6 @@ import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -31,22 +29,19 @@ public class DeckController {
     private final UserCardService userCardService;
     private final SteamService steamService;
     private final DeckSvgRenderer deckSvgRenderer;
-    private final RestTemplate restTemplate;
 
     public DeckController(CurrentSteamUser currentSteamUser,
                           SteamUserService steamUserService,
                           DeckService deckService,
                           UserCardService userCardService,
                           SteamService steamService,
-                          DeckSvgRenderer deckSvgRenderer,
-                          RestTemplate restTemplate) {
+                          DeckSvgRenderer deckSvgRenderer) {
         this.currentSteamUser = currentSteamUser;
         this.steamUserService = steamUserService;
         this.deckService = deckService;
         this.userCardService = userCardService;
         this.steamService = steamService;
         this.deckSvgRenderer = deckSvgRenderer;
-        this.restTemplate = restTemplate;
     }
 
     @GetMapping
@@ -74,14 +69,11 @@ public class DeckController {
      * (route publique déclarée dans {@code WebSecurityConfig}). C'est la seule façon de partager un deck :
      * elle s'intègre dans une page web ou un fichier Markdown via une balise {@code <img>}.
      *
-     * @param steamId ID Steam (17 chiffres, format {@code 7656119...})
      * @return le SVG du deck, ou 404 si l'ID est invalide ou l'utilisateur inconnu
      */
-    @GetMapping(value = "/{steamId}", produces = "image/svg+xml;charset=UTF-8")
+    @GetMapping(value = "/{steamId:" + SteamService.STEAM_ID_PATTERN + "}", produces = "image/svg+xml;charset=UTF-8")
     @ResponseBody
     public String deckImage(@PathVariable String steamId) {
-        if (!steamId.matches("7656119\\d{10}")) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
         SteamUser user = steamUserService.findBySteamId(steamId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         List<UserCard> deckCards = deckService.findDeckCards(user.getId());
@@ -96,12 +88,8 @@ public class DeckController {
      */
     private String avatarDataUri(String steamId) {
         try {
-            Object url = steamService.getUserData(steamId).get("avatarmedium");
-            if (!(url instanceof String s) || s.isBlank()) return null;
-            byte[] bytes = restTemplate.getForObject(s, byte[].class);
-            if (bytes == null || bytes.length == 0) return null;
-            return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(bytes);
-        } catch (SteamException | RestClientException avatarIndisponible) {
+            return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(steamService.getAvatarMedium(steamId));
+        } catch (SteamException avatarIndisponible) {
             return null;
         }
     }

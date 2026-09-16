@@ -22,6 +22,10 @@
 - `aValidSteamAssertionSignsThePlayerInWithAFreshSession` : une assertion acceptée (Steam simulé) connecte le joueur : contexte sauvegardé en session, identifiant de session changé.
 - `aSteamAssertionRefusedLeadsToTheLoginFailurePage` : une assertion refusée renvoie vers `/steam/failed`.
 - `steamLogoutKeepsTheAdminSignedIn` : la déconnexion Steam retire le contexte Steam et conserve le contexte admin de la même session.
+- `adminLogoutKeepsTheSteamPlayerSignedIn` : la déconnexion admin retire le contexte admin et conserve le contexte Steam de la même session.
+- `anAdminWaitingForTheirMfaCodeCanLogOut` : un admin en `ROLE_PRE_MFA` peut se déconnecter depuis la page du code.
+- `anonymousCanOpenASteamProfileAndItsGames` : le profil Steam et sa liste de jeux sont publics pour un identifiant valide (Steam simulé) ; le JSON des jeux garde les noms Java attendus par `profile-by-id.js`.
+- `aMalformedSteamIdLeadsToNoPage` : un identifiant Steam mal formé ne correspond à aucune route (profil, jeux, deck) : 404.
 
 ## steam.service.SteamServiceTest
 
@@ -30,6 +34,9 @@
 - `anAssertionFromAnotherProviderIsRejected` : une assertion d'un autre fournisseur que Steam est refusée.
 - `aClaimedIdDifferentFromTheIdentityIsRejected` : `claimed_id` différent de `identity` est refusé.
 - `anIdentityNotCoveredByTheSignatureIsRejected` : une identité non signée par Steam est refusée.
+- `aPlayerSummaryIsReadIntoTheTypedProfile` : la réponse `GetPlayerSummaries` (Steam simulé) est lue dans `SteamPlayerDTO`, champs inconnus ignorés.
+- `onlyGamesPlayedAnHourOrMoreAreKeptMostPlayedFirst` : seuls les jeux joués au moins une heure sont gardés, du plus joué au moins joué, champs Steam (`appid`, `img_icon_url`…) lus dans `SteamGameDTO`.
+- `aPrivateGameListIsReportedAsAFailure` : une réponse sans `game_count` (liste privée) lève une `SteamException`.
 
 ## steam.service.ScoreConcurrencyTest
 
@@ -100,7 +107,7 @@
 
 ## deck.DeckSharingTest
 
-- `theDeckIsServedAsAnSvgImage` : `/deck/{steamId}` renvoie une image SVG.
+- `theDeckIsServedAsAnSvgImage` : `/deck/{steamId}` renvoie une image SVG, avatar intégré en `data:` URI.
 
 ## market.service.MarketServiceTest
 

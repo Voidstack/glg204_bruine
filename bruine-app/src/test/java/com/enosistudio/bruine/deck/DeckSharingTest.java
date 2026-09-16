@@ -24,8 +24,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -85,19 +85,14 @@ class DeckSharingTest {
 
         deckService.saveDeck(user.getId(), List.of(card.getId()));
 
-        when(steamService.getUserData(anyString())).thenReturn(Map.of(
-                "steamid", STEAM_ID,
-                "personaname", "Joueuse",
-                "avatarfull", "",
-                "avatarmedium", "",
-                "personastate", 1,
-                "communityvisibilitystate", 3));
+        when(steamService.getAvatarMedium(anyString())).thenReturn(new byte[]{1, 2, 3});
     }
 
     @Test
     void theDeckIsServedAsAnSvgImage() throws Exception {
         mvc.perform(get("/deck/" + STEAM_ID))
                 .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith("image/svg+xml"));
+                .andExpect(content().contentTypeCompatibleWith("image/svg+xml"))
+                .andExpect(content().string(containsString("data:image/jpeg;base64,AQID")));
     }
 }
