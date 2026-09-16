@@ -18,10 +18,10 @@ CREATE TABLE shop_pack
 ) ENGINE = InnoDB;
 
 -- Packs par défaut (reprennent le catalogue initialement codé en dur dans shop.html)
-INSERT INTO shop_pack (name, emoji, points, bonus_points, price_cents, popular, sort_order) VALUES
-    ('Gouttelette', '💧', 100, 0, 99, FALSE, 1),
-    ('Ondée', '🌧️', 300, 50, 249, FALSE, 2),
-    ('Averse', '⛈️', 700, 150, 499, TRUE, 3),
-    ('Déluge', '🌊', 1500, 400, 999, FALSE, 4),
-    ('Tempête', '🌪️', 3500, 1000, 1999, FALSE, 5),
-    ('Mousson', '🌏', 8000, 2500, 3999, FALSE, 6);
+INSERT INTO shop_pack (name, emoji, points, bonus_points, price_cents, popular, sort_order)
+VALUES ('Gouttelette', '💧', 100, 0, 99, FALSE, 1),
+       ('Ondée', '🌧️', 300, 50, 249, FALSE, 2),
+       ('Averse', '⛈️', 700, 150, 499, TRUE, 3),
+       ('Déluge', '🌊', 1500, 400, 999, FALSE, 4),
+       ('Tempête', '🌪️', 3500, 1000, 1999, FALSE, 5),
+       ('Mousson', '🌏', 8000, 2500, 3999, FALSE, 6);

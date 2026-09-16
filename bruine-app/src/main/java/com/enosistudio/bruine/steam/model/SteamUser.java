@@ -2,6 +2,7 @@ package com.enosistudio.bruine.steam.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Entity
+@NoArgsConstructor
 @Table(name = "steam_user")
 public class SteamUser {
 
@@ -50,9 +52,6 @@ public class SteamUser {
      */
     @Column(name = "current_playtime_minutes")
     private Long currentPlaytimeMinutes;
-
-    public SteamUser() {
-    }
 
     public SteamUser(Long id, String steamId, String username) {
         this.id = id;

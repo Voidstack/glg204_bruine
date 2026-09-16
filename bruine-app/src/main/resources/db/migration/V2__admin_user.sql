@@ -1,14 +1,14 @@
-create table admin_user
+CREATE TABLE admin_user
 (
-    username     varchar(20),
-    primary key (username),
-    userpassword varchar(500) not null,
-    mfa_secret   varchar(64)  null,
-    mfa_enabled  boolean      not null default false
-) engine = innodb;
+    username     VARCHAR(20)  NOT NULL,
+    userpassword VARCHAR(500) NOT NULL,
+    mfa_secret   VARCHAR(64)  NULL,
+    mfa_enabled  BOOLEAN      NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (username)
+) ENGINE = InnoDB;
 
-insert into admin_user (username, userpassword)
-values ('admin', '{noop}admin'),
+INSERT INTO admin_user (username, userpassword)
+VALUES ('admin', '{noop}admin'),
        ('ada', '{noop}cnam'),
        ('charles', '{noop}cnam'),
        ('joe', '{noop}cnam');

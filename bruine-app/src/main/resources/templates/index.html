@@ -30,7 +30,7 @@
 		</p>
 		<div class="sq-hero__cta">
 			<div sec:authorize="not isAuthenticated()">
-				<a href="/steam/login" class="btn-primary">
+				<a th:href="@{/steam/login}" class="btn-primary">
 					<i class="fa-brands fa-steam"></i> Se connecter via Steam
 				</a>
 			</div>
@@ -225,7 +225,7 @@
 		</p>
 		<div class="sq-hero__cta">
 			<div sec:authorize="not isAuthenticated()">
-				<a href="/steam/login" class="btn-primary" style="font-size: 1.05rem; padding: 1rem 2.4rem;">
+				<a th:href="@{/steam/login}" class="btn-primary" style="font-size: 1.05rem; padding: 1rem 2.4rem;">
 					<i class="fa-brands fa-steam"></i> Commencer gratuitement
 				</a>
 			</div>

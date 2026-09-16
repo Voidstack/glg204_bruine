@@ -13,8 +13,8 @@ CREATE TABLE steam_user
     PRIMARY KEY (id)
 ) ENGINE = InnoDB;
 
-insert into steam_user (steam_id, username, initial_playtime_minutes, current_playtime_minutes, score)
-values ('76561198100881386', 'Voidstack', 0, 300, 500),
+INSERT INTO steam_user (steam_id, username, initial_playtime_minutes, current_playtime_minutes, score)
+VALUES ('76561198100881386', 'Voidstack', 0, 300, 500),
        ('76561198000000000', 'TestUser1', 120, 150, 500),
        ('76561198000000001', 'TestUser2', 300, 350, 500),
        ('76561198000000002', 'TestUser3', 50, 75, 500);
