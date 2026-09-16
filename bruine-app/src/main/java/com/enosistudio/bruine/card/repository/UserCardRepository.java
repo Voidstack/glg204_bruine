@@ -1,5 +1,6 @@
-package com.enosistudio.bruine.card;
+package com.enosistudio.bruine.card.repository;
 
+import com.enosistudio.bruine.card.model.UserCard;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

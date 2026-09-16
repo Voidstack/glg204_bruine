@@ -1,5 +1,8 @@
-package com.enosistudio.bruine.card;
+package com.enosistudio.bruine.card.dto;
 
+import com.enosistudio.bruine.card.ECardFinish;
+import com.enosistudio.bruine.card.ECardRarity;
+import com.enosistudio.bruine.card.model.UserCard;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 
 /**

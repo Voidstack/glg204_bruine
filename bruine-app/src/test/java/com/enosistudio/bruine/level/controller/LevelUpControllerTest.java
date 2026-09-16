@@ -2,8 +2,8 @@ package com.enosistudio.bruine.level.controller;
 
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
-import com.enosistudio.bruine.card.UserCard;
-import com.enosistudio.bruine.card.UserCardRepository;
+import com.enosistudio.bruine.card.model.UserCard;
+import com.enosistudio.bruine.card.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.gacha.model.GachaReward;
@@ -34,10 +34,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc

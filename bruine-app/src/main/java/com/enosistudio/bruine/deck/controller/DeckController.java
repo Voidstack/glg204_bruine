@@ -1,7 +1,8 @@
-package com.enosistudio.bruine.deck;
+package com.enosistudio.bruine.deck.controller;
 
-import com.enosistudio.bruine.card.UserCard;
-import com.enosistudio.bruine.card.UserCardService;
+import com.enosistudio.bruine.card.model.UserCard;
+import com.enosistudio.bruine.card.service.UserCardService;
+import com.enosistudio.bruine.deck.DeckSvgRenderer;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.steam.exception.SteamException;
 import com.enosistudio.bruine.steam.model.SteamUser;

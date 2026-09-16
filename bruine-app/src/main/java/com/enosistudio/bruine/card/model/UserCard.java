@@ -1,5 +1,6 @@
-package com.enosistudio.bruine.card;
+package com.enosistudio.bruine.card.model;
 
+import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import jakarta.persistence.*;

@@ -1,4 +1,4 @@
-package com.enosistudio.bruine.admin.mfa;
+package com.enosistudio.bruine.admin;
 
 public enum EAdminRole {
     ADMIN, PRE_MFA;

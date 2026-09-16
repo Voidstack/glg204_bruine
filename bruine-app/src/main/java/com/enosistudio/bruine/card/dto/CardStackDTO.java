@@ -1,5 +1,6 @@
-package com.enosistudio.bruine.card;
+package com.enosistudio.bruine.card.dto;
 
+import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 
 import java.util.List;

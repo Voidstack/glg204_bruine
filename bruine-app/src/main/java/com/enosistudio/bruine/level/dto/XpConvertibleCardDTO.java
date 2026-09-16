@@ -1,6 +1,6 @@
 package com.enosistudio.bruine.level.dto;
 
-import com.enosistudio.bruine.card.CardStackDTO;
+import com.enosistudio.bruine.card.dto.CardStackDTO;
 
 /**
  * Une pile de cartes libres, avec l'expérience qu'un exemplaire rapporte.

@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.config;
 
+import com.enosistudio.bruine.admin.EAdminRole;
 import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
-import com.enosistudio.bruine.admin.mfa.EAdminRole;
 import com.enosistudio.bruine.admin.mfa.MfaAuthenticationSuccessHandler;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationProvider;
 import com.enosistudio.bruine.steam.security.SteamOpenIdAuthenticationFilter;

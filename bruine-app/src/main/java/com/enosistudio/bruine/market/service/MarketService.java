@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.market.service;
 
-import com.enosistudio.bruine.card.UserCard;
-import com.enosistudio.bruine.card.UserCardService;
+import com.enosistudio.bruine.card.model.UserCard;
+import com.enosistudio.bruine.card.service.UserCardService;
 import com.enosistudio.bruine.common.BusinessRuleException;
 import com.enosistudio.bruine.common.InsufficientScoreException;
 import com.enosistudio.bruine.market.dto.MarketListingDTO;

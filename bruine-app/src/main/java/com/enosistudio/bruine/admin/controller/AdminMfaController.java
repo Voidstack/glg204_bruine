@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.admin.controller;
 
+import com.enosistudio.bruine.admin.EAdminRole;
 import com.enosistudio.bruine.admin.mfa.AdminSecurityContextService;
-import com.enosistudio.bruine.admin.mfa.EAdminRole;
 import com.enosistudio.bruine.admin.mfa.TotpService;
 import com.enosistudio.bruine.admin.service.AdminUserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -68,25 +67,23 @@ public class AdminMfaController {
     }
 
     @PostMapping
-    public void verify(@RequestParam String code,
-                       Authentication authentication,
-                       HttpServletRequest request,
-                       HttpServletResponse response) throws IOException {
+    public String verify(@RequestParam String code,
+                         Authentication authentication,
+                         HttpServletRequest request,
+                         HttpServletResponse response) {
         if (!hasRole(authentication, EAdminRole.PRE_MFA.authority())) {
-            response.sendRedirect(request.getContextPath() + "/admin");
-            return;
+            return "redirect:/admin";
         }
         String username = authentication.getName();
         String secret = adminUserService.getMfaSecret(username);
 
-        if (totpService.verify(secret, code)) {
-            Authentication full = UsernamePasswordAuthenticationToken.authenticated(
-                    username, null, List.of(new SimpleGrantedAuthority(EAdminRole.ADMIN.authority())));
-            adminSecurityContext.save(full, request, response);
-            response.sendRedirect(request.getContextPath() + "/admin");
-        } else {
-            response.sendRedirect(request.getContextPath() + "/admin/mfa?error");
+        if (!totpService.verify(secret, code)) {
+            return "redirect:/admin/mfa?error";
         }
+        Authentication full = UsernamePasswordAuthenticationToken.authenticated(
+                username, null, List.of(new SimpleGrantedAuthority(EAdminRole.ADMIN.authority())));
+        adminSecurityContext.save(full, request, response);
+        return "redirect:/admin";
     }
 
     @GetMapping("/setup")

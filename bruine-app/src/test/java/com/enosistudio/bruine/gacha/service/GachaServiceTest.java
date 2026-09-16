@@ -2,10 +2,10 @@ package com.enosistudio.bruine.gacha.service;
 
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
-import com.enosistudio.bruine.card.UserCardRepository;
+import com.enosistudio.bruine.card.repository.UserCardRepository;
+import com.enosistudio.bruine.common.InsufficientScoreException;
 import com.enosistudio.bruine.gacha.dto.GachaConfigFormDTO;
 import com.enosistudio.bruine.gacha.dto.GachaResultDTO;
-import com.enosistudio.bruine.common.InsufficientScoreException;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaConfigRepository;

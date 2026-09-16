@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.deck.service;
 
-import com.enosistudio.bruine.card.UserCard;
-import com.enosistudio.bruine.card.UserCardService;
+import com.enosistudio.bruine.card.model.UserCard;
+import com.enosistudio.bruine.card.service.UserCardService;
 import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
 import org.springframework.stereotype.Service;

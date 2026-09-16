@@ -1,6 +1,6 @@
 package com.enosistudio.bruine.market.dto;
 
-import com.enosistudio.bruine.card.CardViewDTO;
+import com.enosistudio.bruine.card.dto.CardViewDTO;
 import com.enosistudio.bruine.market.model.MarketListing;
 
 /**

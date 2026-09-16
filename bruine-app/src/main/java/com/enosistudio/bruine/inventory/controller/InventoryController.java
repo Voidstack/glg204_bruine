@@ -1,7 +1,7 @@
 package com.enosistudio.bruine.inventory.controller;
 
-import com.enosistudio.bruine.card.CardStackDTO;
-import com.enosistudio.bruine.card.UserCardService;
+import com.enosistudio.bruine.card.dto.CardStackDTO;
+import com.enosistudio.bruine.card.service.UserCardService;
 import com.enosistudio.bruine.gacha.service.GachaRewardService;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;

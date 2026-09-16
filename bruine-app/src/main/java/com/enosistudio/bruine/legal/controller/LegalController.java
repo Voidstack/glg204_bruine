@@ -1,4 +1,4 @@
-package com.enosistudio.bruine.legal;
+package com.enosistudio.bruine.legal.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

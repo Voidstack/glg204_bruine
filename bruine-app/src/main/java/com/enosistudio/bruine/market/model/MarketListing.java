@@ -1,6 +1,6 @@
 package com.enosistudio.bruine.market.model;
 
-import com.enosistudio.bruine.card.UserCard;
+import com.enosistudio.bruine.card.model.UserCard;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import jakarta.persistence.*;
 import lombok.Getter;

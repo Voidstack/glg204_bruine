@@ -1,11 +1,10 @@
-package com.enosistudio.bruine.leaderboard;
+package com.enosistudio.bruine.leaderboard.controller;
 
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
 
@@ -19,8 +18,8 @@ public class LeaderboardController {
     }
 
     @GetMapping("/leaderboard")
-    public RedirectView leaderboardRoot() {
-        return new RedirectView("/leaderboard/playtime");
+    public String leaderboardRoot() {
+        return "redirect:/leaderboard/playtime";
     }
 
     @GetMapping("/leaderboard/playtime")

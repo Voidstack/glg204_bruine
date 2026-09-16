@@ -2,8 +2,8 @@ package com.enosistudio.bruine.deck;
 
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
-import com.enosistudio.bruine.card.UserCard;
-import com.enosistudio.bruine.card.UserCardRepository;
+import com.enosistudio.bruine.card.model.UserCard;
+import com.enosistudio.bruine.card.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.deck.service.DeckService;

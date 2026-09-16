@@ -1,6 +1,6 @@
 package com.enosistudio.bruine.gacha.dto;
 
-import com.enosistudio.bruine.card.CardViewDTO;
+import com.enosistudio.bruine.card.dto.CardViewDTO;
 
 import java.util.List;
 
