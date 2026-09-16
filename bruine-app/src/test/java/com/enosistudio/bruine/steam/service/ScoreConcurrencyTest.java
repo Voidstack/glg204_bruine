@@ -170,7 +170,6 @@ class ScoreConcurrencyTest {
 
     private Long publish(SteamUser seller, UserCard card, int price) {
         MarketListing listing = new MarketListing();
-        listing.setSeller(seller);
         listing.setUserCard(card);
         listing.setPrice(price);
         return marketListingRepository.save(listing).getId();

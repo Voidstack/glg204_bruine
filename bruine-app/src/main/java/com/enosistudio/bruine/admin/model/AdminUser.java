@@ -35,16 +35,13 @@ public class AdminUser {
     @Column(name = "mfa_secret")
     private String mfaSecret;
 
-    /**
-     * MFA activée pour ce compte.
-     */
-    @Setter
-    @Column(name = "mfa_enabled", nullable = false)
-    private boolean mfaEnabled = false;
-
     public AdminUser(@Size(max = 20) @NotBlank String username, @NotBlank String password) {
         this.username = username;
         this.userPassword = password;
+    }
+
+    public boolean isMfaEnabled() {
+        return mfaSecret != null;
     }
 
 }

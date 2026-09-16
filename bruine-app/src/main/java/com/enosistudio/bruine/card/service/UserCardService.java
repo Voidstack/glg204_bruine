@@ -117,7 +117,7 @@ public class UserCardService {
     }
 
     private Set<Long> listedCardIds(Long userId) {
-        return marketListingRepository.findBySellerId(userId).stream()
+        return marketListingRepository.findByUserCardSteamUserId(userId).stream()
                 .map(listing -> listing.getUserCard().getId())
                 .collect(Collectors.toSet());
     }

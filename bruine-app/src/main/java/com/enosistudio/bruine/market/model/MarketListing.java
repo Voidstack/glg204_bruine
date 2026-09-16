@@ -21,10 +21,6 @@ public class MarketListing {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false)
-    private SteamUser seller;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id", nullable = false, unique = true)
     private UserCard userCard;
@@ -35,4 +31,11 @@ public class MarketListing {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    /**
+     * Une carte en vente n'est pas libre : elle ne change pas de propriétaire tant que l'annonce existe.
+     */
+    public SteamUser getSeller() {
+        return userCard.getSteamUser();
+    }
 }

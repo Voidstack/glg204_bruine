@@ -195,7 +195,6 @@ class DeckServiceTest {
 
     private void putOnSale(UserCard card) {
         MarketListing listing = new MarketListing();
-        listing.setSeller(card.getSteamUser());
         listing.setUserCard(card);
         listing.setPrice(10);
         marketListingRepository.save(listing);

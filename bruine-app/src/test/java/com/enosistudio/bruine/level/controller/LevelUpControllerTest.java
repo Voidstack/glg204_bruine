@@ -115,7 +115,6 @@ class LevelUpControllerTest {
     @Test
     void aRefusedConversionReturnsToThePageWithTheReason() throws Exception {
         MarketListing listing = new MarketListing();
-        listing.setSeller(player);
         listing.setUserCard(card);
         listing.setPrice(10);
         marketListingRepository.save(listing);

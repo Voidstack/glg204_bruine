@@ -20,16 +20,16 @@ public interface MarketListingRepository extends JpaRepository<MarketListing, Lo
     /**
      * Annonces des autres joueurs, la plus récente d'abord.
      */
-    @EntityGraph(attributePaths = {"seller", "userCard", "userCard.gachaReward"})
-    List<MarketListing> findBySellerIdNotOrderByCreatedAtDesc(Long sellerId);
+    @EntityGraph(attributePaths = {"userCard", "userCard.steamUser", "userCard.gachaReward"})
+    List<MarketListing> findByUserCardSteamUserIdNotOrderByCreatedAtDesc(Long sellerId);
 
     /**
      * Annonces d'un vendeur, la plus récente d'abord.
      */
-    @EntityGraph(attributePaths = {"seller", "userCard", "userCard.gachaReward"})
-    List<MarketListing> findBySellerIdOrderByCreatedAtDesc(Long sellerId);
+    @EntityGraph(attributePaths = {"userCard", "userCard.steamUser", "userCard.gachaReward"})
+    List<MarketListing> findByUserCardSteamUserIdOrderByCreatedAtDesc(Long sellerId);
 
-    List<MarketListing> findBySellerId(Long sellerId);
+    List<MarketListing> findByUserCardSteamUserId(Long sellerId);
 
     boolean existsByUserCardId(Long userCardId);
 

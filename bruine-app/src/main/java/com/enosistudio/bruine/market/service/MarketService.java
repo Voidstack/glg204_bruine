@@ -35,14 +35,14 @@ public class MarketService {
      */
     @Transactional(readOnly = true)
     public List<MarketListingDTO> findOtherListings(Long userId) {
-        return marketListingRepository.findBySellerIdNotOrderByCreatedAtDesc(userId).stream()
+        return marketListingRepository.findByUserCardSteamUserIdNotOrderByCreatedAtDesc(userId).stream()
                 .map(MarketListingDTO::of)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<MarketListingDTO> findMyListings(Long sellerId) {
-        return marketListingRepository.findBySellerIdOrderByCreatedAtDesc(sellerId).stream()
+        return marketListingRepository.findByUserCardSteamUserIdOrderByCreatedAtDesc(sellerId).stream()
                 .map(MarketListingDTO::of)
                 .toList();
     }
@@ -64,7 +64,6 @@ public class MarketService {
         UserCard card = userCardService.requireFree(seller.getId(), cardId);
 
         MarketListing listing = new MarketListing();
-        listing.setSeller(card.getSteamUser());
         listing.setUserCard(card);
         listing.setPrice(price);
         marketListingRepository.save(listing);

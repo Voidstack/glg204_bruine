@@ -82,7 +82,6 @@ public class AdminUserService implements UserDetailsService {
         AdminUser user = repository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         user.setMfaSecret(secret);
-        user.setMfaEnabled(true);
     }
 
     @Transactional
@@ -90,6 +89,5 @@ public class AdminUserService implements UserDetailsService {
         AdminUser user = repository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         user.setMfaSecret(null);
-        user.setMfaEnabled(false);
     }
 }

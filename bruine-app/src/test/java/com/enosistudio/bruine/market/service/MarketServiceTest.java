@@ -206,7 +206,6 @@ class MarketServiceTest {
 
     private Long publish(int price) {
         MarketListing listing = new MarketListing();
-        listing.setSeller(seller);
         listing.setUserCard(card);
         listing.setPrice(price);
         return marketListingRepository.save(listing).getId();
