@@ -173,31 +173,34 @@ public class ShopService {
     /**
      * Finalise un achat : vérifie auprès de Stripe que la session est bien payée, crédite les points
      * et enregistre l'historique. Appelé par le webhook et par la page de retour, le premier arrivé
-     * crédite : une même session n'est traitée qu'une seule fois, la contrainte d'unicité sur
-     * {@code stripe_session_id} annulant un éventuel second passage simultané.
+     * crédite : une même session n'est traitée qu'une seule fois.
      *
      * @return l'achat enregistré, ou {@link Optional#empty()} si non payé / déjà traité / introuvable
      */
     @Transactional
     public Optional<ShopPurchase> fulfillCheckout(String sessionId) throws StripeException {
-        if (sessionId == null || sessionId.isBlank() || purchaseRepository.existsByStripeSessionId(sessionId)) {
+        if (sessionId == null || sessionId.isBlank()) {
             return Optional.empty();
         }
 
         Session session = Session.retrieve(sessionId);
-        if (!"paid".equals(session.getPaymentStatus()) || session.getMetadata() == null) {
+        Long userId = session.getMetadata() == null ? null
+                : parseLong(session.getMetadata().get("userId")).orElse(null);
+        if (!"paid".equals(session.getPaymentStatus()) || userId == null) {
             return Optional.empty();
         }
-
+        
+        Optional<SteamUser> locked = steamUserService.lockIfExists(userId);
+        if (locked.isEmpty() || purchaseRepository.existsByStripeSessionId(sessionId)) {
+            return Optional.empty();
+        }
         ShopPack pack = parseLong(session.getMetadata().get("packId"))
                 .flatMap(packRepository::findById).orElse(null);
-        Long userId = parseLong(session.getMetadata().get("userId")).orElse(null);
-        if (pack == null || userId == null || steamUserService.findById(userId).isEmpty()) {
+        if (pack == null) {
             return Optional.empty();
         }
 
-        // crédit sous verrou : un tirage ou un achat simultané ne doit pas l'écraser
-        SteamUser user = steamUserService.lock(userId);
+        SteamUser user = locked.get();
         int total = pack.getTotalPoints();
         user.setScore(user.getScore() + total);
 

@@ -43,8 +43,15 @@ public class SteamUserService {
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public SteamUser lock(Long id) {
-        return repository.findForUpdateById(id)
-                .orElseThrow(() -> new NoSuchElementException("Joueur introuvable : " + id));
+        return lockIfExists(id).orElseThrow(() -> new NoSuchElementException("Joueur introuvable : " + id));
+    }
+
+    /**
+     * Comme {@link #lock}, pour un joueur qui a pu être supprimé entre-temps.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Optional<SteamUser> lockIfExists(Long id) {
+        return repository.findForUpdateById(id);
     }
 
     @Transactional(readOnly = true)

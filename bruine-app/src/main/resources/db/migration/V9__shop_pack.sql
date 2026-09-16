@@ -17,7 +17,7 @@ CREATE TABLE shop_pack
     PRIMARY KEY (id)
 ) ENGINE = InnoDB;
 
--- Packs par défaut (reprennent le catalogue initialement codé en dur dans shop.html)
+-- Packs par défaut
 INSERT INTO shop_pack (name, emoji, points, bonus_points, price_cents, popular, sort_order)
 VALUES ('Gouttelette', '💧', 100, 0, 99, FALSE, 1),
        ('Ondée', '🌧️', 300, 50, 249, FALSE, 2),

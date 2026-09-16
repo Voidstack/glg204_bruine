@@ -19,8 +19,7 @@ import java.util.Map;
 /**
  * Service MFA : génération/vérification de codes TOTP (RFC 6238) et du QR code d'enrôlement.
  * Le cœur TOTP est implémenté maison ({@link TotpGenerator}, HMAC-SHA1 du JDK). ZXing (Google)
- * ne sert qu'à transformer l'URI {@code otpauth://} en image PNG. Standard compatible avec
- * Google Authenticator, Authy, Microsoft Authenticator, etc. aucun service externe.
+ * ne sert qu'à transformer l'URI {@code otpauth://} en image PNG.
  */
 @Service
 public class TotpService {

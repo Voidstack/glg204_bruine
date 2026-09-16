@@ -38,63 +38,20 @@
 		</p>
 	</div>
 
-	<!-- Podium -->
+	<!-- Podium : 2e à gauche, 1re au centre, 3e à droite -->
 	<div th:if="${!top3.isEmpty()}" class="podium-wrapper">
-
-		<!-- 2e place (gauche) -->
-		<div th:if="${top3.size() >= 2}" class="podium-slot rank-2">
+		<div th:each="i : ${ {1, 0, 2} }" th:if="${i < top3.size()}"
+		     th:with="entry=${top3[i]}"
+		     class="podium-slot" th:classappend="|rank-${i + 1}|">
 			<div class="podium-card">
-				<div class="podium-medal">🥈</div>
-				<a th:href="@{/steam/profile/{id}(id=${top3[1].steamId})}"
-				   th:text="${top3[1].username}"
+				<div class="podium-medal" th:text="${ {'🥇', '🥈', '🥉'}[i] }">🥇</div>
+				<a th:href="@{/steam/profile/{id}(id=${entry.steamId})}"
+				   th:text="${entry.username}"
 				   class="podium-name">—</a>
-				<div class="podium-stat" th:if="${statMode == 'playtime'}"
-				     th:text="${top3[1].currentPlaytimeMinutes != null ? (top3[1].currentPlaytimeMinutes / 60) + 'h ' + (top3[1].currentPlaytimeMinutes % 60) + 'min' : 'Données privées'}">
-					—
-				</div>
-				<div class="podium-stat" th:if="${statMode == 'xp'}"
-				     th:text="${top3[1].totalExperience + ' XP'}">—
-				</div>
+				<div class="podium-stat" th:text="${entry.stat ?: 'Données privées'}">—</div>
 			</div>
-			<div class="podium-platform">2</div>
+			<div class="podium-platform" th:text="${i + 1}">1</div>
 		</div>
-
-		<!-- 1re place (centre) -->
-		<div class="podium-slot rank-1">
-			<div class="podium-card">
-				<div class="podium-medal">🥇</div>
-				<a th:href="@{/steam/profile/{id}(id=${top3[0].steamId})}"
-				   th:text="${top3[0].username}"
-				   class="podium-name">—</a>
-				<div class="podium-stat" th:if="${statMode == 'playtime'}"
-				     th:text="${top3[0].currentPlaytimeMinutes != null ? (top3[0].currentPlaytimeMinutes / 60) + 'h ' + (top3[0].currentPlaytimeMinutes % 60) + 'min' : 'Données privées'}">
-					—
-				</div>
-				<div class="podium-stat" th:if="${statMode == 'xp'}"
-				     th:text="${top3[0].totalExperience + ' XP'}">—
-				</div>
-			</div>
-			<div class="podium-platform">1</div>
-		</div>
-
-		<!-- 3e place (droite) -->
-		<div th:if="${top3.size() >= 3}" class="podium-slot rank-3">
-			<div class="podium-card">
-				<div class="podium-medal">🥉</div>
-				<a th:href="@{/steam/profile/{id}(id=${top3[2].steamId})}"
-				   th:text="${top3[2].username}"
-				   class="podium-name">—</a>
-				<div class="podium-stat" th:if="${statMode == 'playtime'}"
-				     th:text="${top3[2].currentPlaytimeMinutes != null ? (top3[2].currentPlaytimeMinutes / 60) + 'h ' + (top3[2].currentPlaytimeMinutes % 60) + 'min' : 'Données privées'}">
-					—
-				</div>
-				<div class="podium-stat" th:if="${statMode == 'xp'}"
-				     th:text="${top3[2].totalExperience + ' XP'}">—
-				</div>
-			</div>
-			<div class="podium-platform">3</div>
-		</div>
-
 	</div>
 
 	<div th:if="${!rest.isEmpty()}"
@@ -104,26 +61,19 @@
 			<tr>
 				<th>#</th>
 				<th>Joueur</th>
-				<th th:if="${statMode == 'playtime'}">Temps de jeu</th>
-				<th th:if="${statMode == 'xp'}">XP Bruine</th>
+				<th th:text="${statMode == 'xp' ? 'XP Bruine' : 'Temps de jeu'}">Temps de jeu</th>
 				<th>Inscrit le</th>
 			</tr>
 			</thead>
 			<tbody>
-			<tr th:each="u, stat : ${rest}">
-				<td class="rank-num" th:text="${stat.index + 4}"></td>
+			<tr th:each="u, row : ${rest}">
+				<td class="rank-num" th:text="${row.index + 4}"></td>
 				<td>
 					<a th:href="@{/steam/profile/{id}(id=${u.steamId})}"
 					   th:text="${u.username}"
 					   style="color:var(--text); text-decoration:none;">—</a>
 				</td>
-				<td class="playtime-col" th:if="${statMode == 'playtime'}"
-				    th:text="${u.currentPlaytimeMinutes != null ? (u.currentPlaytimeMinutes / 60) + 'h ' + (u.currentPlaytimeMinutes % 60) + 'min' : '—'}">
-					—
-				</td>
-				<td class="score-col" th:if="${statMode == 'xp'}"
-				    th:text="${u.totalExperience + ' XP'}">—
-				</td>
+				<td th:class="${statMode == 'xp' ? 'score-col' : 'playtime-col'}" th:text="${u.stat ?: '—'}">—</td>
 				<td class="playtime-col" th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy')}">—</td>
 			</tr>
 			</tbody>
