@@ -44,7 +44,8 @@ public class LevelUpController {
     @PostMapping("/convert")
     public String convert(@ModelAttribute ConvertFormDTO form, RedirectAttributes redirectAttributes) {
         SteamUser user = currentSteamUser.require();
-        redirectAttributes.addFlashAttribute("xpGained", levelUpService.convert(user, form.items()));
+        redirectAttributes.addFlashAttribute("successMessage",
+                "+" + levelUpService.convert(user, form.items()) + " XP gagnés !");
         return "redirect:/levelup";
     }
 }

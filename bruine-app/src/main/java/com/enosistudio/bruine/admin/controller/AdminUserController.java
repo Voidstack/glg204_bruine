@@ -30,9 +30,9 @@ public class AdminUserController {
                          RedirectAttributes redirectAttributes) {
         try {
             userService.createUser(username, password);
-            redirectAttributes.addFlashAttribute("success", "Compte « " + username + " » créé.");
+            redirectAttributes.addFlashAttribute("successMessage", "Compte « " + username + " » créé.");
         } catch (UsernameAlreadyExistsException e) {
-            redirectAttributes.addFlashAttribute("error", "Le nom d'utilisateur « " + username + " » existe déjà.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Le nom d'utilisateur « " + username + " » existe déjà.");
         }
         return "redirect:/admin/admin-users";
     }
@@ -42,11 +42,11 @@ public class AdminUserController {
                          Authentication authentication,
                          RedirectAttributes redirectAttributes) {
         if (username.equals(authentication.getName())) {
-            redirectAttributes.addFlashAttribute("error", "Vous ne pouvez pas supprimer votre propre compte.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Vous ne pouvez pas supprimer votre propre compte.");
             return "redirect:/admin/admin-users";
         }
         userService.deleteUser(username);
-        redirectAttributes.addFlashAttribute("success", "Compte « " + username + " » supprimé.");
+        redirectAttributes.addFlashAttribute("successMessage", "Compte « " + username + " » supprimé.");
         return "redirect:/admin/admin-users";
     }
 
@@ -55,7 +55,7 @@ public class AdminUserController {
                                  @RequestParam String newPassword,
                                  RedirectAttributes redirectAttributes) {
         userService.updatePassword(username, newPassword);
-        redirectAttributes.addFlashAttribute("success", "Mot de passe de « " + username + " » mis à jour.");
+        redirectAttributes.addFlashAttribute("successMessage", "Mot de passe de « " + username + " » mis à jour.");
         return "redirect:/admin/admin-users";
     }
 
@@ -63,7 +63,7 @@ public class AdminUserController {
     public String disableMfa(@PathVariable String username,
                              RedirectAttributes redirectAttributes) {
         userService.disableMfa(username);
-        redirectAttributes.addFlashAttribute("success", "MFA de « " + username + " » désactivée.");
+        redirectAttributes.addFlashAttribute("successMessage", "MFA de « " + username + " » désactivée.");
         return "redirect:/admin/admin-users";
     }
 }

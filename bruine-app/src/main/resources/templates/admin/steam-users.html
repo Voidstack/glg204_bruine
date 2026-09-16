@@ -11,8 +11,7 @@
 		<h1 class="title">Comptes utilisateurs Steam</h1>
 		<p class="subtitle">Utilisateurs inscrits via connexion Steam</p>
 
-		<!-- Notifications -->
-		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
+		<th:block th:replace="~{layout :: flash}"></th:block>
 
 		<div class="box">
 			<table class="table is-fullwidth is-hoverable">

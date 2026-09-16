@@ -383,21 +383,6 @@ body {
     display: block;
 }
 
-.error-banner {
-    background: #2d1515;
-    border: 1px solid var(--red);
-    border-radius: 8px;
-    color: #fc8181;
-    padding: 0.75rem 1rem;
-    text-align: center;
-    margin-bottom: 1rem;
-    display: none;
-}
-
-.error-banner.visible {
-    display: block;
-}
-
 .odds-table {
     width: 100%;
     border-collapse: collapse;

@@ -27,7 +27,7 @@ public class AdminSteamUserController {
                               @RequestParam int score,
                               RedirectAttributes redirectAttributes) {
         steamUserService.updateScore(id, score);
-        redirectAttributes.addFlashAttribute("success", "Score mis à jour.");
+        redirectAttributes.addFlashAttribute("successMessage", "Score mis à jour.");
         return "redirect:/admin/steam-users";
     }
 
@@ -35,7 +35,7 @@ public class AdminSteamUserController {
     public String delete(@PathVariable Long id,
                          RedirectAttributes redirectAttributes) {
         steamUserService.deleteById(id);
-        redirectAttributes.addFlashAttribute("success", "Compte supprimé.");
+        redirectAttributes.addFlashAttribute("successMessage", "Compte supprimé.");
         return "redirect:/admin/steam-users";
     }
 }

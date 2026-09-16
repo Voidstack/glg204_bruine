@@ -10,8 +10,7 @@
 		<p class="subtitle">Gérer le catalogue des récompenses disponibles dans le mini-jeu</p>
 
 		<!-- Notifications -->
-		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
-		<div th:if="${error}" class="notification is-danger  is-light" th:text="${error}"></div>
+		<th:block th:replace="~{layout :: flash}"></th:block>
 
 		<div class="box" style="overflow-x: auto;">
 			<table class="table is-fullwidth is-hoverable">

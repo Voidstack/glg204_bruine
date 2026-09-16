@@ -121,6 +121,12 @@
 			</div>
 		</nav>
 	</header>
+	<th:block th:replace="~{layout :: flash}"></th:block>
+</th:block>
+
+<!-- Bannière des messages flash : errorMessage et successMessage, les deux seules clés du projet.
+     Incluse par header-and-nav pour les pages joueur, à appeler à la main dans les pages admin. -->
+<th:block th:fragment="flash">
 	<article class="message is-danger" th:if="${errorMessage != null}">
 		<div class="message-header">
 			<p>Erreur</p>

@@ -113,11 +113,6 @@
 					<span class="xp-gain" id="xp-preview">0 XP</span>
 				</div>
 
-				<!-- Résultat flash -->
-				<div class="machine-result" id="machine-result"
-				     th:classappend="${xpGained != null} ? 'show success'"
-				     th:text="${xpGained != null} ? '+' + ${xpGained} + ' XP gagnés !'"></div>
-
 				<form id="convert-form" method="post" th:action="@{/levelup/convert}">
 					<button type="submit" class="machine-activate" id="activate-btn" disabled>
 						<span>&#9881;</span>

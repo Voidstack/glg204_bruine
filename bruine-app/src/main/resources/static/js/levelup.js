@@ -4,15 +4,10 @@
     const xpPreview = document.getElementById('xp-preview');
     const activateBtn = document.getElementById('activate-btn');
     const machineBody = document.getElementById('machine-body');
-    const resultEl = document.getElementById('machine-result');
     const convertForm = document.getElementById('convert-form');
 
     // Page sans machine (inventaire vide) : rien à câbler.
     if (!machineBody) return;
-
-    if (resultEl.classList.contains('show')) {
-        setTimeout(() => resultEl.classList.remove('show'), 3500);
-    }
 
     // pending[]: {rewardId, finish, xp, name, emoji}
     const pending = [];

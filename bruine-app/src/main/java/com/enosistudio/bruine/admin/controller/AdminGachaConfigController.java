@@ -29,7 +29,7 @@ public class AdminGachaConfigController {
     @PostMapping
     public String save(@ModelAttribute GachaConfigFormDTO form, RedirectAttributes redirectAttributes) {
         gachaService.saveConfig(form);
-        redirectAttributes.addFlashAttribute("success", "Configuration sauvegardée.");
+        redirectAttributes.addFlashAttribute("successMessage", "Configuration sauvegardée.");
         return "redirect:/admin/gacha-config";
     }
 }

@@ -54,7 +54,7 @@ public class GachaController {
         try {
             redirectAttributes.addFlashAttribute("spinResult", gachaService.spin(user, count));
         } catch (InsufficientScoreException tooPoor) {
-            redirectAttributes.addFlashAttribute("spinError",
+            redirectAttributes.addFlashAttribute("errorMessage",
                     "Score insuffisant ! Il vous faut au moins " + tooPoor.getRequiredScore() + " points.");
         }
         return "redirect:/gacha"; // rechargement de la page pour afficher le résultat du tirage

@@ -26,7 +26,7 @@ public class AdminShopPackController {
     @PostMapping("/create")
     public String create(@ModelAttribute ShopPackFormDTO form, RedirectAttributes redirectAttributes) {
         shopService.create(form);
-        redirectAttributes.addFlashAttribute("success", "Pack « " + form.name() + " » créé.");
+        redirectAttributes.addFlashAttribute("successMessage", "Pack « " + form.name() + " » créé.");
         return "redirect:/admin/shop-packs";
     }
 
@@ -34,14 +34,14 @@ public class AdminShopPackController {
     public String update(@PathVariable Long id, @ModelAttribute ShopPackFormDTO form,
                          RedirectAttributes redirectAttributes) {
         shopService.update(id, form);
-        redirectAttributes.addFlashAttribute("success", "Pack mis à jour.");
+        redirectAttributes.addFlashAttribute("successMessage", "Pack mis à jour.");
         return "redirect:/admin/shop-packs";
     }
 
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         shopService.deleteById(id);
-        redirectAttributes.addFlashAttribute("success", "Pack supprimé.");
+        redirectAttributes.addFlashAttribute("successMessage", "Pack supprimé.");
         return "redirect:/admin/shop-packs";
     }
 }

@@ -47,11 +47,12 @@ public class ShopController {
                 String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
                 return "redirect:" + shopService.createCheckoutSession(user, pack, baseUrl);
             } catch (StripeException e) {
-                redirectAttributes.addFlashAttribute("error", "Impossible de démarrer le paiement : " + e.getMessage());
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Impossible de démarrer le paiement : " + e.getMessage());
                 return "redirect:/shop";
             }
         }).orElseGet(() -> {
-            redirectAttributes.addFlashAttribute("error", "Ce pack n'existe plus.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Ce pack n'existe plus.");
             return "redirect:/shop";
         });
     }
@@ -63,12 +64,13 @@ public class ShopController {
     public String success(@RequestParam("session_id") String sessionId, RedirectAttributes redirectAttributes) {
         try {
             shopService.fulfillCheckout(sessionId).ifPresentOrElse(
-                    purchase -> redirectAttributes.addFlashAttribute("success",
+                    purchase -> redirectAttributes.addFlashAttribute("successMessage",
                             "Paiement accepté, " + purchase.getPointsCredited() + " points crédités !"),
-                    () -> redirectAttributes.addFlashAttribute("error",
+                    () -> redirectAttributes.addFlashAttribute("errorMessage",
                             "Paiement non confirmé ou déjà pris en compte."));
         } catch (StripeException e) {
-            redirectAttributes.addFlashAttribute("error", "Erreur lors de la vérification du paiement : " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Erreur lors de la vérification du paiement : " + e.getMessage());
         }
         return "redirect:/shop";
     }
@@ -97,7 +99,7 @@ public class ShopController {
      */
     @GetMapping("/cancel")
     public String cancel(RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("error", "Paiement annulé, aucun point n'a été débité.");
+        redirectAttributes.addFlashAttribute("errorMessage", "Paiement annulé, aucun point n'a été débité.");
         return "redirect:/shop";
     }
 }

@@ -174,26 +174,7 @@
             background: rgba(102, 192, 244, 0.25);
         }
 
-        /* Flash + historique */
-        .shop-flash {
-            border-radius: 8px;
-            padding: 0.85rem 1.2rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-        }
-
-        .shop-flash.ok {
-            background: rgba(76, 175, 80, 0.1);
-            border: 1px solid rgba(76, 175, 80, 0.4);
-            color: var(--green);
-        }
-
-        .shop-flash.err {
-            background: rgba(244, 67, 54, 0.1);
-            border: 1px solid rgba(244, 67, 54, 0.4);
-            color: #ef9a9a;
-        }
-
+        /* Historique */
         .history-section {
             margin-top: 3rem;
         }

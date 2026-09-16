@@ -12,8 +12,7 @@
 	<div class="container" style="max-width: 520px;">
 		<h1 class="title">Authentification à deux facteurs (MFA)</h1>
 
-		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
-		<div th:if="${error}" class="notification is-danger  is-light" th:text="${error}"></div>
+		<th:block th:replace="~{layout :: flash}"></th:block>
 
 		<!-- MFA déjà active -->
 		<div th:if="${mfaEnabled}" class="box">

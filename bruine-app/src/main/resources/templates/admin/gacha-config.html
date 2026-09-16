@@ -12,7 +12,7 @@
 		<p class="subtitle">Les valeurs sont des poids relatifs, la probabilité de chaque résultat est son poids divisé
 			par la somme des poids du groupe.</p>
 
-		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
+		<th:block th:replace="~{layout :: flash}"></th:block>
 
 		<form th:action="@{/admin/gacha-config}" method="post">
 			<div class="config-grid" style="display:flex; flex-wrap:wrap; gap:1.5rem;">

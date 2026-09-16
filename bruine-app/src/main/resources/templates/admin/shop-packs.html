@@ -11,8 +11,7 @@
         <h1 class="title">Packs de la boutique</h1>
         <p class="subtitle">Gérer les packs € → points Bruine : prix, bonus, promos temporaires et pack « Populaire »</p>
 
-        <div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
-        <div th:if="${error}"   class="notification is-danger  is-light" th:text="${error}"></div>
+        <th:block th:replace="~{layout :: flash}"></th:block>
 
         <div class="notification is-warning is-light">
             <strong>Promo temporaire :</strong> renseignez un pourcentage de réduction et, si vous voulez la limiter dans

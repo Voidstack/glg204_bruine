@@ -22,10 +22,6 @@
 		<span>Mode test (Sandbox) - Aucun vrai paiement n'est effectué. Utilise la carte <code>4242 4242 4242 4242</code> pour simuler un achat.</span>
 	</div>
 
-	<!-- Messages flash -->
-	<div th:if="${success}" class="shop-flash ok" th:text="${success}"></div>
-	<div th:if="${error}" class="shop-flash err" th:text="${error}"></div>
-
 	<div class="pack-grid">
 		<div th:each="pack : ${packs}"
 		     class="pack-card"

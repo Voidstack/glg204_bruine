@@ -36,7 +36,7 @@ public class AdminGachaRewardController {
         reward.setRarity(rarity);
         reward.setDescription(description);
         rewardService.save(reward);
-        redirectAttributes.addFlashAttribute("success", "Récompense « " + emoji + " » créée.");
+        redirectAttributes.addFlashAttribute("successMessage", "Récompense « " + emoji + " » créée.");
         return "redirect:/admin/gacha-rewards";
     }
 
@@ -54,14 +54,14 @@ public class AdminGachaRewardController {
             reward.setDescription(description);
             rewardService.save(reward);
         });
-        redirectAttributes.addFlashAttribute("success", "Récompense mise à jour.");
+        redirectAttributes.addFlashAttribute("successMessage", "Récompense mise à jour.");
         return "redirect:/admin/gacha-rewards";
     }
 
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         rewardService.deleteById(id);
-        redirectAttributes.addFlashAttribute("success", "Récompense supprimée.");
+        redirectAttributes.addFlashAttribute("successMessage", "Récompense supprimée.");
         return "redirect:/admin/gacha-rewards";
     }
 }

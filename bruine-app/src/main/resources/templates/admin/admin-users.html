@@ -11,9 +11,7 @@
 		<h1 class="title">Comptes administrateurs</h1>
 		<p class="subtitle">Page qui permet de gérer les comptes admin</p>
 
-		<!-- Notifications -->
-		<div th:if="${success}" class="notification is-success is-light" th:text="${success}"></div>
-		<div th:if="${error}" class="notification is-danger  is-light" th:text="${error}"></div>
+		<th:block th:replace="~{layout :: flash}"></th:block>
 
 		<!-- Tableau des comptes -->
 		<div class="box">

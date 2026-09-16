@@ -113,9 +113,9 @@ public class AdminMfaController {
         if (totpService.verify(secret, code)) {
             adminUserService.enableMfa(authentication.getName(), secret);
             session.removeAttribute(SETUP_SECRET_ATTR);
-            redirectAttributes.addFlashAttribute("success", "MFA activée avec succès.");
+            redirectAttributes.addFlashAttribute("successMessage", "MFA activée avec succès.");
         } else {
-            redirectAttributes.addFlashAttribute("error", "Code invalide. Réessayez en scannant à nouveau le QR code.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Code invalide. Réessayez en scannant à nouveau le QR code.");
         }
         return "redirect:/admin/mfa/setup";
     }
@@ -123,7 +123,7 @@ public class AdminMfaController {
     @PostMapping("/disable")
     public String disableOwn(Authentication authentication, RedirectAttributes redirectAttributes) {
         adminUserService.disableMfa(authentication.getName());
-        redirectAttributes.addFlashAttribute("success", "MFA désactivée.");
+        redirectAttributes.addFlashAttribute("successMessage", "MFA désactivée.");
         return "redirect:/admin/mfa/setup";
     }
 }
