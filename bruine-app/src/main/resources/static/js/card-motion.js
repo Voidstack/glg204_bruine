@@ -6,8 +6,8 @@
  * API :
  *   CardMotion.enableHover(carte)
  *   CardMotion.enableDrag(carte, handlers)
- *   CardMotion.enableHoverAll(selecteur)
  *   CardMotion.isOver(element, evenement)
+ *   CardMotion.release()    interrompt le glisser sans dépôt et rend la copie
  *
  * handlers accepte trois fonctions, toutes facultatives :
  *   onStart(carte)          renvoyer false pour refuser le glisser
@@ -179,9 +179,13 @@ window.CardMotion = (function () {
             card.addEventListener('pointerdown', function (e) { startDrag(card, bound, e); });
         },
 
-        enableHoverAll: function (selector) {
-            const self = this;
-            document.querySelectorAll(selector).forEach(function (card) { self.enableHover(card); });
+        /* La copie et la carte restent en l'état (copie affichée, carte effacée) : la page les termine. */
+        release: function () {
+            if (!drag) return null;
+            const clone = drag.clone;
+            drag = null;
+            cancelAnimationFrame(rafId);
+            return clone;
         }
     };
 })();
