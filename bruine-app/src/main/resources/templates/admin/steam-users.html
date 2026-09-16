@@ -57,7 +57,6 @@
 						<a th:href="@{/admin/shop-purchases/user/{id}(id=${u.id})}"
 						   class="button is-link is-small" title="Voir l'historique d'achat">Achats</a>
 						<form th:action="@{/admin/impersonate/{id}(id=${u.id})}" method="post" target="_blank">
-							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 							<button class="button is-warning is-small" type="submit"
 							        title="Se connecter en tant que cet utilisateur">Impersonate
 							</button>
@@ -66,7 +65,6 @@
 						      method="post"
 						      th:data-username="${u.username}"
 						      onsubmit="return confirm('Supprimer le compte de « ' + this.dataset.username + ' » ?')">
-							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 							<button class="button is-danger is-small" type="submit">Supprimer</button>
 						</form>
 					</td>
