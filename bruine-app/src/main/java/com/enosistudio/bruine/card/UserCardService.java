@@ -59,10 +59,10 @@ public class UserCardService {
         if (!card.getSteamUser().getId().equals(userId)) {
             throw new BusinessRuleException("Cette carte ne vous appartient pas.");
         }
-        if (listedCardIds(userId).contains(cardId)) {
+        if (marketListingRepository.existsByUserCardId(cardId)) {
             throw new BusinessRuleException("Cette carte est déjà en vente.");
         }
-        if (deckCardIds(userId).contains(cardId)) {
+        if (deckRepository.existsByCardsId(cardId)) {
             throw new BusinessRuleException("Cette carte est dans votre deck, retirez-la du deck d'abord.");
         }
         return card;
@@ -106,7 +106,7 @@ public class UserCardService {
     }
 
     private Set<Long> listedCardIds(Long userId) {
-        return marketListingRepository.findBySellerIdOrderByCreatedAtDesc(userId).stream()
+        return marketListingRepository.findBySellerId(userId).stream()
                 .map(listing -> listing.getUserCard().getId())
                 .collect(Collectors.toSet());
     }

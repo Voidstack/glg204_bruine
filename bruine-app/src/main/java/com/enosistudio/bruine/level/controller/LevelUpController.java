@@ -1,6 +1,5 @@
 package com.enosistudio.bruine.level.controller;
 
-import com.enosistudio.bruine.level.dto.XpConvertibleCardDTO;
 import com.enosistudio.bruine.level.service.LevelUpService;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
@@ -33,12 +32,8 @@ public class LevelUpController {
     public ModelAndView levelUpPage() {
         SteamUser user = currentSteamUser.require();
 
-        List<XpConvertibleCardDTO> cards = levelUpService.findConvertibleCards(user.getId());
-        long totalCards = cards.stream().mapToLong(card -> card.stack().count()).sum();
-
         ModelAndView mav = new ModelAndView("levelup/levelup");
-        mav.addObject("cards", cards);
-        mav.addObject("totalCards", totalCards);
+        mav.addObject("cards", levelUpService.findConvertibleCards(user.getId()));
         mav.addObject("totalExperience", user.getTotalExperience());
         return mav;
     }

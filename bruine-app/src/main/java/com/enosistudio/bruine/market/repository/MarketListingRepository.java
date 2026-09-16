@@ -29,6 +29,10 @@ public interface MarketListingRepository extends JpaRepository<MarketListing, Lo
     @EntityGraph(attributePaths = {"seller", "userCard", "userCard.gachaReward"})
     List<MarketListing> findBySellerIdOrderByCreatedAtDesc(Long sellerId);
 
+    List<MarketListing> findBySellerId(Long sellerId);
+
+    boolean existsByUserCardId(Long userCardId);
+
     /**
      * Annonce verrouillée jusqu'à la fin de la transaction : de deux achats simultanés de la
      * même carte, le second attend et constate que l'annonce n'existe plus.

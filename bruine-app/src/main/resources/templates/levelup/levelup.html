@@ -25,7 +25,7 @@
 	</div>
 
 	<!-- Empty state -->
-	<div th:if="${totalCards == 0}" class="empty-state">
+	<div th:if="${cards.isEmpty()}" class="empty-state">
 		<div class="empty-icon">&#128230;</div>
 		<p>Votre inventaire est vide, pas de cartes à convertir.</p>
 		<a th:href="@{/gacha}" class="button"
@@ -34,7 +34,7 @@
 		</a>
 	</div>
 
-	<div th:if="${totalCards > 0}" class="levelup-layout">
+	<div th:if="${!cards.isEmpty()}" class="levelup-layout">
 
 		<!-- Inventaire -->
 		<div class="lvlup-inventory">

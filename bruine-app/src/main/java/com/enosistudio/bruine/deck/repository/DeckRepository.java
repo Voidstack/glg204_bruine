@@ -21,4 +21,6 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
      */
     @EntityGraph(attributePaths = {"cards", "cards.gachaReward"})
     Optional<Deck> findWithCardsBySteamUserId(Long steamUserId);
+
+    boolean existsByCardsId(Long userCardId);
 }
