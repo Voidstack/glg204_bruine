@@ -1,10 +1,6 @@
 package com.enosistudio.bruine.level.service;
 
-import com.enosistudio.bruine.card.ECardFinish;
-import com.enosistudio.bruine.card.ECardRarity;
-import com.enosistudio.bruine.card.UserCard;
-import com.enosistudio.bruine.card.UserCardService;
-import com.enosistudio.bruine.deck.repository.UserCardRepository;
+import com.enosistudio.bruine.card.*;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.service.GachaService;
 import com.enosistudio.bruine.level.dto.ConvertRequestDTO;

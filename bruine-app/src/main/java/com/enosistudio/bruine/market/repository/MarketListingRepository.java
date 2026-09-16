@@ -36,9 +36,4 @@ public interface MarketListingRepository extends JpaRepository<MarketListing, Lo
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<MarketListing> findForUpdateById(Long id);
 
-    /**
-     * Une annonce court-elle déjà pour cet exemplaire ? La colonne est unique en base,
-     * mais la règle doit se voir avant l'INSERT pour être refusée proprement au joueur.
-     */
-    boolean existsByUserCardId(Long userCardId);
 }

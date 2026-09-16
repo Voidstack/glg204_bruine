@@ -1,13 +1,9 @@
 package com.enosistudio.bruine.market.service;
 
-import com.enosistudio.bruine.card.ECardFinish;
-import com.enosistudio.bruine.card.ECardRarity;
-import com.enosistudio.bruine.card.UserCard;
-import com.enosistudio.bruine.card.UserCardService;
+import com.enosistudio.bruine.card.*;
 import com.enosistudio.bruine.common.BusinessRuleException;
 import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
-import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
@@ -99,6 +95,15 @@ class MarketServiceTest {
         assertThrows(BusinessRuleException.class, () -> marketService.sell(seller, card.getId(), 30));
 
         assertTrue(marketListingRepository.findAll().isEmpty());
+    }
+
+    @Test
+    void sellingRefusesACardAlreadyOnSale() {
+        publish(30);
+
+        assertThrows(BusinessRuleException.class, () -> marketService.sell(seller, card.getId(), 20));
+
+        assertEquals(1, marketListingRepository.findAll().size());
     }
 
     @Test

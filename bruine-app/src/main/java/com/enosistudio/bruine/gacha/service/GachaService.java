@@ -1,10 +1,6 @@
 package com.enosistudio.bruine.gacha.service;
 
-import com.enosistudio.bruine.card.CardViewDTO;
-import com.enosistudio.bruine.card.ECardFinish;
-import com.enosistudio.bruine.card.ECardRarity;
-import com.enosistudio.bruine.card.UserCard;
-import com.enosistudio.bruine.deck.repository.UserCardRepository;
+import com.enosistudio.bruine.card.*;
 import com.enosistudio.bruine.gacha.dto.GachaConfigFormDTO;
 import com.enosistudio.bruine.gacha.dto.GachaResultDTO;
 import com.enosistudio.bruine.gacha.exception.InsufficientScoreException;

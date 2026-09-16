@@ -102,6 +102,7 @@
 - `sellingRefusesAPriceBelowOne` : un prix inférieur à 1 est refusé.
 - `sellingRefusesACardOwnedBySomeoneElse` : on ne vend pas la carte d'un autre.
 - `sellingRefusesACardPlacedInTheDeck` : une carte du deck ne peut pas être vendue.
+- `sellingRefusesACardAlreadyOnSale` : une carte déjà en vente ne peut pas être remise en vente.
 - `sellingAllowsAnotherCopyOfACardInTheDeck` : un doublon d'une carte du deck reste vendable.
 - `buyingMovesThePointsAndHandsOverTheCard` : un achat transfère les points et la carte.
 - `buyingRefusesYourOwnListing` : on n'achète pas sa propre annonce.

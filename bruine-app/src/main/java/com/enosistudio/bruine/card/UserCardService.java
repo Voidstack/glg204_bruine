@@ -1,8 +1,8 @@
 package com.enosistudio.bruine.card;
 
+import com.enosistudio.bruine.common.BusinessRuleException;
 import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
-import com.enosistudio.bruine.deck.repository.UserCardRepository;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import org.springframework.stereotype.Service;
@@ -33,9 +33,7 @@ public class UserCardService {
      * Les cartes du deck en font partie.
      */
     public List<UserCard> findNotListed(Long userId) {
-        Set<Long> listedIds = marketListingRepository.findBySellerIdOrderByCreatedAtDesc(userId).stream()
-                .map(listing -> listing.getUserCard().getId())
-                .collect(Collectors.toSet());
+        Set<Long> listedIds = listedCardIds(userId);
         return userCardRepository.findBySteamUserIdOrderById(userId).stream()
                 .filter(card -> !listedIds.contains(card.getId()))
                 .toList();
@@ -45,15 +43,29 @@ public class UserCardService {
      * Cartes libres du joueur, ni en vente ni dans son deck : les seules qui peuvent être vendues ou converties.
      */
     public List<UserCard> findFree(Long userId) {
-        Set<Long> deckIds = deckRepository.findWithCardsBySteamUserId(userId)
-                .map(Deck::getCards)
-                .orElse(List.of())
-                .stream()
-                .map(UserCard::getId)
-                .collect(Collectors.toSet());
+        Set<Long> deckIds = deckCardIds(userId);
         return findNotListed(userId).stream()
                 .filter(card -> !deckIds.contains(card.getId()))
                 .toList();
+    }
+
+    /**
+     * Carte libre désignée par son identifiant, ou refus expliqué au joueur : seul moyen de viser
+     * une carte à vendre ou à convertir, pour que la règle ne soit pas réécrite ailleurs.
+     */
+    public UserCard requireFree(Long userId, Long cardId) {
+        UserCard card = userCardRepository.findById(cardId)
+                .orElseThrow(() -> new BusinessRuleException("Carte introuvable."));
+        if (!card.getSteamUser().getId().equals(userId)) {
+            throw new BusinessRuleException("Cette carte ne vous appartient pas.");
+        }
+        if (listedCardIds(userId).contains(cardId)) {
+            throw new BusinessRuleException("Cette carte est déjà en vente.");
+        }
+        if (deckCardIds(userId).contains(cardId)) {
+            throw new BusinessRuleException("Cette carte est dans votre deck, retirez-la du deck d'abord.");
+        }
+        return card;
     }
 
     /**
@@ -82,6 +94,21 @@ public class UserCardService {
      */
     public long countDistinctRewards(List<CardStackDTO> cards) {
         return cards.stream().map(card -> card.reward().getId()).distinct().count();
+    }
+
+    private Set<Long> listedCardIds(Long userId) {
+        return marketListingRepository.findBySellerIdOrderByCreatedAtDesc(userId).stream()
+                .map(listing -> listing.getUserCard().getId())
+                .collect(Collectors.toSet());
+    }
+
+    private Set<Long> deckCardIds(Long userId) {
+        return deckRepository.findWithCardsBySteamUserId(userId)
+                .map(Deck::getCards)
+                .orElse(List.of())
+                .stream()
+                .map(UserCard::getId)
+                .collect(Collectors.toSet());
     }
 
     /**

@@ -3,8 +3,6 @@ package com.enosistudio.bruine.market.service;
 import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.card.UserCardService;
 import com.enosistudio.bruine.common.BusinessRuleException;
-import com.enosistudio.bruine.deck.repository.UserCardRepository;
-import com.enosistudio.bruine.deck.service.DeckService;
 import com.enosistudio.bruine.market.dto.MarketListingDTO;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
@@ -19,20 +17,14 @@ import java.util.List;
 public class MarketService {
 
     private final MarketListingRepository marketListingRepository;
-    private final UserCardRepository userCardRepository;
     private final SteamUserRepository steamUserRepository;
-    private final DeckService deckService;
     private final UserCardService userCardService;
 
     public MarketService(MarketListingRepository marketListingRepository,
-                         UserCardRepository userCardRepository,
                          SteamUserRepository steamUserRepository,
-                         DeckService deckService,
                          UserCardService userCardService) {
         this.marketListingRepository = marketListingRepository;
-        this.userCardRepository = userCardRepository;
         this.steamUserRepository = steamUserRepository;
-        this.deckService = deckService;
         this.userCardService = userCardService;
     }
 
@@ -67,24 +59,7 @@ public class MarketService {
             throw new BusinessRuleException("Le prix doit être au moins 1 💧.");
         }
 
-        UserCard card = userCardRepository.findById(cardId)
-                .orElseThrow(() -> new BusinessRuleException("Carte introuvable."));
-
-        if (!card.getSteamUser().getId().equals(seller.getId())) {
-            throw new BusinessRuleException("Cette carte ne vous appartient pas.");
-        }
-
-        // Une carte déjà en vente ne peut pas l'être deux fois. La contrainte d'unicité sur
-        // market_listing.card_id le garantit de toute façon, mais elle ne sait pas le dire au
-        // joueur : sans cette vérification, un double envoi du formulaire finit en erreur 500.
-        if (marketListingRepository.existsByUserCardId(cardId)) {
-            throw new BusinessRuleException("Cette carte est déjà en vente.");
-        }
-
-        if (deckService.findDeckCardIds(seller.getId()).contains(card.getId())) {
-            throw new BusinessRuleException(
-                    "Cette carte est dans votre deck, retirez-la du deck avant de la vendre.");
-        }
+        UserCard card = userCardService.requireFree(seller.getId(), cardId);
 
         MarketListing listing = new MarketListing();
         listing.setSeller(card.getSteamUser());
