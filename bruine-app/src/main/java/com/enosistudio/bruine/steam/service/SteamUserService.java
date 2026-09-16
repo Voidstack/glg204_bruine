@@ -16,6 +16,11 @@ import java.util.Optional;
 @Service
 public class SteamUserService {
 
+    /**
+     * Une heure de jeu complète paie un tirage ({@code GachaService.COST_PER_PULL}).
+     */
+    public static final int POINTS_PER_PLAYED_HOUR = 10;
+
     private final SteamUserRepository repository;
     private final DeckRepository deckRepository;
 
@@ -53,10 +58,10 @@ public class SteamUserService {
     }
 
     /**
-     * Enregistre une connexion : crée le joueur et son deck vide à sa première visite, sinon met à jour
-     * sa date de connexion et son temps de jeu sans toucher au reste (score, expérience).
+     * Enregistre une connexion : crée le joueur et son deck vide à sa première visite, met à jour sa date
+     * de connexion et crédite chaque nouvelle heure de jeu Steam complète depuis la connexion précédente.
      *
-     * @param totalPlaytimeMinutes temps de jeu Steam, {@code null} si le profil est privé
+     * @param totalPlaytimeMinutes temps de jeu Steam, null si le profil est privé
      */
     @Transactional
     public SteamUser recordLogin(String steamId, String username, Long totalPlaytimeMinutes) {
@@ -65,10 +70,18 @@ public class SteamUserService {
         boolean firstVisit = user.getId() == null;
         user.setLastLoginAt(LocalDateTime.now());
         if (totalPlaytimeMinutes != null) {
+            Long knownPlaytime = user.getCurrentPlaytimeMinutes();
             if (user.getInitialPlaytimeMinutes() == null) {
                 user.setInitialPlaytimeMinutes(totalPlaytimeMinutes);
             }
-            user.setCurrentPlaytimeMinutes(totalPlaytimeMinutes);
+            if (knownPlaytime == null) {
+                user.setCurrentPlaytimeMinutes(totalPlaytimeMinutes);
+            } else if (totalPlaytimeMinutes > knownPlaytime) {
+                long newHours = totalPlaytimeMinutes / 60 - knownPlaytime / 60;
+                long earned = newHours * POINTS_PER_PLAYED_HOUR;
+                user.setScore(Math.toIntExact(user.getScore() + earned));
+                user.setCurrentPlaytimeMinutes(totalPlaytimeMinutes);
+            }
         }
         SteamUser saved = repository.save(user);
         if (firstVisit) {

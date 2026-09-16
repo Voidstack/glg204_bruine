@@ -1,6 +1,6 @@
 # Projet *Bruine* : Tests
 
-`./gradlew :bruine-app:test` — 80 tests, JUnit 5, profil `test` (H2 en mémoire, aucun appel réseau).
+`./gradlew :bruine-app:test` — 93 tests, JUnit 5, profil `test` (H2 en mémoire, aucun appel réseau).
 
 ## admin.mfa.TotpGeneratorTest
 
@@ -17,6 +17,7 @@
 - `anonymousCanLoadTheSiteImages` : les images sous `/img` sont publiques.
 - `anonymousIsRedirectedToSteamLoginFromPlayerPages` : les pages joueur redirigent vers la connexion Steam.
 - `anonymousIsRedirectedToAdminLoginFromAdminPages` : les pages admin redirigent vers le login admin.
+- `stripeReachesTheWebhookWithoutSessionNorCsrfToken` : le webhook Stripe est joignable sans session ni jeton CSRF, seule la signature décide (signature invalide : 400, pas de redirection ni de 403).
 - `anonymousCanOpenTheAdminLoginPage` : la page de login admin est accessible.
 - `aValidSteamAssertionSignsThePlayerInWithAFreshSession` : une assertion acceptée (Steam simulé) connecte le joueur : contexte sauvegardé en session, identifiant de session changé.
 - `aSteamAssertionRefusedLeadsToTheLoginFailurePage` : une assertion refusée renvoie vers `/steam/failed`.
@@ -82,6 +83,14 @@
 
 - `aNewPlayerGetsAnEmptyDeck` : la première connexion d'un joueur lui crée un deck vide.
 - `aReturningPlayerKeepsHisSingleDeck` : les connexions suivantes ne créent pas de second deck.
+- `aNewPlayerEarnsNothingForThePlaytimeHeAlreadyHad` : le temps de jeu connu à l'inscription ne rapporte aucun point.
+- `eachFullHourPlayedSinceTheLastLoginPaysOnePull` : chaque heure complète jouée depuis la connexion précédente rapporte 10 💧, le prix d'un tirage.
+- `minutesBelowAFullHourPayNothing` : des minutes qui ne complètent pas une heure ne rapportent rien.
+- `anHourCompletedAcrossTwoLoginsIsCredited` : une heure commencée avant une connexion et terminée après est bien créditée.
+- `theSameHoursAreNeverCreditedTwice` : une reconnexion sans nouvelle heure de jeu ne crédite rien.
+- `aDecreasingPlaytimeCreditsNothingAndKeepsTheCounter` : un temps qui baisse ne crédite rien et ne fait pas reculer le compteur, seules les heures au-delà du maximum connu rapportent.
+- `aPrivateProfileLeavesTheCountersUntouched` : un profil privé ne change ni le score ni le temps de jeu.
+- `aProfileThatWasPrivateAtSignUpStartsCountingWhenItOpens` : un profil privé à l'inscription commence à compter à son ouverture, sans créditer le temps passé.
 
 ## deck.DeckSharingTest
 
@@ -117,3 +126,7 @@
 - `thePacksAreListedInTheOrderChosenByTheAdministrator` : les packs suivent l'ordre choisi par l'admin.
 - `aPaymentAlreadyCreditedIsNotCreditedAgain` : un paiement déjà crédité ne l'est pas deux fois.
 - `anAbsentSessionIdentifierCreditsNothing` : sans identifiant de session, rien n'est crédité.
+- `aWebhookEventWithoutAValidSignatureIsRefused` : un événement de webhook mal signé est refusé.
+- `theWebhookRefusesEveryEventWhenNoSecretIsConfigured` : sans secret de webhook configuré, tout événement est refusé, même signé.
+- `aSignedPaidCheckoutEventGivesTheSessionToFulfill` : un événement signé de session payée donne la session à créditer.
+- `aSignedEventThatIsNotAPaymentIsIgnored` : un événement signé qui n'est pas un paiement est ignoré.

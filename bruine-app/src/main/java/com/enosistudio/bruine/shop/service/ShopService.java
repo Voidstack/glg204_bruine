@@ -7,28 +7,55 @@ import com.enosistudio.bruine.shop.repository.ShopPackRepository;
 import com.enosistudio.bruine.shop.repository.ShopPurchaseRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamUserService;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class ShopService {
 
+    /**
+     * Événements signalant une session Checkout payée : immédiatement, ou plus tard pour les moyens
+     * de paiement différés (virement...).
+     */
+    private static final Logger log = LoggerFactory.getLogger(ShopService.class);
+
+    private static final Set<String> PAID_CHECKOUT_EVENTS =
+            Set.of("checkout.session.completed", "checkout.session.async_payment_succeeded");
+
     private final ShopPackRepository packRepository;
     private final ShopPurchaseRepository purchaseRepository;
     private final SteamUserService steamUserService;
+    private final String webhookSecret;
 
     public ShopService(ShopPackRepository packRepository,
                        ShopPurchaseRepository purchaseRepository,
-                       SteamUserService steamUserService) {
+                       SteamUserService steamUserService,
+                       @Value("${stripe.webhook-secret}") String webhookSecret) {
         this.packRepository = packRepository;
         this.purchaseRepository = purchaseRepository;
         this.steamUserService = steamUserService;
+        this.webhookSecret = webhookSecret;
+        if (webhookSecret.isBlank()) {
+            log.warn("""
+                    STRIPE_WEBHOOK_SECRET absent : le webhook Stripe POST /shop/webhook est désactivé.\s
+                    Un achat est crédité que si le joueur revient sur /shop/success.\s
+                    Pour webhook en local -> Stripe CLI -> connection -> stripe listen --forward-to localhost:8080/shop/webhook\s
+                    Récupérer le secret du webhook avec : stripe listen --print-secret\s
+                    STRIPE_WEBHOOK_SECRET=whsec_... (secret affiché par la commande).""");
+        }
     }
 
     /**
@@ -144,9 +171,10 @@ public class ShopService {
     }
 
     /**
-     * Finalise un achat après retour de Stripe : vérifie que la session est bien payée,
-     * crédite les points et enregistre l'historique. Idempotent : une même session n'est
-     * traitée qu'une seule fois (protège contre un rechargement de la page de succès).
+     * Finalise un achat : vérifie auprès de Stripe que la session est bien payée, crédite les points
+     * et enregistre l'historique. Appelé par le webhook et par la page de retour, le premier arrivé
+     * crédite : une même session n'est traitée qu'une seule fois, la contrainte d'unicité sur
+     * {@code stripe_session_id} annulant un éventuel second passage simultané.
      *
      * @return l'achat enregistré, ou {@link Optional#empty()} si non payé / déjà traité / introuvable
      */
@@ -183,6 +211,25 @@ public class ShopService {
         purchase.setPromoPercent(pack.isPromoActive() ? pack.getPromoPercent() : 0);
         purchase.setStripeSessionId(sessionId);
         return Optional.of(purchaseRepository.save(purchase));
+    }
+
+    /**
+     * Vérifie la signature d'un événement envoyé par Stripe et, s'il annonce une session Checkout
+     * payée, renvoie l'identifiant de cette session à passer à {@link #fulfillCheckout}.
+     *
+     * @throws SignatureVerificationException si l'événement n'a pas été signé avec le secret du webhook
+     */
+    public Optional<String> paidCheckoutSessionId(String payload, String signature) throws StripeException {
+        if (webhookSecret.isBlank()) {
+            log.warn("Événement Stripe refusé : STRIPE_WEBHOOK_SECRET n'est pas configuré.");
+            throw new SignatureVerificationException("Secret du webhook Stripe non configuré", signature);
+        }
+        Event event = Webhook.constructEvent(payload, signature, webhookSecret);
+        if (!PAID_CHECKOUT_EVENTS.contains(event.getType())) {
+            return Optional.empty();
+        }
+        Session session = (Session) event.getDataObjectDeserializer().deserializeUnsafe();
+        return Optional.of(session.getId());
     }
 
     private Optional<Long> parseLong(String value) {

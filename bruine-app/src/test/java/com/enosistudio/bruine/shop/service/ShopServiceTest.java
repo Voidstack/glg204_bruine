@@ -7,7 +7,9 @@ import com.enosistudio.bruine.shop.repository.ShopPurchaseRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import com.enosistudio.bruine.steam.service.SteamUserService;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import com.stripe.net.Webhook;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -16,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Import({ShopService.class, SteamUserService.class})
 class ShopServiceTest {
+
+    private static final String WEBHOOK_SECRET = "whsec_test_dummy";
 
     @Autowired
     private ShopService shopService;
@@ -35,6 +40,9 @@ class ShopServiceTest {
 
     @Autowired
     private SteamUserRepository steamUserRepository;
+
+    @Autowired
+    private SteamUserService steamUserService;
 
     @Autowired
     private TestEntityManager entityManager;
@@ -95,6 +103,47 @@ class ShopServiceTest {
         assertTrue(shopService.fulfillCheckout("   ").isEmpty());
 
         assertEquals(0, shopPurchaseRepository.count());
+    }
+
+    @Test
+    void aWebhookEventWithoutAValidSignatureIsRefused() {
+        assertThrows(SignatureVerificationException.class,
+                () -> shopService.paidCheckoutSessionId(checkoutEvent("checkout.session.completed"), "t=1,v1=invalide"));
+    }
+
+    @Test
+    void theWebhookRefusesEveryEventWhenNoSecretIsConfigured() throws Exception {
+        ShopService withoutSecret = new ShopService(shopPackRepository, shopPurchaseRepository, steamUserService, "");
+        String payload = checkoutEvent("checkout.session.completed");
+
+        assertThrows(SignatureVerificationException.class,
+                () -> withoutSecret.paidCheckoutSessionId(payload, sign(payload)));
+    }
+
+    @Test
+    void aSignedPaidCheckoutEventGivesTheSessionToFulfill() throws Exception {
+        String payload = checkoutEvent("checkout.session.completed");
+
+        assertEquals(Optional.of("cs_test_42"), shopService.paidCheckoutSessionId(payload, sign(payload)));
+    }
+
+    @Test
+    void aSignedEventThatIsNotAPaymentIsIgnored() throws Exception {
+        String payload = checkoutEvent("checkout.session.expired");
+
+        assertTrue(shopService.paidCheckoutSessionId(payload, sign(payload)).isEmpty());
+    }
+
+    private String checkoutEvent(String type) {
+        return """
+                {"id": "evt_test_1", "object": "event", "type": "%s",
+                 "data": {"object": {"id": "cs_test_42", "object": "checkout.session"}}}
+                """.formatted(type);
+    }
+
+    private String sign(String payload) throws Exception {
+        long timestamp = Webhook.Util.getTimeNow();
+        return "t=" + timestamp + ",v1=" + Webhook.Util.computeHmacSha256(WEBHOOK_SECRET, timestamp + "." + payload);
     }
 
     private ShopPack createPack(String name, boolean popular) {

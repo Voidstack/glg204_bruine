@@ -27,6 +27,8 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 @Configuration
 public class WebSecurityConfig {
 
+    private static final String STRIPE_WEBHOOK = "/shop/webhook";
+
     private final SteamAuthenticationProvider steamAuthenticationProvider;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
@@ -96,10 +98,14 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/steam/profile", "/steam/profile/*", "/steam/profile/*/games").permitAll()
                         // image SVG du deck d'un joueur, partageable via <img>
                         .requestMatchers(HttpMethod.GET, "/deck/7656119*").permitAll()
+                        // webhook Stripe : appelé par les serveurs de Stripe, authentifié par la signature de l'événement
+                        .requestMatchers(HttpMethod.POST, STRIPE_WEBHOOK).permitAll()
                         // tout le reste (gacha, inventaire, deck, market, shop, levelup, delete...) exige une session Steam
                         .anyRequest().authenticated()
                 )
                 .anonymous(Customizer.withDefaults())
+                // Stripe ne peut pas connaître le jeton CSRF de la session
+                .csrf(c -> c.ignoringRequestMatchers(STRIPE_WEBHOOK))
                 .exceptionHandling(e -> e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/steam/login")))
                 .addFilterBefore(steamOpenIdAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 // session conservée : elle porte aussi le contexte admin

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -140,6 +141,15 @@ class WebSecurityConfigTest {
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrlPattern("**/admin"));
         }
+    }
+
+    @Test
+    void stripeReachesTheWebhookWithoutSessionNorCsrfToken() throws Exception {
+        mvc.perform(post("/shop/webhook")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Stripe-Signature", "t=1,v1=invalide")
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

@@ -63,15 +63,22 @@ public class SteamService {
 
     /**
      * Retourne tous les jeux possédés par le joueur.
+     *
+     * @throws SteamException aussi quand la liste des jeux est privée : Steam répond alors sans
+     *                        {@code game_count}, à distinguer d'un profil public sans aucun jeu
      */
     public List<SteamGameDTO> getOwnedGames(String steamId) throws SteamException {
         String url = String.format(
                 "%s/IPlayerService/GetOwnedGames/v1/?key=%s&steamid=%s&include_appinfo=1&format=json",
                 STEAM_API_URL, steamApiToken, steamId);
-        JsonNode gamesNode = get("GetOwnedGames", url).path("response").path("games");
+        JsonNode response = get("GetOwnedGames", url).path("response");
+        if (!response.has("game_count")) {
+            throw new SteamException("Liste des jeux privée pour l'identifiant " + steamId);
+        }
 
+        JsonNode gamesNode = response.path("games");
         if (!gamesNode.isArray()) {
-            return List.of(); // profil privé ou aucun jeu
+            return List.of();
         }
 
         List<SteamGameDTO> games = new ArrayList<>();

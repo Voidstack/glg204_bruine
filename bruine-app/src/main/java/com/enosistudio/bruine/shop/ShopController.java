@@ -3,12 +3,16 @@ package com.enosistudio.bruine.shop;
 import com.enosistudio.bruine.shop.service.ShopService;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/shop")
@@ -67,6 +71,25 @@ public class ShopController {
             redirectAttributes.addFlashAttribute("error", "Erreur lors de la vérification du paiement : " + e.getMessage());
         }
         return "redirect:/shop";
+    }
+
+    /**
+     * Notification serveur à serveur de Stripe : crédite le joueur même s'il ferme l'onglet avant
+     * d'être revenu sur {@code /shop/success}. Toute réponse autre que 2xx fait réessayer Stripe.
+     */
+    @PostMapping("/webhook")
+    public ResponseEntity<Void> webhook(@RequestBody String payload,
+                                        @RequestHeader("Stripe-Signature") String signature) throws StripeException {
+        Optional<String> sessionId = shopService.paidCheckoutSessionId(payload, signature);
+        if (sessionId.isPresent()) {
+            shopService.fulfillCheckout(sessionId.get());
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @ExceptionHandler(SignatureVerificationException.class)
+    public ResponseEntity<Void> onInvalidSignature() {
+        return ResponseEntity.badRequest().build();
     }
 
     /**
