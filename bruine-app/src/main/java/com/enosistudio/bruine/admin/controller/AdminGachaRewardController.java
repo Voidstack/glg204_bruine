@@ -1,7 +1,6 @@
 package com.enosistudio.bruine.admin.controller;
 
-import com.enosistudio.bruine.card.ECardRarity;
-import com.enosistudio.bruine.gacha.model.GachaReward;
+import com.enosistudio.bruine.gacha.dto.GachaRewardFormDTO;
 import com.enosistudio.bruine.gacha.service.GachaRewardService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,35 +24,16 @@ public class AdminGachaRewardController {
     }
 
     @PostMapping("/create")
-    public String create(@RequestParam String emoji,
-                         @RequestParam String name,
-                         @RequestParam ECardRarity rarity,
-                         @RequestParam(required = false) String description,
-                         RedirectAttributes redirectAttributes) {
-        GachaReward reward = new GachaReward();
-        reward.setEmoji(emoji);
-        reward.setName(name);
-        reward.setRarity(rarity);
-        reward.setDescription(description);
-        rewardService.save(reward);
-        redirectAttributes.addFlashAttribute("successMessage", "Récompense « " + emoji + " » créée.");
+    public String create(@ModelAttribute GachaRewardFormDTO form, RedirectAttributes redirectAttributes) {
+        rewardService.create(form);
+        redirectAttributes.addFlashAttribute("successMessage", "Récompense « " + form.emoji() + " » créée.");
         return "redirect:/admin/gacha-rewards";
     }
 
     @PostMapping("/{id}/update")
-    public String update(@PathVariable Long id,
-                         @RequestParam String emoji,
-                         @RequestParam String name,
-                         @RequestParam ECardRarity rarity,
-                         @RequestParam(required = false) String description,
+    public String update(@PathVariable Long id, @ModelAttribute GachaRewardFormDTO form,
                          RedirectAttributes redirectAttributes) {
-        rewardService.findById(id).ifPresent(reward -> {
-            reward.setEmoji(emoji);
-            reward.setName(name);
-            reward.setRarity(rarity);
-            reward.setDescription(description);
-            rewardService.save(reward);
-        });
+        rewardService.update(id, form);
         redirectAttributes.addFlashAttribute("successMessage", "Récompense mise à jour.");
         return "redirect:/admin/gacha-rewards";
     }
