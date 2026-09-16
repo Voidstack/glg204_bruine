@@ -39,9 +39,10 @@ public interface SteamUserRepository extends JpaRepository<SteamUser, Long> {
 
     List<SteamUser> findAllByOrderByTotalExperienceDesc();
 
-    @Query("SELECT SUM(u.totalPulls) FROM SteamUser u")
-    Long sumTotalPulls();
+    // SUM vaut null sans aucune ligne
+    @Query("SELECT COALESCE(SUM(u.totalPulls), 0) FROM SteamUser u")
+    long sumTotalPulls();
 
-    @Query("SELECT SUM(u.totalExperience) FROM SteamUser u")
-    Long sumTotalExperience();
+    @Query("SELECT COALESCE(SUM(u.totalExperience), 0) FROM SteamUser u")
+    long sumTotalExperience();
 }

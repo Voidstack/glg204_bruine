@@ -26,6 +26,13 @@ class SteamUserServiceTest {
     private DeckRepository deckRepository;
 
     @Test
+    void siteTotalsAreZeroWithoutAnyPlayer() {
+        assertEquals(0, steamUserService.countPlayers());
+        assertEquals(0, steamUserService.sumTotalPulls());
+        assertEquals(0, steamUserService.sumTotalExperience());
+    }
+
+    @Test
     void aNewPlayerGetsAnEmptyDeck() {
         SteamUser player = steamUserService.recordLogin(STEAM_ID, "Joueuse", 120L);
 

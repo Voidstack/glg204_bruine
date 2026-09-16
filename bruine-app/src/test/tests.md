@@ -94,6 +94,7 @@
 
 ## steam.service.SteamUserServiceTest
 
+- `siteTotalsAreZeroWithoutAnyPlayer` : sans aucun joueur, les totaux de l'accueil valent 0 et non null.
 - `aNewPlayerGetsAnEmptyDeck` : la première connexion d'un joueur lui crée un deck vide.
 - `aReturningPlayerKeepsHisSingleDeck` : les connexions suivantes ne créent pas de second deck.
 - `aNewPlayerEarnsNothingForThePlaytimeHeAlreadyHad` : le temps de jeu connu à l'inscription ne rapporte aucun point.

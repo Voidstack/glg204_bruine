@@ -1,8 +1,7 @@
 package com.enosistudio.bruine;
 
-import com.enosistudio.bruine.gacha.model.GachaConfig;
-import com.enosistudio.bruine.gacha.repository.GachaConfigRepository;
-import com.enosistudio.bruine.steam.repository.SteamUserRepository;
+import com.enosistudio.bruine.gacha.service.GachaService;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,24 +11,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class HomeController {
 
-    private final SteamUserRepository steamUserRepository;
-    private final GachaConfigRepository gachaConfigRepository;
+    private final SteamUserService steamUserService;
+    private final GachaService gachaService;
 
-    public HomeController(SteamUserRepository steamUserRepository, GachaConfigRepository gachaConfigRepository) {
-        this.steamUserRepository = steamUserRepository;
-        this.gachaConfigRepository = gachaConfigRepository;
+    public HomeController(SteamUserService steamUserService, GachaService gachaService) {
+        this.steamUserService = steamUserService;
+        this.gachaService = gachaService;
     }
 
     @GetMapping
     public String index(Model model) {
-        model.addAttribute("statUsers", steamUserRepository.count());
-        model.addAttribute("statPulls", nullToZero(steamUserRepository.sumTotalPulls()));
-        model.addAttribute("statXp", nullToZero(steamUserRepository.sumTotalExperience()));
-        model.addAttribute("gachaConfig", gachaConfigRepository.findById(1).orElseGet(GachaConfig::new));
+        model.addAttribute("statUsers", steamUserService.countPlayers());
+        model.addAttribute("statPulls", steamUserService.sumTotalPulls());
+        model.addAttribute("statXp", steamUserService.sumTotalExperience());
+        model.addAttribute("gachaConfig", gachaService.currentConfig());
         return "index";
-    }
-
-    private long nullToZero(Long value) {
-        return value != null ? value : 0L;
     }
 }

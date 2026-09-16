@@ -112,4 +112,19 @@ public class SteamUserService {
     public List<SteamUser> findLeaderboardByXp() {
         return repository.findAllByOrderByTotalExperienceDesc();
     }
+
+    @Transactional(readOnly = true)
+    public long countPlayers() {
+        return repository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public long sumTotalPulls() {
+        return repository.sumTotalPulls();
+    }
+
+    @Transactional(readOnly = true)
+    public long sumTotalExperience() {
+        return repository.sumTotalExperience();
+    }
 }
