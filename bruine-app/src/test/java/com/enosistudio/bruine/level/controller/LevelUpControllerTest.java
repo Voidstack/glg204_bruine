@@ -8,6 +8,8 @@ import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
+import com.enosistudio.bruine.market.model.MarketListing;
+import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.repository.SteamUserRepository;
 import com.enosistudio.bruine.steam.security.SteamAuthenticationToken;
@@ -33,6 +35,7 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,12 +61,15 @@ class LevelUpControllerTest {
     @Autowired
     private UserCardRepository userCardRepository;
 
+    @Autowired
+    private MarketListingRepository marketListingRepository;
+
     @MockitoBean
     private SteamService steamService;
 
     private SteamUser player;
 
-    private GachaReward reward;
+    private UserCard card;
 
     private MockHttpSession session;
 
@@ -75,13 +81,13 @@ class LevelUpControllerTest {
         steamUserRepository.save(player);
         deckRepository.save(new Deck(player));
 
-        reward = new GachaReward();
+        GachaReward reward = new GachaReward();
         reward.setRarity(ECardRarity.COMMON);
         reward.setName("Pierre Grise");
         reward.setEmoji("*");
         gachaRewardRepository.save(reward);
 
-        UserCard card = new UserCard();
+        card = new UserCard();
         card.setSteamUser(player);
         card.setGachaReward(reward);
         card.setFinish(ECardFinish.FOIL);
@@ -93,17 +99,16 @@ class LevelUpControllerTest {
     }
 
     @Test
-    void thePageSendsTheFinishByItsConstantName() throws Exception {
+    void thePageCarriesTheIdsOfTheFreeCopies() throws Exception {
         mvc.perform(get("/levelup").session(session))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("data-finish=\"FOIL\"")));
+                .andExpect(content().string(containsString("data-card-ids=\"" + card.getId() + "\"")));
     }
 
     @Test
-    void aFinishSentByItsConstantNameIsConverted() throws Exception {
+    void theCardsSentByTheirIdsAreConverted() throws Exception {
         mvc.perform(post("/levelup/convert").session(session).with(csrf())
-                        .param("items[0].rewardId", reward.getId().toString())
-                        .param("items[0].finish", "FOIL"))
+                        .param("cardIds", card.getId().toString()))
                 .andExpect(redirectedUrl("/levelup"));
 
         assertEquals(0, userCardRepository.count());
@@ -111,11 +116,18 @@ class LevelUpControllerTest {
     }
 
     @Test
-    void anUnknownFinishIsRefusedWithoutConvertingAnything() throws Exception {
+    void aRefusedConversionReturnsToThePageWithTheReason() throws Exception {
+        MarketListing listing = new MarketListing();
+        listing.setSeller(player);
+        listing.setUserCard(card);
+        listing.setPrice(10);
+        marketListingRepository.save(listing);
+
         mvc.perform(post("/levelup/convert").session(session).with(csrf())
-                        .param("items[0].rewardId", reward.getId().toString())
-                        .param("items[0].finish", "PLASMA"))
-                .andExpect(status().isBadRequest());
+                        .header("Referer", "http://localhost/levelup")
+                        .param("cardIds", card.getId().toString()))
+                .andExpect(redirectedUrl("/levelup"))
+                .andExpect(flash().attribute("errorMessage", "Cette carte est déjà en vente."));
 
         assertEquals(1, userCardRepository.count());
     }

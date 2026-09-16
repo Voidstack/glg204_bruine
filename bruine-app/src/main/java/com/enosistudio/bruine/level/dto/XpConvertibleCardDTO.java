@@ -1,14 +1,9 @@
 package com.enosistudio.bruine.level.dto;
 
-import com.enosistudio.bruine.card.CardViewDTO;
-import com.enosistudio.bruine.card.ECardFinish;
-import com.enosistudio.bruine.gacha.model.GachaReward;
+import com.enosistudio.bruine.card.CardStackDTO;
 
 /**
- * Un empilement de cartes de la collection, accompagné de l'expérience qu'une carte rapporte.
+ * Une pile de cartes libres, avec l'expérience qu'un exemplaire rapporte.
  */
-public record XpConvertibleCardDTO(GachaReward reward, ECardFinish finish, long count, int xp) {
-    public CardViewDTO view() {
-        return CardViewDTO.of(reward, finish, count);
-    }
+public record XpConvertibleCardDTO(CardStackDTO stack, int xp) {
 }

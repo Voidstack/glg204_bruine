@@ -42,16 +42,13 @@
 
 				<div th:each="item : ${cards}"
 				     class="card-slot"
-				     th:id="'slot-' + ${item.reward.id} + '-' + ${item.view.finish.name()}"
-				     th:attr="data-reward-id=${item.reward.id},
-                              data-finish=${item.view.finish.name()},
+				     th:attr="data-card-ids=${#strings.listJoin(item.stack.cardIds, ',')},
                               data-xp=${item.xp},
-                              data-count=${item.count},
-                              data-name=${item.reward.name},
-                              data-emoji=${item.reward.emoji}">
+                              data-name=${item.stack.reward.name},
+                              data-emoji=${item.stack.reward.emoji}">
 
 					<div th:replace="~{fragments/card :: card(
-					         view            = ${item.view},
+					         view            = ${item.stack.view},
 					         baseClass       = 'inv-card',
 					         dataId          = null,
 					         showDescription = true,

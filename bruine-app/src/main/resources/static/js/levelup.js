@@ -9,10 +9,8 @@
     // Page sans machine (inventaire vide) : rien à câbler.
     if (!machineBody) return;
 
-    // pending[]: {rewardId, finish, xp, name, emoji}
+    // pending[]: {cardId, slot, xp, name, emoji}
     const pending = [];
-    // usedCount: how many of each slot are already in the machine
-    const usedCount = {};
 
     /* Cartes : survol et glisser vers la machine */
     /* Le mouvement vient de card-motion.js. Ici on ne décrit que la règle du level up :
@@ -20,6 +18,9 @@
     document.querySelectorAll('.card-slot').forEach(slot => {
         const card = slot.querySelector('.inv-card');
         if (!card) return;
+
+        // Exemplaires de la pile pas encore dans la machine
+        slot.remaining = slot.dataset.cardIds.split(',');
 
         CardMotion.enableHover(card);
         CardMotion.enableDrag(card, {
@@ -34,21 +35,17 @@
 
     /** Vrai si tous les exemplaires de cette carte sont déjà dans la machine. */
     function isExhausted(slot) {
-        const {rewardId, finish, count} = slot.dataset;
-        return (usedCount[slotKey(rewardId, finish)] ?? 0) >= parseInt(count);
+        return slot.remaining.length === 0;
     }
 
     function loadIntoMachine(slot) {
         if (isExhausted(slot)) return;
 
-        const {rewardId, finish, xp, count, name, emoji} = slot.dataset;
-        const key = slotKey(rewardId, finish);
-
-        usedCount[key] = (usedCount[key] ?? 0) + 1;
-        pending.push({rewardId, finish, xp: parseInt(xp), name, emoji});
+        const {xp, name, emoji} = slot.dataset;
+        pending.push({cardId: slot.remaining.shift(), slot, xp: parseInt(xp), name, emoji});
 
         renderQueue();
-        updateSlotDisplay(rewardId, finish, parseInt(count));
+        updateSlotDisplay(slot);
     }
 
     /* Queue rendering */
@@ -72,11 +69,8 @@
             btn.addEventListener('click', () => removeFromQueue(parseInt(btn.dataset.idx)));
         });
 
-        convertForm.querySelectorAll('input[name^="items["]').forEach(n => n.remove());
-        pending.forEach((item, idx) => {
-            addHidden(`items[${idx}].rewardId`, item.rewardId);
-            addHidden(`items[${idx}].finish`, item.finish);
-        });
+        convertForm.querySelectorAll('input[name="cardIds"]').forEach(n => n.remove());
+        pending.forEach(item => addHidden('cardIds', item.cardId));
 
         // XP total
         const total = pending.reduce((s, i) => s + i.xp, 0);
@@ -101,26 +95,16 @@
     }
 
     function removeFromQueue(idx) {
-        const item = pending[idx];
-        const key = slotKey(item.rewardId, item.finish);
-        usedCount[key] = Math.max(0, (usedCount[key] ?? 1) - 1);
-        pending.splice(idx, 1);
-
-        // find original count from slot
-        const slot = document.getElementById(`slot-${item.rewardId}-${item.finish}`);
-        const count = slot ? parseInt(slot.dataset.count) : 1;
-        updateSlotDisplay(item.rewardId, item.finish, count);
+        const [item] = pending.splice(idx, 1);
+        item.slot.remaining.unshift(item.cardId);
+        updateSlotDisplay(item.slot);
         renderQueue();
     }
 
     /* Slot display (exhausted state) */
-    function updateSlotDisplay(rewardId, finish, totalCount) {
-        const key = slotKey(rewardId, finish);
-        const used = usedCount[key] ?? 0;
-        const slot = document.getElementById(`slot-${rewardId}-${finish}`);
-        if (!slot) return;
-        const remaining = totalCount - used;
-        slot.dataset.exhausted = remaining <= 0 ? 'true' : 'false';
+    function updateSlotDisplay(slot) {
+        const remaining = slot.remaining.length;
+        slot.dataset.exhausted = remaining === 0 ? 'true' : 'false';
         // update count badge
         // Le compteur est rendu par le fragment de carte partagé, on le cherche dans la carte.
         const countEl = slot.querySelector('.card-count');
@@ -138,10 +122,6 @@
     });
 
     /* Helpers */
-    function slotKey(rewardId, finish) {
-        return `${rewardId}_${finish}`;
-    }
-
     function addHidden(name, value) {
         const input = document.createElement('input');
         input.type = 'hidden';

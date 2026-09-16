@@ -1,6 +1,7 @@
 package com.enosistudio.bruine.level.service;
 
 import com.enosistudio.bruine.card.*;
+import com.enosistudio.bruine.common.BusinessRuleException;
 import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
@@ -9,7 +10,6 @@ import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
 import com.enosistudio.bruine.gacha.service.GachaRewardService;
 import com.enosistudio.bruine.gacha.service.GachaService;
 import com.enosistudio.bruine.level.dto.XpConvertibleCardDTO;
-import com.enosistudio.bruine.level.dto.XpLevelConvertRequestDTO;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
@@ -24,8 +24,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -61,109 +63,99 @@ class LevelUpServiceTest {
 
     @BeforeEach
     void setUp() {
-        owner = createOwner();
+        owner = createUser("76561190000000001");
     }
 
     @Test
     void experienceIsTheRarityBaseWhenTheFinishIsPlain() {
-        createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+        UserCard card = createCard(owner, ECardRarity.LEGENDARY, ECardFinish.NORMAL);
 
-        assertEquals(500, convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL));
+        assertEquals(500, convert(card));
     }
 
     @Test
     void experienceScalesWithTheFinishMultiplier() {
-        createCard(ECardRarity.LEGENDARY, ECardFinish.POLYCHROME);
+        UserCard card = createCard(owner, ECardRarity.LEGENDARY, ECardFinish.POLYCHROME);
 
-        assertEquals(2000, convert(ECardRarity.LEGENDARY, ECardFinish.POLYCHROME),
-                "polychrome vaut quatre fois la base dans la configuration par défaut");
+        assertEquals(2000, convert(card), "polychrome vaut quatre fois la base dans la configuration par défaut");
     }
 
     @Test
     void eachRarityHasItsOwnBase() {
-        createCard(ECardRarity.COMMON, ECardFinish.NORMAL);
+        UserCard card = createCard(owner, ECardRarity.COMMON, ECardFinish.NORMAL);
 
-        assertEquals(10, convert(ECardRarity.COMMON, ECardFinish.NORMAL));
+        assertEquals(10, convert(card));
     }
 
     @Test
-    void aCardListedOnTheMarketIsNotDestroyed() {
-        UserCard listed = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
-        putOnSale(listed);
-
-        long xpGained = convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
-
-        assertEquals(0, xpGained);
-        assertEquals(1, userCardRepository.count());
-    }
-
-    @Test
-    void aCardPlacedInTheDeckIsNotDestroyed() {
-        UserCard inDeck = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
-        deckService.saveDeck(owner.getId(), List.of(inDeck.getId()));
-
-        long xpGained = convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
-
-        assertEquals(0, xpGained);
-        assertEquals(1, userCardRepository.count());
-    }
-
-    @Test
-    void theFreeCopyIsConvertedWhileTheDeckCopyStays() {
-        UserCard inDeck = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
-        UserCard spare = new UserCard();
-        spare.setSteamUser(owner);
-        spare.setGachaReward(inDeck.getGachaReward());
-        spare.setFinish(ECardFinish.NORMAL);
-        userCardRepository.save(spare);
-        deckService.saveDeck(owner.getId(), List.of(inDeck.getId()));
-
-        long xpGained = levelUpService.convert(reloadOwner(),
-                List.of(new XpLevelConvertRequestDTO(inDeck.getGachaReward().getId(), ECardFinish.NORMAL)));
-
-        assertEquals(500, xpGained);
-        assertEquals(List.of(inDeck.getId()), userCardRepository.findAll().stream().map(UserCard::getId).toList());
-    }
-
-    @Test
-    void aCardThePlayerDoesNotOwnIsIgnored() {
-        GachaReward neverOwned = createReward(ECardRarity.LEGENDARY);
-
-        long xpGained = levelUpService.convert(reloadOwner(),
-                List.of(new XpLevelConvertRequestDTO(neverOwned.getId(), ECardFinish.NORMAL)));
-
-        assertEquals(0, xpGained);
-    }
-
-    @Test
-    void severalRequestsAreAddedUpAndCreditedToThePlayer() {
+    void severalCardsAreAddedUpAndCreditedToThePlayer() {
         owner.setTotalExperience(1000);
-        UserCard legendary = createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
-        UserCard foil = createCard(ECardRarity.COMMON, ECardFinish.FOIL);
+        UserCard legendary = createCard(owner, ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+        UserCard foil = createCard(owner, ECardRarity.COMMON, ECardFinish.FOIL);
 
-        long xpGained = levelUpService.convert(reloadOwner(), List.of(
-                new XpLevelConvertRequestDTO(legendary.getGachaReward().getId(), ECardFinish.NORMAL),
-                new XpLevelConvertRequestDTO(foil.getGachaReward().getId(), ECardFinish.FOIL)));
-
-        assertEquals(530, xpGained, "500 pour la légendaire, 10 fois 3 pour le foil commun");
+        assertEquals(530, convert(legendary, foil), "500 pour la légendaire, 10 fois 3 pour le foil commun");
         assertEquals(1530, reloadOwner().getTotalExperience());
         assertEquals(0, userCardRepository.count(), "les deux exemplaires sont détruits");
+    }
+
+    @Test
+    void theSameCardSentTwiceIsConvertedOnce() {
+        UserCard card = createCard(owner, ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+
+        assertEquals(500, convert(card, card));
+        assertEquals(500, reloadOwner().getTotalExperience());
     }
 
     @Test
     void convertingNothingChangesNothing() {
         owner.setTotalExperience(1000);
 
-        long xpGained = levelUpService.convert(reloadOwner(), List.of());
+        assertEquals(0, convert());
+        assertEquals(1000, reloadOwner().getTotalExperience());
+    }
 
-        assertEquals(0, xpGained);
+    @Test
+    void aCardListedOnTheMarketIsRefused() {
+        UserCard listed = createCard(owner, ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+        putOnSale(listed);
+
+        assertThrows(BusinessRuleException.class, () -> convert(listed));
+        assertEquals(1, userCardRepository.count());
+    }
+
+    @Test
+    void aCardPlacedInTheDeckIsRefused() {
+        UserCard inDeck = createCard(owner, ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+        deckService.saveDeck(owner.getId(), List.of(inDeck.getId()));
+
+        assertThrows(BusinessRuleException.class, () -> convert(inDeck));
+        assertEquals(1, userCardRepository.count());
+    }
+
+    @Test
+    void aCardOwnedBySomeoneElseIsRefused() {
+        UserCard othersCard = createCard(createUser("76561190000000002"), ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+
+        assertThrows(BusinessRuleException.class, () -> convert(othersCard));
+        assertEquals(1, userCardRepository.count());
+    }
+
+    @Test
+    void oneCardThatIsNoLongerFreeRefusesTheWholeConversion() {
+        owner.setTotalExperience(1000);
+        UserCard free = createCard(owner, ECardRarity.LEGENDARY, ECardFinish.NORMAL);
+        UserCard listed = createCard(owner, ECardRarity.COMMON, ECardFinish.NORMAL);
+        putOnSale(listed);
+
+        assertThrows(BusinessRuleException.class, () -> convert(free, listed));
+        assertEquals(2, userCardRepository.count());
         assertEquals(1000, reloadOwner().getTotalExperience());
     }
 
     @Test
     void theOfferedCardsCarryTheExperienceTheyWillPay() {
-        createCard(ECardRarity.EPIC, ECardFinish.NORMAL);
-        createCard(ECardRarity.EPIC, ECardFinish.NEGATIVE);
+        createCard(owner, ECardRarity.EPIC, ECardFinish.NORMAL);
+        createCard(owner, ECardRarity.EPIC, ECardFinish.NEGATIVE);
 
         List<XpConvertibleCardDTO> offered = levelUpService.findConvertibleCards(reloadOwner().getId());
 
@@ -172,27 +164,25 @@ class LevelUpServiceTest {
         assertEquals(1000, offered.get(1).xp(), "épique multiplié par cinq pour le négatif");
     }
 
-    private SteamUser createOwner() {
+    private SteamUser createUser(String steamId) {
         SteamUser user = new SteamUser();
-        user.setSteamId("76561190000000001");
+        user.setSteamId(steamId);
         user.setUsername("joueur");
         steamUserRepository.save(user);
         deckRepository.save(new Deck(user));
         return user;
     }
 
-    private GachaReward createReward(ECardRarity rarity) {
+    private UserCard createCard(SteamUser user, ECardRarity rarity, ECardFinish finish) {
         GachaReward reward = new GachaReward();
         reward.setRarity(rarity);
         reward.setName("Carte " + rarity);
         reward.setEmoji("*");
-        return gachaRewardRepository.save(reward);
-    }
+        gachaRewardRepository.save(reward);
 
-    private UserCard createCard(ECardRarity rarity, ECardFinish finish) {
         UserCard card = new UserCard();
-        card.setSteamUser(owner);
-        card.setGachaReward(createReward(rarity));
+        card.setSteamUser(user);
+        card.setGachaReward(reward);
         card.setFinish(finish);
         return userCardRepository.save(card);
     }
@@ -205,9 +195,8 @@ class LevelUpServiceTest {
         marketListingRepository.save(listing);
     }
 
-    private long convert(ECardRarity rarity, ECardFinish finish) {
-        Long rewardId = gachaRewardRepository.findByRarity(rarity).get(0).getId();
-        return levelUpService.convert(reloadOwner(), List.of(new XpLevelConvertRequestDTO(rewardId, finish)));
+    private long convert(UserCard... cards) {
+        return levelUpService.convert(reloadOwner(), Stream.of(cards).map(UserCard::getId).toList());
     }
 
     private SteamUser reloadOwner() {

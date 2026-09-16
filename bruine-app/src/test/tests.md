@@ -57,19 +57,20 @@
 - `experienceIsTheRarityBaseWhenTheFinishIsPlain` : une carte simple rapporte la base de sa rareté.
 - `experienceScalesWithTheFinishMultiplier` : la finition multiplie l'XP.
 - `eachRarityHasItsOwnBase` : chaque rareté a sa propre base.
-- `aCardListedOnTheMarketIsNotDestroyed` : une carte en vente n'est pas convertie.
-- `aCardPlacedInTheDeckIsNotDestroyed` : une carte posée dans le deck n'est pas convertie.
-- `theFreeCopyIsConvertedWhileTheDeckCopyStays` : quand un exemplaire est dans le deck, c'est l'exemplaire libre de la même carte qui est converti.
-- `aCardThePlayerDoesNotOwnIsIgnored` : une carte non possédée ne rapporte rien.
-- `severalRequestsAreAddedUpAndCreditedToThePlayer` : plusieurs conversions s'additionnent et sont créditées.
+- `severalCardsAreAddedUpAndCreditedToThePlayer` : plusieurs cartes s'additionnent et sont créditées.
+- `theSameCardSentTwiceIsConvertedOnce` : un identifiant envoyé deux fois ne rapporte qu'une fois.
 - `convertingNothingChangesNothing` : une conversion vide ne change rien.
+- `aCardListedOnTheMarketIsRefused` : une carte en vente est refusée et n'est pas détruite.
+- `aCardPlacedInTheDeckIsRefused` : une carte posée dans le deck est refusée et n'est pas détruite.
+- `aCardOwnedBySomeoneElseIsRefused` : la carte d'un autre joueur est refusée.
+- `oneCardThatIsNoLongerFreeRefusesTheWholeConversion` : une seule carte non libre fait tout refuser, les cartes libres envoyées avec restent intactes.
 - `theOfferedCardsCarryTheExperienceTheyWillPay` : la liste affiche l'XP réelle de chaque carte.
 
 ## level.controller.LevelUpControllerTest
 
-- `thePageSendsTheFinishByItsConstantName` : la page porte la finition sous le nom de la constante (`FOIL`), la forme que Spring sait lier.
-- `aFinishSentByItsConstantNameIsConverted` : une demande envoyée avec ce nom est liée à `ECardFinish` et la carte est convertie.
-- `anUnknownFinishIsRefusedWithoutConvertingAnything` : une finition inconnue est refusée à la liaison (400), aucune carte n'est détruite.
+- `thePageCarriesTheIdsOfTheFreeCopies` : chaque pile de la page porte les identifiants de ses exemplaires.
+- `theCardsSentByTheirIdsAreConverted` : les cartes envoyées par identifiant sont converties et l'XP créditée.
+- `aRefusedConversionReturnsToThePageWithTheReason` : un refus renvoie sur la page avec le message destiné au joueur, sans rien détruire.
 
 ## deck.service.DeckServiceTest
 

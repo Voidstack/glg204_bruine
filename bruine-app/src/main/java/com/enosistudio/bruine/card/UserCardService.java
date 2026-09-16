@@ -68,6 +68,15 @@ public class UserCardService {
         return card;
     }
 
+    public List<UserCard> requireAllFree(Long userId, List<Long> cardIds) {
+        Map<Long, UserCard> freeById = findFree(userId).stream()
+                .collect(Collectors.toMap(UserCard::getId, card -> card));
+        return cardIds.stream()
+                .distinct()
+                .map(cardId -> freeById.containsKey(cardId) ? freeById.get(cardId) : requireFree(userId, cardId))
+                .toList();
+    }
+
     /**
      * Cartes non vendues du joueur, empilées et triées par rareté décroissante.
      */
