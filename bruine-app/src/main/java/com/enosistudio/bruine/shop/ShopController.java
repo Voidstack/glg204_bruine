@@ -52,11 +52,9 @@ public class ShopController {
     @GetMapping("/success")
     public String success(@RequestParam("session_id") String sessionId,
                           RedirectAttributes redirectAttributes) throws StripeException {
-        shopService.fulfillCheckout(sessionId).ifPresentOrElse(
+        shopService.fulfillCheckout(sessionId).ifPresent(
                 purchase -> redirectAttributes.addFlashAttribute("successMessage",
-                        "Paiement accepté, " + purchase.getPointsCredited() + " points crédités !"),
-                () -> redirectAttributes.addFlashAttribute("errorMessage",
-                        "Paiement non confirmé ou déjà pris en compte."));
+                        "Paiement accepté, " + purchase.getPointsCredited() + " points crédités !"));
         return "redirect:/shop";
     }
 
