@@ -1,5 +1,6 @@
 package com.enosistudio.bruine.market.service;
 
+import com.enosistudio.bruine.card.dto.CardStackDTO;
 import com.enosistudio.bruine.card.model.UserCard;
 import com.enosistudio.bruine.card.service.UserCardService;
 import com.enosistudio.bruine.common.BusinessRuleException;
@@ -50,8 +51,8 @@ public class MarketService {
      * Cartes que le joueur peut mettre en vente : ni déjà en vente, ni dans son deck.
      */
     @Transactional(readOnly = true)
-    public List<UserCard> findSellableCards(Long userId) {
-        return userCardService.findFree(userId);
+    public List<CardStackDTO> findSellableCards(Long userId) {
+        return userCardService.findFreeCards(userId);
     }
 
     @Transactional

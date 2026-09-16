@@ -36,9 +36,10 @@
 			<div class="field">
 				<label for="cardId">Carte à vendre</label>
 				<select id="cardId" name="cardId" required>
-					<option th:each="card : ${myInventory}"
-					        th:value="${card.id}"
-					        th:text="${card.gachaReward.emoji + ' ' + card.gachaReward.name + (card.finish.name() != 'NORMAL' ? ' ' + card.finish.emoji : '') + ' · ' + card.gachaReward.rarity.label}">
+					<option th:each="stack : ${myInventory}"
+					        th:with="view=${stack.view}"
+					        th:value="${stack.cardIds[0]}"
+					        th:text="${view.emoji + ' ' + view.name + (view.hasFinish() ? ' ' + view.finish.emoji : '') + ' · ' + view.rarity.label + (view.count > 1 ? ' ×' + view.count : '')}">
 						Carte
 					</option>
 				</select>

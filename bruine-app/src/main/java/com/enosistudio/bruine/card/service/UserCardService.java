@@ -49,8 +49,7 @@ public class UserCardService {
     /**
      * Cartes libres du joueur, ni en vente ni dans son deck : les seules qui peuvent être vendues ou converties.
      */
-    @Transactional(readOnly = true)
-    public List<UserCard> findFree(Long userId) {
+    private List<UserCard> findFree(Long userId) {
         Set<Long> deckIds = deckCardIds(userId);
         return findNotListed(userId).stream()
                 .filter(card -> !deckIds.contains(card.getId()))

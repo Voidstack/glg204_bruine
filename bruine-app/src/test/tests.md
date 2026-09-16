@@ -79,6 +79,10 @@
 - `theCardsSentByTheirIdsAreConverted` : les cartes envoyées par identifiant sont converties et l'XP créditée.
 - `aRefusedConversionReturnsToThePageWithTheReason` : un refus renvoie sur la page avec le message destiné au joueur, sans rien détruire.
 
+## market.MarketControllerTest
+
+- `theSellFormListsEachFreeCardOnceWithItsFinishAndCount` : le sélecteur de vente propose chaque carte libre une seule fois (premier exemplaire), avec sa finition et son nombre d'exemplaires.
+
 ## deck.service.DeckServiceTest
 
 - `savingKeepsTheChosenCards` : les cartes choisies sont enregistrées.
