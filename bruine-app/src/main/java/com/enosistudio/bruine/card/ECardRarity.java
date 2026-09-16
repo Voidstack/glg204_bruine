@@ -38,12 +38,8 @@ public enum ECardRarity {
         return COMMON;
     }
 
-    public static ECardRarity fromString(String code) {
-        return valueOf(code.toUpperCase());
-    }
-
     /**
-     * Code en minuscules, valeur stockée en base et classe CSS de la carte. c'est pas super.
+     * Code en minuscules, classe CSS de la carte. c'est pas super.
      */
     public String getCode() {
         return name().toLowerCase();

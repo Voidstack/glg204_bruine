@@ -28,6 +28,7 @@ public class GachaReward {
     @Column(nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ECardRarity rarity;
 
