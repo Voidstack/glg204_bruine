@@ -2,7 +2,7 @@ package com.enosistudio.bruine.steam.service;
 
 import com.enosistudio.bruine.steam.dto.SteamOpenidLoginDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.ConstraintViolationException;
+import org.springframework.security.authentication.BadCredentialsException;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestTemplate;
@@ -25,7 +25,7 @@ class SteamServiceTest {
         SteamOpenidLoginDTO dto = new SteamOpenidLoginDTO("http://specs.openid.net/auth/2.0", ENDPOINT, IDENTITY,
                 IDENTITY, RETURN_TO, "2026-09-13T10:00:00Zabc", "1234567890", SIGNED, "");
 
-        assertThrows(ConstraintViolationException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
+        assertThrows(BadCredentialsException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
     }
 
     @Test
@@ -33,7 +33,7 @@ class SteamServiceTest {
         SteamOpenidLoginDTO dto = assertion(ENDPOINT, IDENTITY, IDENTITY,
                 "https://site-hostile.example/steam/login/redirect", SIGNED);
 
-        assertThrows(IllegalArgumentException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
+        assertThrows(BadCredentialsException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
     }
 
     @Test
@@ -41,7 +41,7 @@ class SteamServiceTest {
         SteamOpenidLoginDTO dto = assertion("https://faux-steam.example/openid/login", IDENTITY, IDENTITY,
                 RETURN_TO, SIGNED);
 
-        assertThrows(IllegalArgumentException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
+        assertThrows(BadCredentialsException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
     }
 
     @Test
@@ -49,7 +49,7 @@ class SteamServiceTest {
         SteamOpenidLoginDTO dto = assertion(ENDPOINT, IDENTITY,
                 "https://steamcommunity.com/openid/id/76561198000000000", RETURN_TO, SIGNED);
 
-        assertThrows(IllegalArgumentException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
+        assertThrows(BadCredentialsException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
     }
 
     @Test
@@ -57,7 +57,7 @@ class SteamServiceTest {
         SteamOpenidLoginDTO dto = assertion(ENDPOINT, IDENTITY, IDENTITY,
                 RETURN_TO, "signed,op_endpoint,return_to,response_nonce,assoc_handle");
 
-        assertThrows(IllegalArgumentException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
+        assertThrows(BadCredentialsException.class, () -> steamService.validateLoginParameters(dto, BASE_URL));
     }
 
     private static SteamOpenidLoginDTO assertion(String opEndpoint, String claimedId, String identity,

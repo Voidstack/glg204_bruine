@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -72,7 +73,7 @@ class WebSecurityConfigTest {
     @Test
     void aSteamAssertionRefusedLeadsToTheLoginFailurePage() throws Exception {
         when(steamService.validateLoginParameters(any(), any()))
-                .thenThrow(new IllegalArgumentException("Assertion OpenID destinée à une autre adresse"));
+                .thenThrow(new BadCredentialsException("Assertion OpenID destinée à une autre adresse"));
 
         mvc.perform(get("/steam/login/redirect"))
                 .andExpect(redirectedUrl("/steam/failed"));

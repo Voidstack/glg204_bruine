@@ -68,7 +68,17 @@ public class GachaConfig {
         };
     }
 
-    public int getRarityWeight(ECardRarity rarity) {
+    public int xpMultiplierFor(ECardFinish finish) {
+        return switch (finish) {
+            case NEGATIVE -> xpMultNegative;
+            case POLYCHROME -> xpMultPolychrome;
+            case FOIL -> xpMultFoil;
+            case HOLOGRAPHIC -> xpMultHolographic;
+            case NORMAL -> xpMultNormal;
+        };
+    }
+
+    public int rarityWeightFor(ECardRarity rarity) {
         return switch (rarity) {
             case LEGENDARY -> rarityLegendary;
             case EPIC -> rarityEpic;
@@ -78,7 +88,7 @@ public class GachaConfig {
         };
     }
 
-    public int getFinishWeight(ECardFinish finish) {
+    public int finishWeightFor(ECardFinish finish) {
         return switch (finish) {
             case NEGATIVE -> finishNegative;
             case POLYCHROME -> finishPolychrome;

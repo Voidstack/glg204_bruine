@@ -1,6 +1,5 @@
 package com.enosistudio.bruine.gacha.controller;
 
-import com.enosistudio.bruine.gacha.exception.InsufficientScoreException;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.service.GachaService;
 import com.enosistudio.bruine.steam.model.SteamUser;
@@ -51,12 +50,7 @@ public class GachaController {
     @PostMapping("/spin")
     public String spin(@RequestParam(defaultValue = "1") int count, RedirectAttributes redirectAttributes) {
         SteamUser user = currentSteamUser.require();
-        try {
-            redirectAttributes.addFlashAttribute("spinResult", gachaService.spin(user, count));
-        } catch (InsufficientScoreException tooPoor) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Score insuffisant ! Il vous faut au moins " + tooPoor.getRequiredScore() + " points.");
-        }
+        redirectAttributes.addFlashAttribute("spinResult", gachaService.spin(user, count));
         return "redirect:/gacha"; // rechargement de la page pour afficher le résultat du tirage
     }
 }

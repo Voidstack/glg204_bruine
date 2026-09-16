@@ -31,7 +31,7 @@ public enum ECardRarity {
         int draw = ThreadLocalRandom.current().nextInt(Math.max(config.rarityWeightTotal(), 1));
         ECardRarity[] rarities = values();
         for (int i = rarities.length - 1; i > 0; i--) {
-            int weight = config.getRarityWeight(rarities[i]);
+            int weight = config.rarityWeightFor(rarities[i]);
             if (draw < weight) return rarities[i];
             draw -= weight;
         }

@@ -50,13 +50,13 @@
 - `aConfigurationEntirelyAtZeroStillDraws` : une configuration à zéro tire quand même une commune.
 - `aRarityWithoutAnyCardStillCostsThePull` : une rareté sans carte coûte le tirage sans rien ajouter.
 - `aMissingConfigurationFallsBackToTheDefaults` : une configuration absente utilise les valeurs par défaut.
+- `aMultiplierBelowOneIsSavedAsOne` : un multiplicateur d'XP saisi sous 1 est enregistré à 1.
 
 ## level.service.LevelUpServiceTest
 
 - `experienceIsTheRarityBaseWhenTheFinishIsPlain` : une carte simple rapporte la base de sa rareté.
 - `experienceScalesWithTheFinishMultiplier` : la finition multiplie l'XP.
 - `eachRarityHasItsOwnBase` : chaque rareté a sa propre base.
-- `aMultiplierOfZeroStillPaysTheRarityBase` : un multiplicateur à 0 rapporte quand même la base.
 - `aCardListedOnTheMarketIsNotDestroyed` : une carte en vente n'est pas convertie.
 - `aCardPlacedInTheDeckIsNotDestroyed` : une carte posée dans le deck n'est pas convertie.
 - `theFreeCopyIsConvertedWhileTheDeckCopyStays` : quand un exemplaire est dans le deck, c'est l'exemplaire libre de la même carte qui est converti.

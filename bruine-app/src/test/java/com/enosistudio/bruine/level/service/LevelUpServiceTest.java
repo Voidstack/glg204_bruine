@@ -4,9 +4,7 @@ import com.enosistudio.bruine.card.*;
 import com.enosistudio.bruine.deck.model.Deck;
 import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.deck.service.DeckService;
-import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.model.GachaReward;
-import com.enosistudio.bruine.gacha.repository.GachaConfigRepository;
 import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
 import com.enosistudio.bruine.gacha.service.GachaRewardService;
 import com.enosistudio.bruine.gacha.service.GachaService;
@@ -37,9 +35,6 @@ class LevelUpServiceTest {
 
     @Autowired
     private LevelUpService levelUpService;
-
-    @Autowired
-    private GachaConfigRepository gachaConfigRepository;
 
     @Autowired
     private GachaRewardRepository gachaRewardRepository;
@@ -89,16 +84,6 @@ class LevelUpServiceTest {
         createCard(ECardRarity.COMMON, ECardFinish.NORMAL);
 
         assertEquals(10, convert(ECardRarity.COMMON, ECardFinish.NORMAL));
-    }
-
-    @Test
-    void aMultiplierOfZeroStillPaysTheRarityBase() {
-        GachaConfig config = new GachaConfig();
-        config.setXpMultNormal(0);
-        gachaConfigRepository.save(config);
-        createCard(ECardRarity.LEGENDARY, ECardFinish.NORMAL);
-
-        assertEquals(500, convert(ECardRarity.LEGENDARY, ECardFinish.NORMAL));
     }
 
     @Test

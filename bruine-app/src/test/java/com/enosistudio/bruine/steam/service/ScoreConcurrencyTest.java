@@ -3,7 +3,7 @@ package com.enosistudio.bruine.steam.service;
 import com.enosistudio.bruine.card.*;
 import com.enosistudio.bruine.common.BusinessRuleException;
 import com.enosistudio.bruine.deck.service.DeckService;
-import com.enosistudio.bruine.gacha.exception.InsufficientScoreException;
+import com.enosistudio.bruine.common.InsufficientScoreException;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaRewardRepository;
 import com.enosistudio.bruine.gacha.service.GachaRewardService;

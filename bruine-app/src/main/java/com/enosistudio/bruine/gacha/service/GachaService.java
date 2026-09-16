@@ -1,9 +1,9 @@
 package com.enosistudio.bruine.gacha.service;
 
 import com.enosistudio.bruine.card.*;
+import com.enosistudio.bruine.common.InsufficientScoreException;
 import com.enosistudio.bruine.gacha.dto.GachaConfigFormDTO;
 import com.enosistudio.bruine.gacha.dto.GachaResultDTO;
-import com.enosistudio.bruine.gacha.exception.InsufficientScoreException;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaConfigRepository;
@@ -107,7 +107,7 @@ public class GachaService {
 
         SteamUser steanUser = steamUserService.lock(user.getId());
         if (steanUser.getScore() < totalCost) {
-            throw new InsufficientScoreException(steanUser.getScore(), totalCost);
+            throw new InsufficientScoreException(totalCost);
         }
 
         steanUser.setScore(steanUser.getScore() - totalCost);
@@ -123,7 +123,7 @@ public class GachaService {
 
     private CardViewDTO drawOne(SteamUser user, GachaConfig config) {
         ECardRarity rarity = ECardRarity.getRandomRarityFromConfig(config);
-        ECardFinish finish = ECardFinish.roll(config);
+        ECardFinish finish = ECardFinish.getRandomFinishFromConfig(config);
         GachaReward reward = pickReward(rarity);
 
         if (reward != null) {

@@ -42,9 +42,9 @@ public class AdminUserService implements UserDetailsService {
     }
 
     @Transactional
-    public AdminUser createUser(String username, String password) throws UsernameAlreadyExistsException {
+    public AdminUser createUser(String username, String password) {
         if (repository.existsById(username)) {
-            throw new UsernameAlreadyExistsException();
+            throw new UsernameAlreadyExistsException(username);
         }
         String encodedPassword = passwordEncoder.encode(password);
         return repository.save(new AdminUser(username, encodedPassword));

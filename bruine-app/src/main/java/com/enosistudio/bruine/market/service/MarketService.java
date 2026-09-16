@@ -3,6 +3,7 @@ package com.enosistudio.bruine.market.service;
 import com.enosistudio.bruine.card.UserCard;
 import com.enosistudio.bruine.card.UserCardService;
 import com.enosistudio.bruine.common.BusinessRuleException;
+import com.enosistudio.bruine.common.InsufficientScoreException;
 import com.enosistudio.bruine.market.dto.MarketListingDTO;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
@@ -94,7 +95,7 @@ public class MarketService {
         }
 
         if (managedBuyer.getScore() < listing.getPrice()) {
-            throw new BusinessRuleException("Score insuffisant (il vous faut " + listing.getPrice() + " 💧).");
+            throw new InsufficientScoreException(listing.getPrice());
         }
 
         // Les trois entités viennent d'être chargées dans cette transaction : Hibernate les

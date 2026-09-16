@@ -1,6 +1,5 @@
 package com.enosistudio.bruine.admin.controller;
 
-import com.enosistudio.bruine.admin.exception.UsernameAlreadyExistsException;
 import com.enosistudio.bruine.admin.service.AdminUserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -28,12 +27,8 @@ public class AdminUserController {
     public String create(@RequestParam String username,
                          @RequestParam String password,
                          RedirectAttributes redirectAttributes) {
-        try {
-            userService.createUser(username, password);
-            redirectAttributes.addFlashAttribute("successMessage", "Compte « " + username + " » créé.");
-        } catch (UsernameAlreadyExistsException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Le nom d'utilisateur « " + username + " » existe déjà.");
-        }
+        userService.createUser(username, password);
+        redirectAttributes.addFlashAttribute("successMessage", "Compte « " + username + " » créé.");
         return "redirect:/admin/admin-users";
     }
 

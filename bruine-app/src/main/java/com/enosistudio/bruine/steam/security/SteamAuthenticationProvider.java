@@ -4,12 +4,10 @@ import com.enosistudio.bruine.steam.exception.SteamException;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamService;
 import com.enosistudio.bruine.steam.service.SteamUserService;
-import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
@@ -67,9 +65,6 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
     private String verifiedSteamId(SteamAuthenticationToken token) {
         try {
             return steamService.validateLoginParameters(token.getCredentials(), token.getBaseUrl());
-        } catch (IllegalArgumentException | ConstraintViolationException assertionRefusee) {
-            log.warn("Assertion OpenID Steam refusée : {}", assertionRefusee.getMessage());
-            throw new BadCredentialsException("Assertion OpenID Steam refusée.", assertionRefusee);
         } catch (RestClientException steamInjoignable) {
             log.warn("Vérification de l'assertion OpenID impossible", steamInjoignable);
             throw new AuthenticationServiceException("Steam injoignable, connexion impossible pour le moment.",

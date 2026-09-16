@@ -3,8 +3,9 @@ package com.enosistudio.bruine.gacha.service;
 import com.enosistudio.bruine.card.ECardFinish;
 import com.enosistudio.bruine.card.ECardRarity;
 import com.enosistudio.bruine.card.UserCardRepository;
+import com.enosistudio.bruine.gacha.dto.GachaConfigFormDTO;
 import com.enosistudio.bruine.gacha.dto.GachaResultDTO;
-import com.enosistudio.bruine.gacha.exception.InsufficientScoreException;
+import com.enosistudio.bruine.common.InsufficientScoreException;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.gacha.repository.GachaConfigRepository;
@@ -155,6 +156,19 @@ class GachaServiceTest {
 
         assertEquals(1, fallback.getXpMultNormal());
         assertEquals(4, fallback.getXpMultPolychrome());
+    }
+
+    @Test
+    void aMultiplierBelowOneIsSavedAsOne() {
+        GachaConfig saved = gachaService.saveConfig(new GachaConfigFormDTO(
+                0, 100, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                10, 25, 75, 200, 500,
+                0, -2, 3, 5, 4));
+
+        assertEquals(1, saved.xpMultiplierFor(ECardFinish.NORMAL));
+        assertEquals(1, saved.xpMultiplierFor(ECardFinish.HOLOGRAPHIC));
+        assertEquals(3, saved.xpMultiplierFor(ECardFinish.FOIL));
     }
 
     private SteamUser createPlayer(int score) {

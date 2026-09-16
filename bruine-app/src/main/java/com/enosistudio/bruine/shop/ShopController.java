@@ -1,18 +1,16 @@
 package com.enosistudio.bruine.shop;
 
+import com.enosistudio.bruine.common.BusinessRuleException;
+import com.enosistudio.bruine.shop.model.ShopPack;
 import com.enosistudio.bruine.shop.service.ShopService;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
-import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/shop")
@@ -40,58 +38,26 @@ public class ShopController {
      * et redirige l'utilisateur vers la page de paiement hébergée par Stripe.
      */
     @PostMapping("/checkout/{id}")
-    public String checkout(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String checkout(@PathVariable Long id) throws StripeException {
         SteamUser user = currentSteamUser.require();
-        return shopService.findById(id).map(pack -> {
-            try {
-                String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-                return "redirect:" + shopService.createCheckoutSession(user, pack, baseUrl);
-            } catch (StripeException e) {
-                redirectAttributes.addFlashAttribute("errorMessage",
-                        "Impossible de démarrer le paiement : " + e.getMessage());
-                return "redirect:/shop";
-            }
-        }).orElseGet(() -> {
-            redirectAttributes.addFlashAttribute("errorMessage", "Ce pack n'existe plus.");
-            return "redirect:/shop";
-        });
+        ShopPack pack = shopService.findById(id)
+                .orElseThrow(() -> new BusinessRuleException("Ce pack n'existe plus."));
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        return "redirect:" + shopService.createCheckoutSession(user, pack, baseUrl);
     }
 
     /**
      * Retour après paiement réussi : on valide la session et on crédite les points.
      */
     @GetMapping("/success")
-    public String success(@RequestParam("session_id") String sessionId, RedirectAttributes redirectAttributes) {
-        try {
-            shopService.fulfillCheckout(sessionId).ifPresentOrElse(
-                    purchase -> redirectAttributes.addFlashAttribute("successMessage",
-                            "Paiement accepté, " + purchase.getPointsCredited() + " points crédités !"),
-                    () -> redirectAttributes.addFlashAttribute("errorMessage",
-                            "Paiement non confirmé ou déjà pris en compte."));
-        } catch (StripeException e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Erreur lors de la vérification du paiement : " + e.getMessage());
-        }
+    public String success(@RequestParam("session_id") String sessionId,
+                          RedirectAttributes redirectAttributes) throws StripeException {
+        shopService.fulfillCheckout(sessionId).ifPresentOrElse(
+                purchase -> redirectAttributes.addFlashAttribute("successMessage",
+                        "Paiement accepté, " + purchase.getPointsCredited() + " points crédités !"),
+                () -> redirectAttributes.addFlashAttribute("errorMessage",
+                        "Paiement non confirmé ou déjà pris en compte."));
         return "redirect:/shop";
-    }
-
-    /**
-     * Notification serveur à serveur de Stripe : crédite le joueur même s'il ferme l'onglet avant
-     * d'être revenu sur {@code /shop/success}. Toute réponse autre que 2xx fait réessayer Stripe.
-     */
-    @PostMapping("/webhook")
-    public ResponseEntity<Void> webhook(@RequestBody String payload,
-                                        @RequestHeader("Stripe-Signature") String signature) throws StripeException {
-        Optional<String> sessionId = shopService.paidCheckoutSessionId(payload, signature);
-        if (sessionId.isPresent()) {
-            shopService.fulfillCheckout(sessionId.get());
-        }
-        return ResponseEntity.ok().build();
-    }
-
-    @ExceptionHandler(SignatureVerificationException.class)
-    public ResponseEntity<Void> onInvalidSignature() {
-        return ResponseEntity.badRequest().build();
     }
 
     /**
@@ -100,6 +66,12 @@ public class ShopController {
     @GetMapping("/cancel")
     public String cancel(RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("errorMessage", "Paiement annulé, aucun point n'a été débité.");
+        return "redirect:/shop";
+    }
+
+    @ExceptionHandler(StripeException.class)
+    public String onStripeFailure(StripeException panneStripe, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Le paiement n'a pas abouti : " + panneStripe.getMessage());
         return "redirect:/shop";
     }
 }

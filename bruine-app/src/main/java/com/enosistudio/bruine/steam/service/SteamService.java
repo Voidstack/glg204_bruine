@@ -8,10 +8,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -48,7 +48,7 @@ public class SteamService {
         this.steamApiToken = steamApiToken;
     }
 
-    public Map<String, Object> getUserData(String steamUserId) throws SteamException {
+    public Map<String, Object> getUserData(String steamUserId) {
         String url = String.format("%s/ISteamUser/GetPlayerSummaries/v2/?key=%s&format=json&steamids=%s", STEAM_API_URL, steamApiToken, steamUserId);
         JsonNode players = get("GetPlayerSummaries", url).path("response").path("players");
 
@@ -67,7 +67,7 @@ public class SteamService {
      * @throws SteamException aussi quand la liste des jeux est privée : Steam répond alors sans
      *                        {@code game_count}, à distinguer d'un profil public sans aucun jeu
      */
-    public List<SteamGameDTO> getOwnedGames(String steamId) throws SteamException {
+    public List<SteamGameDTO> getOwnedGames(String steamId) {
         String url = String.format(
                 "%s/IPlayerService/GetOwnedGames/v1/?key=%s&steamid=%s&include_appinfo=1&format=json",
                 STEAM_API_URL, steamApiToken, steamId);
@@ -93,7 +93,7 @@ public class SteamService {
         return games;
     }
 
-    public long getTotalPlaytimeMinutes(String steamId) throws SteamException {
+    public long getTotalPlaytimeMinutes(String steamId) {
         return getOwnedGames(steamId).stream()
                 .filter(SteamService::isPlayed)
                 .mapToLong(SteamGameDTO::playtimeMinutes)
@@ -106,7 +106,7 @@ public class SteamService {
      *
      * @param api nom de l'API interrogée, pour que le message dise laquelle a échoué
      */
-    private JsonNode get(String api, String url) throws SteamException {
+    private JsonNode get(String api, String url) {
         ResponseEntity<String> response;
         try {
             response = restTemplate.getForEntity(url, String.class);
@@ -155,30 +155,30 @@ public class SteamService {
     /**
      * Steam signe aussi les assertions destinées à d'autres sites.
      */
-    public String validateLoginParameters(SteamOpenidLoginDTO dto, String baseUrl) throws IllegalArgumentException {
+    public String validateLoginParameters(SteamOpenidLoginDTO dto, String baseUrl) {
         Set<ConstraintViolation<SteamOpenidLoginDTO>> violations = validator.validate(dto);
         if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
+            throw new BadCredentialsException("Assertion OpenID incomplète : " + violations);
         }
 
         if (!STEAM_OPENID_ENDPOINT.equals(dto.getOpEndpoint())) {
-            throw new IllegalArgumentException(
+            throw new BadCredentialsException(
                     "Assertion OpenID émise par un fournisseur inattendu : " + dto.getOpEndpoint());
         }
 
         if (!returnToUrl(baseUrl).equals(dto.getReturnTo())) {
-            throw new IllegalArgumentException(
+            throw new BadCredentialsException(
                     "Assertion OpenID destinée à une autre adresse : " + dto.getReturnTo());
         }
 
         if (!dto.getClaimedId().equals(dto.getIdentity())) {
-            throw new IllegalArgumentException(
+            throw new BadCredentialsException(
                     "claimed_id et identity diffèrent : " + dto.getClaimedId() + " / " + dto.getIdentity());
         }
 
         Set<String> signedFields = Set.of(dto.getSigned().split(","));
         if (!signedFields.containsAll(REQUIRED_SIGNED_FIELDS)) {
-            throw new IllegalArgumentException(
+            throw new BadCredentialsException(
                     "Champs OpenID non signés par Steam, signés : " + dto.getSigned());
         }
 

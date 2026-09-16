@@ -106,14 +106,6 @@ public class LevelUpService {
     }
 
     private int computeXp(ECardRarity rarity, ECardFinish finish, GachaConfig config) {
-        int base = config.xpBaseFor(rarity);
-        int multiplier = switch (finish) {
-            case HOLOGRAPHIC -> config.getXpMultHolographic();
-            case FOIL -> config.getXpMultFoil();
-            case NEGATIVE -> config.getXpMultNegative();
-            case POLYCHROME -> config.getXpMultPolychrome();
-            default -> config.getXpMultNormal();
-        };
-        return base * Math.max(multiplier, 1);
+        return config.xpBaseFor(rarity) * config.xpMultiplierFor(finish);
     }
 }

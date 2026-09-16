@@ -22,12 +22,12 @@ public enum ECardFinish {
         this.badge = badge;
     }
 
-    public static ECardFinish roll(GachaConfig config) {
+    public static ECardFinish getRandomFinishFromConfig(GachaConfig config) {
         // pas vraiment safe il faudrais utiliser SecureRandom..
         int draw = ThreadLocalRandom.current().nextInt(Math.max(config.finishWeightTotal(), 1));
         ECardFinish[] finishes = values();
         for (int i = finishes.length - 1; i > 0; i--) {
-            int weight = config.getFinishWeight(finishes[i]);
+            int weight = config.finishWeightFor(finishes[i]);
             if (draw < weight) return finishes[i];
             draw -= weight;
         }

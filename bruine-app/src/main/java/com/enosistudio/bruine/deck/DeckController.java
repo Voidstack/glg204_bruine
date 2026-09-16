@@ -15,6 +15,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Base64;
 import java.util.List;
@@ -58,10 +59,12 @@ public class DeckController {
     }
 
     @PostMapping
-    public String save(@RequestParam(required = false) List<Long> cardIds) {
+    public String save(@RequestParam(required = false) List<Long> cardIds,
+                       RedirectAttributes redirectAttributes) {
         SteamUser user = currentSteamUser.require();
 
         deckService.saveDeck(user.getId(), cardIds);
+        redirectAttributes.addFlashAttribute("successMessage", "Deck sauvegardé avec succès !");
         return "redirect:/deck";
     }
 
