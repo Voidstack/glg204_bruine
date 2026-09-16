@@ -11,6 +11,7 @@ import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.repository.SteamUserRepository;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import({MarketService.class, DeckService.class, UserCardService.class})
+@Import({MarketService.class, DeckService.class, UserCardService.class, SteamUserService.class})
 class MarketServiceTest {
 
     @Autowired

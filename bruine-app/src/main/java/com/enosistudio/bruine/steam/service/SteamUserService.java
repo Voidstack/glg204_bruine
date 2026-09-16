@@ -52,11 +52,6 @@ public class SteamUserService {
         return repository.findBySteamId(steamId);
     }
 
-    @Transactional
-    public SteamUser save(SteamUser user) {
-        return repository.save(user);
-    }
-
     /**
      * Enregistre une connexion : crée le joueur et son deck vide à sa première visite, met à jour sa date
      * de connexion et crédite chaque nouvelle heure de jeu Steam complète depuis la connexion précédente.

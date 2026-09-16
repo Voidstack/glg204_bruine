@@ -28,6 +28,7 @@ public class DeckService {
     /**
      * Cartes du deck du joueur, dans l'ordre choisi.
      */
+    @Transactional(readOnly = true)
     public List<UserCard> findDeckCards(Long userId) {
         return deckRepository.findWithCardsBySteamUserId(userId)
                 .map(deck -> List.copyOf(deck.getCards()))
@@ -37,6 +38,7 @@ public class DeckService {
     /**
      * Identifiants des cartes du deck du joueur, dans l'ordre choisi.
      */
+    @Transactional(readOnly = true)
     public List<Long> findDeckCardIds(Long userId) {
         return findDeckCards(userId).stream()
                 .map(UserCard::getId)

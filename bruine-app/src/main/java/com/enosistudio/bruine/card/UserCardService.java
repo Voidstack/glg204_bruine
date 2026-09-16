@@ -6,6 +6,7 @@ import com.enosistudio.bruine.deck.repository.DeckRepository;
 import com.enosistudio.bruine.gacha.model.GachaReward;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ public class UserCardService {
      * Cartes du joueur qui ne sont pas en vente : elles sont bloquées tant que l'annonce court.
      * Les cartes du deck en font partie.
      */
+    @Transactional(readOnly = true)
     public List<UserCard> findNotListed(Long userId) {
         Set<Long> listedIds = listedCardIds(userId);
         return userCardRepository.findBySteamUserIdOrderById(userId).stream()
@@ -42,6 +44,7 @@ public class UserCardService {
     /**
      * Cartes libres du joueur, ni en vente ni dans son deck : les seules qui peuvent être vendues ou converties.
      */
+    @Transactional(readOnly = true)
     public List<UserCard> findFree(Long userId) {
         Set<Long> deckIds = deckCardIds(userId);
         return findNotListed(userId).stream()
@@ -53,6 +56,7 @@ public class UserCardService {
      * Carte libre désignée par son identifiant, ou refus expliqué au joueur : seul moyen de viser
      * une carte à vendre ou à convertir, pour que la règle ne soit pas réécrite ailleurs.
      */
+    @Transactional(readOnly = true)
     public UserCard requireFree(Long userId, Long cardId) {
         UserCard card = userCardRepository.findById(cardId)
                 .orElseThrow(() -> new BusinessRuleException("Carte introuvable."));
@@ -68,6 +72,7 @@ public class UserCardService {
         return card;
     }
 
+    @Transactional(readOnly = true)
     public List<UserCard> requireAllFree(Long userId, List<Long> cardIds) {
         Map<Long, UserCard> freeById = findFree(userId).stream()
                 .collect(Collectors.toMap(UserCard::getId, card -> card));
@@ -80,6 +85,7 @@ public class UserCardService {
     /**
      * Cartes non vendues du joueur, empilées et triées par rareté décroissante.
      */
+    @Transactional(readOnly = true)
     public List<CardStackDTO> findOwnedCards(Long userId) {
         return groupByCardSortedByRarity(findNotListed(userId));
     }
@@ -87,6 +93,7 @@ public class UserCardService {
     /**
      * Cartes libres du joueur, empilées et triées par rareté décroissante.
      */
+    @Transactional(readOnly = true)
     public List<CardStackDTO> findFreeCards(Long userId) {
         return groupByCardSortedByRarity(findFree(userId));
     }

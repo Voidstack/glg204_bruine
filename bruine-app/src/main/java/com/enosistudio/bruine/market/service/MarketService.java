@@ -8,7 +8,7 @@ import com.enosistudio.bruine.market.dto.MarketListingDTO;
 import com.enosistudio.bruine.market.model.MarketListing;
 import com.enosistudio.bruine.market.repository.MarketListingRepository;
 import com.enosistudio.bruine.steam.model.SteamUser;
-import com.enosistudio.bruine.steam.repository.SteamUserRepository;
+import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,14 +18,14 @@ import java.util.List;
 public class MarketService {
 
     private final MarketListingRepository marketListingRepository;
-    private final SteamUserRepository steamUserRepository;
+    private final SteamUserService steamUserService;
     private final UserCardService userCardService;
 
     public MarketService(MarketListingRepository marketListingRepository,
-                         SteamUserRepository steamUserRepository,
+                         SteamUserService steamUserService,
                          UserCardService userCardService) {
         this.marketListingRepository = marketListingRepository;
-        this.steamUserRepository = steamUserRepository;
+        this.steamUserService = steamUserService;
         this.userCardService = userCardService;
     }
 
@@ -87,11 +87,11 @@ public class MarketService {
         SteamUser managedBuyer;
         SteamUser managedSeller;
         if (buyerId < sellerId) {
-            managedBuyer = steamUserRepository.findForUpdateById(buyerId).orElseThrow();
-            managedSeller = steamUserRepository.findForUpdateById(sellerId).orElseThrow();
+            managedBuyer = steamUserService.lock(buyerId);
+            managedSeller = steamUserService.lock(sellerId);
         } else {
-            managedSeller = steamUserRepository.findForUpdateById(sellerId).orElseThrow();
-            managedBuyer = steamUserRepository.findForUpdateById(buyerId).orElseThrow();
+            managedSeller = steamUserService.lock(sellerId);
+            managedBuyer = steamUserService.lock(buyerId);
         }
 
         if (managedBuyer.getScore() < listing.getPrice()) {

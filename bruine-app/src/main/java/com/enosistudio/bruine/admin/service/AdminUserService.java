@@ -65,7 +65,6 @@ public class AdminUserService implements UserDetailsService {
         AdminUser user = repository.findById(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         user.setUserPassword(passwordEncoder.encode(newPassword));
-        repository.save(user);
     }
 
     @Transactional(readOnly = true)
@@ -84,7 +83,6 @@ public class AdminUserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         user.setMfaSecret(secret);
         user.setMfaEnabled(true);
-        repository.save(user);
     }
 
     @Transactional
@@ -93,6 +91,5 @@ public class AdminUserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         user.setMfaSecret(null);
         user.setMfaEnabled(false);
-        repository.save(user);
     }
 }
