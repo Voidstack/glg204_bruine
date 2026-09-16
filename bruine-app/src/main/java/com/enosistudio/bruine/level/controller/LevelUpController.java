@@ -1,12 +1,15 @@
 package com.enosistudio.bruine.level.controller;
 
-import com.enosistudio.bruine.level.dto.ConvertFormDTO;
-import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
+import com.enosistudio.bruine.level.dto.XpConvertibleCardDTO;
+import com.enosistudio.bruine.level.dto.XpLevelConvertFormDTO;
 import com.enosistudio.bruine.level.service.LevelUpService;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -31,8 +34,8 @@ public class LevelUpController {
     public ModelAndView levelUpPage() {
         SteamUser user = currentSteamUser.require();
 
-        List<ConvertibleCardDTO> cards = levelUpService.findConvertibleCards(user.getId());
-        long totalCards = cards.stream().mapToLong(ConvertibleCardDTO::count).sum();
+        List<XpConvertibleCardDTO> cards = levelUpService.findConvertibleCards(user.getId());
+        long totalCards = cards.stream().mapToLong(XpConvertibleCardDTO::count).sum();
 
         ModelAndView mav = new ModelAndView("levelup/levelup");
         mav.addObject("cards", cards);
@@ -42,7 +45,7 @@ public class LevelUpController {
     }
 
     @PostMapping("/convert")
-    public String convert(@ModelAttribute ConvertFormDTO form, RedirectAttributes redirectAttributes) {
+    public String convert(@ModelAttribute XpLevelConvertFormDTO form, RedirectAttributes redirectAttributes) {
         SteamUser user = currentSteamUser.require();
         redirectAttributes.addFlashAttribute("successMessage",
                 "+" + levelUpService.convert(user, form.items()) + " XP gagnés !");

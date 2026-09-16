@@ -61,10 +61,15 @@
 - `aCardPlacedInTheDeckIsNotDestroyed` : une carte posée dans le deck n'est pas convertie.
 - `theFreeCopyIsConvertedWhileTheDeckCopyStays` : quand un exemplaire est dans le deck, c'est l'exemplaire libre de la même carte qui est converti.
 - `aCardThePlayerDoesNotOwnIsIgnored` : une carte non possédée ne rapporte rien.
-- `anUnknownFinishNameIsIgnored` : une finition inconnue est ignorée.
 - `severalRequestsAreAddedUpAndCreditedToThePlayer` : plusieurs conversions s'additionnent et sont créditées.
 - `convertingNothingChangesNothing` : une conversion vide ne change rien.
 - `theOfferedCardsCarryTheExperienceTheyWillPay` : la liste affiche l'XP réelle de chaque carte.
+
+## level.controller.LevelUpControllerTest
+
+- `thePageSendsTheFinishByItsConstantName` : la page porte la finition sous le nom de la constante (`FOIL`), la forme que Spring sait lier.
+- `aFinishSentByItsConstantNameIsConverted` : une demande envoyée avec ce nom est liée à `ECardFinish` et la carte est convertie.
+- `anUnknownFinishIsRefusedWithoutConvertingAnything` : une finition inconnue est refusée à la liaison (400), aucune carte n'est détruite.
 
 ## deck.service.DeckServiceTest
 

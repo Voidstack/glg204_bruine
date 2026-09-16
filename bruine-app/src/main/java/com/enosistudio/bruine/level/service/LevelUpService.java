@@ -3,8 +3,8 @@ package com.enosistudio.bruine.level.service;
 import com.enosistudio.bruine.card.*;
 import com.enosistudio.bruine.gacha.model.GachaConfig;
 import com.enosistudio.bruine.gacha.service.GachaService;
-import com.enosistudio.bruine.level.dto.ConvertRequestDTO;
-import com.enosistudio.bruine.level.dto.ConvertibleCardDTO;
+import com.enosistudio.bruine.level.dto.XpConvertibleCardDTO;
+import com.enosistudio.bruine.level.dto.XpLevelConvertRequestDTO;
 import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.stereotype.Service;
@@ -42,10 +42,10 @@ public class LevelUpService {
      * Cartes convertibles du joueur (ni en vente, ni dans le deck), avec l'expérience que rapporte chaque exemplaire.
      */
     @Transactional(readOnly = true)
-    public List<ConvertibleCardDTO> findConvertibleCards(Long userId) {
+    public List<XpConvertibleCardDTO> findConvertibleCards(Long userId) {
         GachaConfig config = gachaService.currentConfig();
         return userCardService.findFreeCards(userId).stream()
-                .map(card -> new ConvertibleCardDTO(
+                .map(card -> new XpConvertibleCardDTO(
                         card.reward(),
                         card.finish(),
                         card.count(),
@@ -56,20 +56,18 @@ public class LevelUpService {
     /**
      * Détruit un exemplaire libre par demande recevable et crédite l'expérience correspondante.
      * <p>
-     * Une demande est ignorée si sa finition est inconnue ou si le joueur n'a plus d'exemplaire libre
-     * (ni en vente, ni dans le deck) de cette carte.
+     * Une demande est ignorée si le joueur n'a plus d'exemplaire libre (ni en vente, ni dans le deck) de cette carte.
      */
     @Transactional
-    public long convert(SteamUser user, List<ConvertRequestDTO> requests) {
+    public long convert(SteamUser user, List<XpLevelConvertRequestDTO> requests) {
         // verrou pris en premier : les lectures suivantes voient l'état laissé par une conversion concurrente
         SteamUser player = steamUserService.lock(user.getId());
         GachaConfig config = gachaService.currentConfig();
         List<UserCard> freeCards = new ArrayList<>(userCardService.findFree(player.getId()));
         long xpGained = 0;
 
-        for (ConvertRequestDTO request : requests) {
-            Optional<UserCard> convertible = parseFinish(request.finish())
-                    .flatMap(finish -> takeFreeCard(freeCards, request.rewardId(), finish));
+        for (XpLevelConvertRequestDTO request : requests) {
+            Optional<UserCard> convertible = takeFreeCard(freeCards, request.rewardId(), request.finish());
             if (convertible.isEmpty()) {
                 continue;
             }
@@ -92,17 +90,6 @@ public class LevelUpService {
                 .findFirst();
         card.ifPresent(freeCards::remove);
         return card;
-    }
-
-    private Optional<ECardFinish> parseFinish(String finish) {
-        if (finish == null) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(ECardFinish.valueOf(finish.toUpperCase()));
-        } catch (IllegalArgumentException unknownFinish) {
-            return Optional.empty();
-        }
     }
 
     private int computeXp(ECardRarity rarity, ECardFinish finish, GachaConfig config) {

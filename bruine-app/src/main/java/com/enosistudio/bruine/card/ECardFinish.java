@@ -35,7 +35,7 @@ public enum ECardFinish {
     }
 
     /**
-     * Code en minuscules, classe CSS de la carte et identifiants côté JavaScript. c'est pas super.
+     * Code en minuscules, classe CSS de la carte. c'est pas super.
      */
     public String getCode() {
         return name().toLowerCase();

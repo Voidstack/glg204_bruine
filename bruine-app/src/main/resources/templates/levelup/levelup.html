@@ -42,9 +42,9 @@
 
 				<div th:each="item : ${cards}"
 				     class="card-slot"
-				     th:id="'slot-' + ${item.reward.id} + '-' + ${item.view.finish.code}"
+				     th:id="'slot-' + ${item.reward.id} + '-' + ${item.view.finish.name()}"
 				     th:attr="data-reward-id=${item.reward.id},
-                              data-finish=${item.view.finish.code},
+                              data-finish=${item.view.finish.name()},
                               data-xp=${item.xp},
                               data-count=${item.count},
                               data-name=${item.reward.name},
