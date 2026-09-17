@@ -5,7 +5,7 @@ import com.enosistudio.bruine.steam.service.SteamUserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
 
 import java.util.List;
 
@@ -24,14 +24,13 @@ public class LeaderboardController {
     }
 
     @GetMapping("/leaderboard/{statMode:playtime|xp}")
-    public ModelAndView leaderboard(@PathVariable String statMode) {
+    public String leaderboard(@PathVariable String statMode, Model model) {
         List<LeaderboardEntryDTO> entries = "xp".equals(statMode)
                 ? steamUserService.findLeaderboardByXp().stream().map(LeaderboardEntryDTO::xp).toList()
                 : steamUserService.findLeaderboard().stream().map(LeaderboardEntryDTO::playtime).toList();
 
-        ModelAndView mav = new ModelAndView("leaderboard");
-        mav.addObject("top3", entries.stream().limit(3).toList());
-        mav.addObject("rest", entries.stream().skip(3).toList());
-        return mav;
+        model.addAttribute("top3", entries.stream().limit(3).toList());
+        model.addAttribute("rest", entries.stream().skip(3).toList());
+        return "leaderboard";
     }
 }

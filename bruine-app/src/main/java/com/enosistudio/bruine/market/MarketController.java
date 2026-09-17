@@ -5,7 +5,7 @@ import com.enosistudio.bruine.steam.model.SteamUser;
 import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -21,14 +21,13 @@ public class MarketController {
     }
 
     @GetMapping
-    public ModelAndView page() {
+    public String page(Model model) {
         SteamUser user = currentSteamUser.require();
 
-        ModelAndView mav = new ModelAndView("market/market");
-        mav.addObject("myInventory", marketService.findSellableCards(user.getId()));
-        mav.addObject("allListings", marketService.findOtherListings(user.getId()));
-        mav.addObject("myListings", marketService.findMyListings(user.getId()));
-        return mav;
+        model.addAttribute("myInventory", marketService.findSellableCards(user.getId()));
+        model.addAttribute("allListings", marketService.findOtherListings(user.getId()));
+        model.addAttribute("myListings", marketService.findMyListings(user.getId()));
+        return "market/market";
     }
 
     @PostMapping("/sell")

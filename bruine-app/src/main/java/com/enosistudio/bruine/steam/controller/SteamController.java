@@ -15,7 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
@@ -52,14 +52,14 @@ public class SteamController {
     }
 
     @GetMapping("/profile")
-    public ModelAndView profile() {
+    public String profile() {
         return currentSteamUser.steamId()
-                .map(connecte -> new ModelAndView("redirect:/steam/profile/" + connecte))
-                .orElseGet(() -> new ModelAndView("redirect:/"));
+                .map(connecte -> "redirect:/steam/profile/" + connecte)
+                .orElse("redirect:/");
     }
 
     @GetMapping("/profile/{steamId:" + SteamService.STEAM_ID_PATTERN + "}")
-    public ModelAndView profileById(@PathVariable String steamId) {
+    public String profileById(@PathVariable String steamId, Model model) {
         try {
             SteamPlayerDTO player = steamService.getPlayer(steamId);
             Optional<SteamUser> registeredUser = steamUserService.findBySteamId(steamId);
@@ -74,15 +74,14 @@ public class SteamController {
             String deckImageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/deck/").path(steamId).toUriString();
 
-            ModelAndView mav = new ModelAndView("steam/profile-by-id");
-            mav.addObject("player", player);
-            mav.addObject("registeredOnSite", registeredOnSite);
-            mav.addObject("isOwnProfile", isOwnProfile);
-            mav.addObject("hasDeck", hasDeck);
-            mav.addObject("deckImageUrl", deckImageUrl);
-            return mav;
+            model.addAttribute("player", player);
+            model.addAttribute("registeredOnSite", registeredOnSite);
+            model.addAttribute("isOwnProfile", isOwnProfile);
+            model.addAttribute("hasDeck", hasDeck);
+            model.addAttribute("deckImageUrl", deckImageUrl);
+            return "steam/profile-by-id";
         } catch (SteamException steamIndisponible) {
-            return new ModelAndView("redirect:/steam/failed");
+            return "redirect:/steam/failed";
         }
     }
 

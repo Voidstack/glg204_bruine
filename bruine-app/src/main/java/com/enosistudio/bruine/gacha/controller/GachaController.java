@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -28,17 +28,16 @@ public class GachaController {
     }
 
     @GetMapping
-    public ModelAndView page() {
+    public String page(Model model) {
         SteamUser user = currentSteamUser.require();
 
         GachaConfig config = gachaService.currentConfig();
-        ModelAndView mav = new ModelAndView("gacha/gacha");
-        mav.addObject("costPerPull", GachaService.COST_PER_PULL);
-        mav.addObject("userScore", user.getScore());
-        mav.addObject("gachaConfig", config);
-        mav.addObject("rarityTotal", Math.max(config.rarityWeightTotal(), 1));
-        mav.addObject("finishTotal", Math.max(config.finishWeightTotal(), 1));
-        return mav;
+        model.addAttribute("costPerPull", GachaService.COST_PER_PULL);
+        model.addAttribute("userScore", user.getScore());
+        model.addAttribute("gachaConfig", config);
+        model.addAttribute("rarityTotal", Math.max(config.rarityWeightTotal(), 1));
+        model.addAttribute("finishTotal", Math.max(config.finishWeightTotal(), 1));
+        return "gacha/gacha";
     }
 
     /**

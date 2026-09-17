@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Base64;
@@ -45,13 +45,12 @@ public class DeckController {
     }
 
     @GetMapping
-    public ModelAndView page() {
+    public String page(Model model) {
         SteamUser user = currentSteamUser.require();
 
-        ModelAndView mav = new ModelAndView("deck/deck");
-        mav.addObject("inventoryStacks", userCardService.findOwnedCards(user.getId()));
-        mav.addObject("deckCardIds", deckService.findDeckCardIds(user.getId()));
-        return mav;
+        model.addAttribute("inventoryStacks", userCardService.findOwnedCards(user.getId()));
+        model.addAttribute("deckCardIds", deckService.findDeckCardIds(user.getId()));
+        return "deck/deck";
     }
 
     @PostMapping

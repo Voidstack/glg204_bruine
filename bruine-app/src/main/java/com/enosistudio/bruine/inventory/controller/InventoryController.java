@@ -8,7 +8,7 @@ import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
 
 import java.util.List;
 
@@ -32,16 +32,15 @@ public class InventoryController {
     }
 
     @GetMapping
-    public ModelAndView inventory() {
+    public String inventory(Model model) {
         SteamUser user = currentSteamUser.require();
 
         List<CardStackDTO> cards = userCardService.findOwnedCards(user.getId());
 
-        ModelAndView mav = new ModelAndView("inventory/inventory");
-        mav.addObject("cards", cards);
-        mav.addObject("uniqueCount", userCardService.countDistinctRewards(cards));
-        mav.addObject("totalPulls", userCardService.countOwned(cards));
-        mav.addObject("totalAvailable", gachaRewardService.findAll().size());
-        return mav;
+        model.addAttribute("cards", cards);
+        model.addAttribute("uniqueCount", userCardService.countDistinctRewards(cards));
+        model.addAttribute("totalPulls", userCardService.countOwned(cards));
+        model.addAttribute("totalAvailable", gachaRewardService.findAll().size());
+        return "inventory/inventory";
     }
 }

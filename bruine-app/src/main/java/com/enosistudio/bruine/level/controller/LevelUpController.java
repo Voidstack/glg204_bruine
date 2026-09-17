@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -29,13 +29,12 @@ public class LevelUpController {
     }
 
     @GetMapping
-    public ModelAndView levelUpPage() {
+    public String levelUpPage(Model model) {
         SteamUser user = currentSteamUser.require();
 
-        ModelAndView mav = new ModelAndView("levelup/levelup");
-        mav.addObject("cards", levelUpService.findConvertibleCards(user.getId()));
-        mav.addObject("totalExperience", user.getTotalExperience());
-        return mav;
+        model.addAttribute("cards", levelUpService.findConvertibleCards(user.getId()));
+        model.addAttribute("totalExperience", user.getTotalExperience());
+        return "levelup/levelup";
     }
 
     @PostMapping("/convert")

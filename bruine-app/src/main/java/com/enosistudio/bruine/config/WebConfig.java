@@ -9,6 +9,8 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import java.util.Locale;
 
+// localConfig + steamConfig avec le RestTemplate pour les appels API.
+// Il faut rename
 @Configuration
 public class WebConfig {
     @Bean

@@ -8,7 +8,7 @@ import com.enosistudio.bruine.steam.security.CurrentSteamUser;
 import com.stripe.exception.StripeException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -25,12 +25,11 @@ public class ShopController {
     }
 
     @GetMapping
-    public ModelAndView page() {
+    public String page(Model model) {
         SteamUser user = currentSteamUser.require();
-        ModelAndView mav = new ModelAndView("shop/shop");
-        mav.addObject("packs", shopService.findAllOrdered());
-        mav.addObject("history", shopService.findUserHistory(user.getId()));
-        return mav;
+        model.addAttribute("packs", shopService.findAllOrdered());
+        model.addAttribute("history", shopService.findUserHistory(user.getId()));
+        return "shop/shop";
     }
 
     /**
