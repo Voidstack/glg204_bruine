@@ -98,7 +98,7 @@ public class ShopService {
     }
 
     /**
-     * Je passe tout ici pour la regle de pack populaire unique.
+     * Je passe tout ici pour la règle de pack populaire unique.
      */
     private ShopPack persist(ShopPack pack) {
         ShopPack saved = packRepository.save(pack);
@@ -189,7 +189,7 @@ public class ShopService {
         if (!"paid".equals(session.getPaymentStatus()) || userId == null) {
             return Optional.empty();
         }
-        
+
         Optional<SteamUser> locked = steamUserService.lockIfExists(userId);
         if (locked.isEmpty() || purchaseRepository.existsByStripeSessionId(sessionId)) {
             return Optional.empty();

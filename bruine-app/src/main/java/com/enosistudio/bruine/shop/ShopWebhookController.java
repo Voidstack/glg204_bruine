@@ -12,7 +12,7 @@ import java.util.Optional;
  * Séparé de {@link ShopController} parce qu'une panne Stripe ne se traite pas pareil des deux côtés :
  * ici Stripe attend un code HTTP et rejoue tant qu'il n'est pas 2xx, là-bas le joueur attend une page.
  */
-@RestController
+@RestController // Parce que serveur à serveur, pas de redirection vers une page HTML
 @RequestMapping("/shop/webhook")
 public class ShopWebhookController {
 

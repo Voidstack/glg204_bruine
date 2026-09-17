@@ -20,6 +20,7 @@ public interface ShopPackRepository extends JpaRepository<ShopPack, Long> {
 
     /**
      * Retire le drapeau « Populaire » de tous les packs sauf celui indiqué.
+     * WHERE p.id <> :id veut dire si p.id != id en param
      */
     @Modifying
     @Query("UPDATE ShopPack p SET p.popular = false WHERE p.id <> :id")
