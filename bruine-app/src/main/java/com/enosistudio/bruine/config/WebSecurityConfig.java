@@ -13,7 +13,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,7 +51,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain adminFilterChain(HttpSecurity http, AdminSecurityContextService adminSecurityContext, MfaAuthenticationSuccessHandler mfaSuccessHandler) throws Exception {
         // @formatter:off
         http
-                .securityMatcher("/admin", "/admin/**")
+                .securityMatcher("/admin/**")
                 .securityContext(sc -> sc.securityContextRepository(adminSecurityContext.repository()))
                 .authorizeHttpRequests(a -> a
                         // page de login
@@ -97,7 +96,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/error").permitAll()
                         // pages publiques
                         .requestMatchers(HttpMethod.GET, "/",
-                                "/leaderboard", "/leaderboard/**",
+                                "/leaderboard/**",
                                 "/mentions-legales", "/politique-confidentialite").permitAll()
                         // authentification Steam
                         .requestMatchers("/steam/login", "/steam/login/redirect", "/steam/failed").permitAll()
@@ -111,7 +110,6 @@ public class WebSecurityConfig {
                         // tout le reste (gacha, inventaire, deck, market, shop, levelup, delete...) exige une session Steam
                         .anyRequest().authenticated()
                 )
-                .anonymous(Customizer.withDefaults())
                 // Stripe ne peut pas connaître le jeton CSRF de la session
                 .csrf(c -> c.ignoringRequestMatchers(STRIPE_WEBHOOK))
                 .exceptionHandling(e -> e.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/steam/login")))
